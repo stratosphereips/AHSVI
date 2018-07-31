@@ -13,6 +13,7 @@ public class POMDPProblem {
     private final ArrayList<POMDPState> states;
     private final ArrayList<POMDPAction> actions;
     private final ArrayList<POMDPObservation> observations;
+    private POMDPBelief initialBelief = null;
 
     public POMDPProblem() {
         states = new ArrayList<>();
