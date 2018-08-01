@@ -1,40 +1,47 @@
 package ahsvi.pomdpproblem;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Scanner;
 
 /**
  *
  * @author dansm
  */
 public class POMDPFileReader {
-    
-    private POMDPProblem hsviProblem = null;
+
+    private static final HashSet<String> pomdpFileKeyWords = new HashSet<String>(Arrays.asList("discount:",
+            "values:", "states:", "actions:", "observations:", "start:", "T:", "O:", "R:"));
+
+    private final POMDPProblem hsviProblem;
 
     public POMDPFileReader(String fileName) {
         this(new File(fileName));
     }
-    
+
     public POMDPFileReader(File file) {
+        hsviProblem = new POMDPProblem();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            try {
-                while ((line = br.readLine()) != null) {
-                    if (line.startsWith("#") || line.isEmpty()) {
-                        continue;
-                    }
-                    
+            Scanner sc = new Scanner(new FileReader(file));
+            String token;
+            while (sc.hasNext()) {
+                token = sc.next();
+                if (isCurrentLineComment(token)) {
+                    // System.out.println("# " + sc.nextLine());
+                    continue;
                 }
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                System.out.println(token);
             }
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
     }
-    
+
+    private boolean isCurrentLineComment(String token) {
+        return token.startsWith("#");
+    }
 }
