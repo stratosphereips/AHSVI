@@ -1,6 +1,7 @@
 package ahsvi;
 
 import ahsvi.pomdpproblem.POMDPFileReader;
+import java.io.FileNotFoundException;
 
 /**
  *
@@ -14,7 +15,12 @@ public class AHSVI {
     public static void main(String[] args) {
         String test1 = "resources/1d.POMDP";
         String test2 = "resources/cheese.95.POMDP";
-        POMDPFileReader pomdpFileReader = new POMDPFileReader(test1);
+        try {
+            POMDPFileReader pomdpFileReader = new POMDPFileReader(test1);
+            pomdpFileReader.loadPOMDP();
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
     }
     
 }
