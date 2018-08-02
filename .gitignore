@@ -1,8 +1,7 @@
 # IDE files
-/AHSVI/nbproject/
-/AHSVI/build/
-/AHSVI/build.xml
-/AHSVI/manifest.mf
+.idea/
+out
+AHSVI.iml
 
 # Prerequisites
 *.d
