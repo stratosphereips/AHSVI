@@ -8,12 +8,13 @@ import java.util.TreeMap;
 public class POMDPProblem {
     final List<String> indexToStateName;
     final Map<String, Integer> stateNameToIndex;
-    final List<Double> initBelief;
+    final double[] initBelief;
+    double discount;
 
     public POMDPProblem() {
         indexToStateName = new ArrayList<>();
         stateNameToIndex = new TreeMap<>();
-        initBelief = new ArrayList<>();
+        initBelief = null;
     }
 
     public void addState(String name) {
@@ -21,5 +22,11 @@ public class POMDPProblem {
         indexToStateName.add(name);
     }
 
+    public String indexToStateName(int i) {
+        return indexToStateName.get(i);
+    }
 
+    public int stateNameToIndex(String name) {
+        return stateNameToIndex.get(name);
+    }
 }

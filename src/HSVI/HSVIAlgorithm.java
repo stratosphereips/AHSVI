@@ -1,5 +1,6 @@
 package HSVI;
 
+import POMDPProblem.POMDPProblem;
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
 
@@ -30,14 +31,13 @@ public class HSVIAlgorithmTG {
     private double[] initialBeliefe;
     public double minLB, minUB;
 
-    public HSVIAlgorithmTG(GeneralSolverSetting game) {
+    public HSVIAlgorithmTG(POMDPProblem pomdpProblem) {
         try {
             Cplex.get().setParam(IloCplex.IntParam.RootAlg, 2);
         } catch (IloException e) {
             e.printStackTrace();
         }
 //        if ( MINIMIZE_VALUE ) {
-        game.prepareStateIndexing();
 //        } else {
 //            game.prepareStateIndexingOnlySupport();
 //        }
