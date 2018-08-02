@@ -9,26 +9,14 @@ import java.util.Iterator;
 /**
  * Created by wigos on 3.8.16.
  */
-public class HSVIAlgorithmTG {
-
-    public static boolean MINIMIZE_VALUE;
-
+public class HSVIAlgorithm {
 
     private final POMDPProblem pomdpProblem;
-    public PartitionTG partition;
+    public Partition partition;
 
-    private double Q = 0.0; // TODO : Compute the slope accordingly!
-    private double convergenceFactor = Double.parseDouble(System.getProperty("hsvi.convergenceFactor", "0.9"));
-    private double minValue = Double.POSITIVE_INFINITY;
-
-    private double INCSIZE_PRUNNING = 1.2;
-
-    //    public double[] minLBBelief;
-//    public double[] minUBBelief;
     public double finalUtilityLB;
     public double finalUtilityUB;
     public int numberOfCalls = 1;
-    private double[] initialBeliefe;
     public double minLB, minUB;
 
     public HSVIAlgorithm(POMDPProblem pomdpProblem) {
@@ -42,22 +30,19 @@ public class HSVIAlgorithmTG {
 //            game.prepareStateIndexingOnlySupport();
 //        }
         this.pomdpProblem = pomdpProblem;
-        this.partition = new PartitionTG(0, pomdpProblem);
+        this.partition = new Partition(0, pomdpProblem);
         this.partition.initValueFunctions();
-//        minValue = Collections.min(game.getRewards().values()) / (1 - game.discount);
-        minValue = 0;
     }
 
     public void setStopwatch(Stopwatch stopwatch) {
         this.stopwatch = stopwatch;
     }
 
-    public void solve(PartitionTG initialPartition, double[] initialBelief, double epsilon) throws IloException {
-        this.initialBeliefe=initialBelief;
+    public void solve(Partition initialPartition, double epsilon) throws IloException {
         int removed = 0;
         long next = 0;
 
-        if (HSVIAlgorithmTG.MINIMIZE_VALUE) {
+        if (HSVIAlgorithm.MINIMIZE_VALUE) {
             this.partition.lbFunction.updateMinimumWithFP(game);
 
             initialBelief = this.partition.lbFunction.minimalFPBelief;
@@ -139,7 +124,7 @@ public class HSVIAlgorithmTG {
 
 
             System.out.println("New value at old init belief is " + this.partition.lbFunction.getValue(initialBelief));
-            if ( HSVIAlgorithmTG.MINIMIZE_VALUE ) {
+            if ( HSVIAlgorithm.MINIMIZE_VALUE ) {
                 this.partition.lbFunction.updateMinimumWithFP(game);
                 this.partition.ubFunction.updateMinimumWithFP(game);
 
@@ -194,7 +179,7 @@ public class HSVIAlgorithmTG {
 //        Q = (ePrime - epsilon) * G * (game.getGamma() - 1) / (1 - G);
 //    }
 
-    private void explore(PartitionTG partition, double[] belief, double ePrime, int t) throws IloException {
+    private void explore(Partition partition, double[] belief, double ePrime, int t) throws IloException {
 
         if ( !MINIMIZE_VALUE ) {
             if ( t < numberOfCalls ) {
@@ -263,7 +248,7 @@ public class HSVIAlgorithmTG {
         }
     }
 
-    private Triplet<Integer,Integer,double[]> select(PartitionTG partition, double[] belief, double ePrime, int t) throws IloException {
+    private Triplet<Integer,Integer,double[]> select(Partition partition, double[] belief, double ePrime, int t) throws IloException {
 
         double gamma = game.discount;
         Triplet<Integer, Integer, double[]> best = null;
@@ -409,7 +394,7 @@ public class HSVIAlgorithmTG {
         return immediateReward;
     }
 
-    private void updateUb(PartitionTG partition, double[] belief) throws IloException {
+    private void updateUb(Partition partition, double[] belief) throws IloException {
 
         // get best action
         double bestValue = 0;
@@ -458,7 +443,7 @@ public class HSVIAlgorithmTG {
 
     }
 
-    private void updateLb(PartitionTG partition, double[] belief) throws IloException {
+    private void updateLb(Partition partition, double[] belief) throws IloException {
         MultiKeyMap map = new MultiKeyMap();
 
         for ( int actionInd = 0; actionInd < game.thresholds.size(); actionInd++ ) {
@@ -596,7 +581,7 @@ public class HSVIAlgorithmTG {
 //        partition.lbFunction.addVector(values, node);
     }
 
-    private double width(PartitionTG partition, double[] belief) {
+    private double width(Partition partition, double[] belief) {
         double lowerValue = partition.lbFunction.getValue(belief);
         double upperValue = partition.ubFunction.getValue(belief);
         return upperValue - lowerValue;

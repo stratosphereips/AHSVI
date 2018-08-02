@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 /**
  * Created by wigos on 8.8.16.
  */
-public class PartitionTG {
+public class Partition {
 
     private final POMDPProblem pomdpProblem;
     protected int leaderActions;
@@ -22,23 +22,14 @@ public class PartitionTG {
     public AlphaVectorValueFunction<Integer> lbFunction;
     public PointBasedValueFunction ubFunction;
 
-    public PartitionTG(int leaderActions, POMDPProblem pomdpProblem) {
+    public Partition(int leaderActions, POMDPProblem pomdpProblem) {
         this.leaderActions = leaderActions;
         this.pomdpProblem = pomdpProblem;
     }
 
-    public double getObservationProbability(double[] belief, int action, int observation) {
-        // to implement
-        double total = 0;
-        for (int state = 0; state < belief.length; state++) {
-            total += setting.indexToState.get(state).getLeft().getProbabilityOfObservationToNextStep(observation) * belief[state];
-        }
-        return total;
-    }
-
     public void initValueFunctions() {
-        lbFunction = new AlphaVectorValueFunction(setting.getNumberOfStates());
-        ubFunction = new PointBasedValueFunction(setting.getNumberOfStates());
+        lbFunction = new AlphaVectorValueFunction(pomdpProblem.getNumberOfStates());
+        ubFunction = new PointBasedValueFunction(pomdpProblem.getNumberOfStates());
 
         Collection<Long> rewards = setting.thresholds.values();
         long minReward = Collections.min(rewards);

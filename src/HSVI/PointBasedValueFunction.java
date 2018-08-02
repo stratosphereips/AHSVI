@@ -513,67 +513,6 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
         nPoints = points.size();
     }
 
-    public void updateMinimumWithFP(GeneralSolverSetting setting) throws IloException {
-        //TODO remove FP
-        if ( cplex == null ) {
-            cplex = Cplex.get();
-        }
-        cplex.clearModel();
-        IloNumVar[] coords;
-        IloNumVar[] coordsForLP;
-        if ( setting.DEFENDER_PURE_STRATEGY ) {
-            coords = cplex.numVarArray(dimension, 0.0, 1.0, IloNumVarType.Bool);
-        } else {
-            coords = cplex.numVarArray(dimension, 0.0, 1.0);
-        }
-        coordsForLP = cplex.numVarArray(dimension, 0.0, 1.0);
-        IloNumVar value = cplex.numVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-//        cplex.addEq(cplex.sum(coords), setting.prior.getProbabilityDistribution().size());
-
-        // False Positive constraint
-        IloNumExpr fpValue = cplex.constant(-setting.FP);
-        for ( int i=0; i<coords.length; i++ ) {
-            double typePrb = setting.prior.getProbabilityDistribution().get(setting.indexToState.get(i).getLeft());
-            fpValue = cplex.sum(fpValue, cplex.prod(setting.indexedFP.get(i) * typePrb, coords[i]));
-        }
-        cplex.addLe(fpValue, 0);
-
-        for ( int i=0; i<coords.length;i++ ) {
-            double typePrb = setting.prior.getProbabilityDistribution().get(setting.indexToState.get(i).getLeft());
-            IloNumExpr e = cplex.constant(0);
-            e = cplex.sum(e, cplex.prod(-typePrb, coords[i]));
-            e = cplex.sum(e, coordsForLP[i]);
-            cplex.addEq(e, 0);
-        }
-
-        // actions sums up to type probability
-        for (Map.Entry<UserTypeI, Double> entry : setting.prior.getProbabilityDistribution().entrySet()) {
-            IloNumExpr typePrb = cplex.constant(-1d);
-//            double prb = entry.getValue();
-
-            for (Long threshold : setting.thresholds.values()) {
-                int index = setting.stateToIndex.get(entry.getKey()).get(threshold);
-                typePrb = cplex.sum(typePrb, coords[index]);
-
-            }
-            cplex.addEq(typePrb, 0);
-
-        }
-
-        constructLP(cplex, coordsForLP, value);
-        cplex.addMinimize(value);
-        cplex.solve();
-        cplex.exportModel("cplex.lp");
-        this.minimumFP = cplex.getObjValue();
-
-        //extract result
-        this.minimalFPBelief = new double[dimension];
-        for ( int i=0; i<coords.length; i++ ) {
-            double typePrb = setting.prior.getProbabilityDistribution().get(setting.indexToState.get(i).getLeft());
-            minimalFPBelief[i] = cplex.getValue(coords[i]) * typePrb;
-        }
-    }
-
     public static class Point<T> {
         double[] coordinates;
         double value;
