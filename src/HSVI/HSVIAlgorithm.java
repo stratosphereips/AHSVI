@@ -14,7 +14,7 @@ public class HSVIAlgorithmTG {
     public static boolean MINIMIZE_VALUE;
 
 
-    private GeneralSolverSetting game;
+    private final POMDPProblem pomdpProblem;
     public PartitionTG partition;
 
     private double Q = 0.0; // TODO : Compute the slope accordingly!
@@ -31,7 +31,7 @@ public class HSVIAlgorithmTG {
     private double[] initialBeliefe;
     public double minLB, minUB;
 
-    public HSVIAlgorithmTG(POMDPProblem pomdpProblem) {
+    public HSVIAlgorithm(POMDPProblem pomdpProblem) {
         try {
             Cplex.get().setParam(IloCplex.IntParam.RootAlg, 2);
         } catch (IloException e) {
@@ -41,8 +41,8 @@ public class HSVIAlgorithmTG {
 //        } else {
 //            game.prepareStateIndexingOnlySupport();
 //        }
-        this.game = game;
-        this.partition = new PartitionTG(0, game);
+        this.pomdpProblem = pomdpProblem;
+        this.partition = new PartitionTG(0, pomdpProblem);
         this.partition.initValueFunctions();
 //        minValue = Collections.min(game.getRewards().values()) / (1 - game.discount);
         minValue = 0;

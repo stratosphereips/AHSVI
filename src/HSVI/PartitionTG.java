@@ -1,5 +1,7 @@
 package HSVI;
 
+import POMDPProblem.POMDPProblem;
+
 import static java.util.stream.Collectors.toList;
 
 import java.util.*;
@@ -11,7 +13,7 @@ import java.util.stream.IntStream;
  */
 public class PartitionTG {
 
-    private final GeneralSolverSetting setting;
+    private final POMDPProblem pomdpProblem;
     protected int leaderActions;
 
     protected double minValue = Double.NaN;
@@ -20,9 +22,9 @@ public class PartitionTG {
     public AlphaVectorValueFunction<Integer> lbFunction;
     public PointBasedValueFunction ubFunction;
 
-    public PartitionTG(int leaderActions, GeneralSolverSetting setting) {
+    public PartitionTG(int leaderActions, POMDPProblem pomdpProblem) {
         this.leaderActions = leaderActions;
-        this.setting = setting;
+        this.pomdpProblem = pomdpProblem;
     }
 
     public double getObservationProbability(double[] belief, int action, int observation) {
