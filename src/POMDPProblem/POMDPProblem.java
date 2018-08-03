@@ -3,21 +3,20 @@ package POMDPProblem;
 import java.util.*;
 
 public class POMDPProblem {
-    // TODO rewards matrix dimension and arguments (pomdp file vs hsvi)
-    final ArrayList<String> stateNames;
-    final HashMap<String, Integer> stateNameToIndex;
-    final ArrayList<String> actionNames;
-    final HashMap<String, Integer> actionNameToIndex;
-    final double[][][] actionProbabilities; // probability p of getting from start-state s_ to end-state s_ playing
+    public final ArrayList<String> stateNames;
+    public final HashMap<String, Integer> stateNameToIndex;
+    public final ArrayList<String> actionNames;
+    public final HashMap<String, Integer> actionNameToIndex;
+    public final double[][][] actionProbabilities; // probability p of getting from start-state s_ to end-state s_ playing
     //                                         action a ... p = actionProbabilities[s][a][s_]
-    final ArrayList<String> observationNames;
-    final HashMap<String, Integer> observationNameToIndex;
-    final double[][][] observationProbabilities; // probability p of seeing an observation o playing action a getting to
+    public final ArrayList<String> observationNames;
+    public final HashMap<String, Integer> observationNameToIndex;
+    public final double[][][] observationProbabilities; // probability p of seeing an observation o playing action a getting to
     //                                              end-state s_ ... p = observationProbabilities[s_][a][o]
-    final double[][] rewards; // reward r for playing action a in state s ... r = rewards[s][a]
-    final double discount;
-    final double[] initBelief;
-    final boolean minimize;
+    public final double[][] rewards; // reward r for playing action a in state s ... r = rewards[s][a]
+    public final double discount;
+    public final double[] initBelief;
+    public final boolean minimize;
 
     public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
                         List<String> actionNames, HashMap<String, Integer> actionNameToIndex,
@@ -66,10 +65,10 @@ public class POMDPProblem {
         return stateNames.size();
     }
 
-    public double getProbabilityOfObservationPlayingAction(int actionI, int observationI) {
+    public double getProbabilityOfObservationPlayingAction(int a, int o) {
         double probSum = 0;
-        for (int endStateI = 0; endStateI < stateNames.size(); ++endStateI) {
-            probSum += observationProbabilities[actionI][endStateI][observationI];
+        for (int s_ = 0; s_ < stateNames.size(); ++s_) {
+            probSum += observationProbabilities[a][s_][o];
         }
         return probSum;
     }
