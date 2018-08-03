@@ -1,10 +1,8 @@
-package HSVI;
+package main.java.AHSVI;
 
-import POMDPProblem.POMDPProblem;
+import main.java.POMDPProblem.POMDPProblem;
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
-
-import java.util.Iterator;
 
 /**
  * Created by wigos on 3.8.16.
@@ -30,30 +28,18 @@ public class HSVIAlgorithm {
     }
 
     public void solve(Partition initialPartition, double epsilon) throws IloException {
-        int removed = 0;
-        long next = 0;
-
-        double prevMinLB = -1;
+        double ePrime;
         while (true) {
             double width = width(initialPartition, initialBelief);
 
             minLB = this.partition.lbFunction.getValue(initialBelief);
             minUB = this.partition.ubFunction.getValue(initialBelief);
-            System.out.println("minLB=" + minLB);
-            System.out.println("minUB=" + minUB);
-
-            double e = (minUB - minLB) / minUB;
-
-            prevMinLB = minLB;
 
             if ((minUB - minLB) / minUB < epsilon / 100) {
-                System.out.println("Breaking!!");
-                System.out.println((minUB - minLB) / minUB + " vs " + epsilon / 100);
                 break;
             }
 
-            double ePrime = epsilon / 100d;
-            Q = 0; // TODO: is it so?
+            ePrime = epsilon / 100d;
 
             explore(initialPartition, initialBelief, ePrime, 0);
         }
@@ -69,89 +55,62 @@ public class HSVIAlgorithm {
     }
 
     private void explore(Partition partition, double[] belief, double ePrime, int t) throws IloException {
-
-        if (!MINIMIZE_VALUE) {
-            if (t < numberOfCalls) {
-                Triplet<Integer, Integer, double[]> aoPair = select(partition, belief, ePrime, t + 1);
-                if (aoPair != null) {
-                    System.out.println("Action=" + aoPair.getFirst() + ", Observation=" + aoPair.getSecond());
-                    explore(partition, aoPair.getThird(), ePrime, t + 1);
-                } else {
-                    System.out.println(" Depth " + t);
-                }
-            }
+        Triplet<Integer, Integer, double[]> aoPair = select(partition, belief, ePrime, t + 1);
+        if (aoPair != null) {
+            explore(partition, aoPair.getThird(), ePrime, t + 1);
         } else {
-//            if ( t < Math.sqrt(numberOfCalls) ) {
-            if (t < numberOfCalls) {
-                Triplet<Integer, Integer, double[]> aoPair = select(partition, belief, ePrime, t + 1);
-                if (aoPair != null) {
-                    System.out.println("Action=" + aoPair.getFirst() + ", Observation=" + aoPair.getSecond());
-                    explore(partition, aoPair.getThird(), ePrime, t + 1);
-                } else {
-                    System.out.println(" Depth " + t);
-                }
-            } else {
-                System.out.println(" Depth " + t);
-            }
+            System.out.println(" Depth " + t);
         }
 
         updateLb(partition, belief);
-
         updateUb(partition, belief);
     }
 
     private Triplet<Integer, Integer, double[]> select(Partition partition, double[] belief, double ePrime, int t) throws IloException {
-
+        //TODO change this function
         double gamma = pomdpProblem.discount;
         Triplet<Integer, Integer, double[]> best = null;
 
-        int i = 0;
-
         double ePrimeValue = ePrime;
-        double circleValue = 0.0;
 
         ePrimeValue /= Math.pow(gamma, t);
 
-        // added by me
-//        System.out.println("selecting action");
-        int bestActionIndex = 0;
-        double valueOfBestAction = -1;
-        for (int actionIndex = 0; actionIndex < game.thresholds.size(); actionIndex++) {
-//        for (Integer action : game.actions) {
-
-            // compute lower QV
-            double value = computeQub(belief, actionIndex);
-
-//            System.out.println(value);
-            if (value > valueOfBestAction) {
-                bestActionIndex = actionIndex;
-                valueOfBestAction = value;
+        int bestA = 0;
+        double valueOfBestA = computeQub(belief, 0);
+        double value;
+        int actionsCount = pomdpProblem.actionNames.size();
+        if (actionsCount > 1) {
+            for (int a = 1; a < actionsCount; ++a) {
+                // compute lower QV
+                value = computeQub(belief, a);
+                if (value > valueOfBestA) {
+                    bestA = a;
+                    valueOfBestA = value;
+                }
             }
-//            else {
-//                break;
-//            }
         }
 
-//        System.out.println("selecting observation");
         // compute best observation
-        Integer bestObservation = 0;
-        double valueOfBestObservation = 0;
-        for (int obIndex = 0; obIndex < game.thresholds.size(); obIndex++) {
-//        for (Integer observation : game.observations) {
-            double[] nextBelief = partition.nextBelief(belief, bestActionIndex, obIndex);
-            if (nextBelief == null) continue;
-            double prb = partition.getObservationProbability(belief, bestActionIndex, obIndex);
-            double excess = width(partition, nextBelief) - ePrimeValue;
-            double value = prb * excess;
-            if (value > valueOfBestObservation) {
-                bestObservation = obIndex;
-                valueOfBestObservation = value;
+        int bestO = 0;
+        double valueOfBestO = 0;
+        int observationsCount = pomdpProblem.observationNames.size();
+        for (int o = 0; o < observationsCount; ++o) {
+            double[] nextBelief = partition.nextBelief(belief, bestA, o);
+            if (nextBelief != null) {
+                double prb = pomdpProblem.getProbabilityOfObservationPlayingAction(bestA, o);
+                double excess = width(partition, nextBelief) - ePrimeValue;
+                value = prb * excess;
+                if (value > valueOfBestO) {
+                    bestO = o;
+                    valueOfBestO = value;
+                }
             }
         }
-        // added by me
 
-        double[] nextBel = partition.nextBelief(belief, bestActionIndex, bestObservation);
-        if (valueOfBestObservation > 0) best = new Triplet<>(bestActionIndex, bestObservation, nextBel);
+        double[] nextBel = partition.nextBelief(belief, bestA, bestO);
+        if (valueOfBestO > 0) {
+            best = new Triplet<>(bestA, bestO, nextBel);
+        }
 
         return best;
 
@@ -230,19 +189,6 @@ public class HSVIAlgorithm {
                 */
             }
         }
-
-        // future reward
-        /*
-        double futureReward = 0;
-        for (Integer observation : game.observations) {
-            double[] newBelief = partition.nextBelief(belief, action, observation);
-            if ( newBelief == null ) continue;
-            double prb = partition.getObservationProbability(belief, action, observation);
-            double value = partition.ubFunction.getValue(newBelief);
-            futureReward += prb * value;
-        }
-        return immediateReward + game.discount * futureReward;
-        */
 
         return immediateReward;
     }

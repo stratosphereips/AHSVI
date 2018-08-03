@@ -1,12 +1,8 @@
-package HSVI;
+package main.java.AHSVI;
 
-import POMDPProblem.POMDPProblem;
-
-import static java.util.stream.Collectors.toList;
+import main.java.POMDPProblem.POMDPProblem;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Created by wigos on 8.8.16.

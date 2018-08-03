@@ -1,4 +1,4 @@
-package HSVI;
+package main.java.AHSVI;
 
 /**
  * Created by karel on 1/22/2016.

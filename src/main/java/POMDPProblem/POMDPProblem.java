@@ -1,4 +1,4 @@
-package POMDPProblem;
+package main.java.POMDPProblem;
 
 import java.util.*;
 

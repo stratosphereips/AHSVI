@@ -1,4 +1,4 @@
-package HSVI;
+package main.java.AHSVI;
 
 public interface Dominable<T> {
     Object parent = null;

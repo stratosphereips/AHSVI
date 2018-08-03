@@ -1,9 +1,6 @@
-package HSVI;
+package main.java.AHSVI;
 
-import HSVI.Dominable;
-import HSVI.ValueFunction;
 import ilog.concert.*;
-import ilog.cplex.CplexI;
 import ilog.cplex.IloCplex;
 
 import java.util.*;

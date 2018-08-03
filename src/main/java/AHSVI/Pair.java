@@ -1,4 +1,4 @@
-package HSVI;
+package main.java.AHSVI;
 
 /*
  * @author Karel Durkota
