@@ -76,18 +76,17 @@ public class HSVIAlgorithm {
         updateUb(partition, belief);
     }
 
-    private Triplet<Integer, Integer, double[]> select(Partition partition, double[] belief) throws IloException {
-        //TODO change this function
+    private Triplet<Integer, Integer, double[]> select(Partition partition, double[] belief) {
         Triplet<Integer, Integer, double[]> best = null;
 
         int bestA = 0;
-        double valueOfBestA = computeQub(belief, 0);
+        double valueOfBestA = computeQ(belief, 0);
         double value;
         int actionsCount = pomdpProblem.actionNames.size();
         if (actionsCount > 1) {
             for (int a = 1; a < actionsCount; ++a) {
                 // compute lower QV
-                value = computeQub(belief, a);
+                value = computeQ(belief, a);
                 if (value > valueOfBestA) {
                     bestA = a;
                     valueOfBestA = value;
@@ -122,51 +121,36 @@ public class HSVIAlgorithm {
 
     }
 
-    private double computeQub(double[] belief, int actionIndex) {
-        double immediateReward = 0;
-        //TODO complete this [paper 3.3]
-        /*
-        for (int i = 0; i < belief.length; i++) {
-            if (belief[i] < Config.ZERO) {
-                continue;
+    private double computeQ(double[] belief, int a) {
+        double rewardsSum = 0;
+        double observationsValuesSum = 0;
+        double observationsValuesSubSum;
+        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+            rewardsSum += pomdpProblem.rewards[s][a];
+            observationsValuesSubSum = 0;
+            for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
+                for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+                    observationsValuesSubSum += pomdpProblem.actionProbabilities[s][a][s_] *
+                            pomdpProblem.observationProbabilities[s_][a][o];
+                }
             }
-
-            for (int obInd = 0; obInd < game.thresholds.size(); obInd++) {
-                double probabilityOfObservation = userTypeIIntegerPair.getLeft().getProbabilityOfObservationToNextStep(obInd);
-
-                if (probabilityOfObservation < Config.ZERO) {
-                    continue;
-                }
-
-
-                double[] next = partition.nextBelief(belief, actionIndex, obInd);
-                if (next != null) {
-                    double prbOfNotDetecting = userTypeIIntegerPair.getLeft().getProbabilityOfNotDetectingNormalized(game.getDefendersThresholdActionInverse(userTypeIIntegerPair.getRight()), actionIndex, obInd, game.IS_ADDITIVE);
-                    if (prbOfNotDetecting == 0) {
-                        continue;
-                    }
-                    if (prbOfNotDetecting > 1 + Config.ZERO || prbOfNotDetecting < 0 - Config.ZERO) {
-                        prbOfNotDetecting = userTypeIIntegerPair.getLeft().getProbabilityOfNotDetectingNormalized(game.getDefendersThresholdActionInverse(userTypeIIntegerPair.getRight()), actionIndex, obInd, game.IS_ADDITIVE);
-                    }
-
-                    immediateReward += belief[i] * probabilityOfObservation * prbOfNotDetecting * (game.thresholds.get(actionIndex) + game.discount * partition.ubFunction.getValue(next));
-                }
-            }*/
+            observationsValuesSum += belief[s] * observationsValuesSubSum;
+        }
+        observationsValuesSum *= pomdpProblem.discount;
+        return rewardsSum + observationsValuesSum;
     }
 
-        return immediateReward;
-}
+    private double computeHV(double[] belief) {
+        // [paper 3.3]
+        double maxQa = Double.NEGATIVE_INFINITY;
+        for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
+            maxQa = Math.max(maxQa, computeQ(belief, a));
+        }
+        return maxQa;
+    }
 
     private void updateUb(Partition partition, double[] belief) throws IloException {
-        double bestValue = Double.NEGATIVE_INFINITY;
-        double v;
-        for (int a = 0; a < pomdpProblem.getNumberOfActions(); a++) {
-            v = computeQub(belief, a);
-            if (v > bestValue) {
-                bestValue = v;
-            }
-        }
-        partition.ubFunction.addPoint(belief, bestValue, null);
+        partition.ubFunction.addPoint(belief, computeHV(belief));
     }
 
     private double multiply(double[] a, double[] b) {
