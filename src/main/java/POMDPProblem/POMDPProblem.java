@@ -65,6 +65,14 @@ public class POMDPProblem {
         return stateNames.size();
     }
 
+    public int getNumberOfActions() {
+        return actionNames.size();
+    }
+
+    public int getNumberOfObservations() {
+        return observationNames.size();
+    }
+
     public double getProbabilityOfObservationPlayingAction(int a, int o) {
         double probSum = 0;
         for (int s_ = 0; s_ < stateNames.size(); ++s_) {

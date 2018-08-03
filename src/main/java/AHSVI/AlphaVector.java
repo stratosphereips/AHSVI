@@ -5,11 +5,9 @@ public class AlphaVector<T> {
     T data;
     boolean updated;
 
-    public AlphaVector(double [] vector, T data) {
+    public AlphaVector(double[] vector, T data) {
         this.vector = vector;
-        if (data != null) {
-            this.data = data;
-        }
+        this.data = data;
     }
 
     public void update(double[] vector) {

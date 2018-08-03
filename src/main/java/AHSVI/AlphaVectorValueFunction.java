@@ -16,10 +16,10 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     private IloCplex cplex;
 
 
-
     public AlphaVectorValueFunction(int dimension) {
         this(dimension, null);
     }
+
     public AlphaVectorValueFunction(int dimension, Object data) {
         super(dimension, data);
         alphaVectors = new LinkedList<>();
@@ -28,12 +28,12 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     public AlphaVector<T> addVector(double[] alphaVector) {
         return addVector(alphaVector, null);
     }
+
     public AlphaVector<T> addVector(double[] alphaVector, Integer data) {
         AlphaVector<T> vector = new AlphaVector(alphaVector, data);
-        Iterator<AlphaVector<T>> it = alphaVectors.iterator();
         alphaVectors.add(vector);
 
-        for(int i = 0 ; i < alphaVector.length ; i++) {
+        for (int i = 0; i < alphaVector.length; i++) {
             minimum = Math.min(minimum, alphaVector[i]);
         }
 
@@ -41,7 +41,7 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     }
 
     public void printVectors() {
-        for(AlphaVector<T> vector : alphaVectors) {
+        for (AlphaVector<T> vector : alphaVectors) {
             System.out.println(vector);
         }
     }
@@ -49,9 +49,9 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     @Override
     public double getValue(double[] point) {
         double max = Double.NEGATIVE_INFINITY;
-        for(AlphaVector<T> alphaVector : alphaVectors) {
+        for (AlphaVector<T> alphaVector : alphaVectors) {
             double value = 0.0;
-            for(int i = 0 ; i < dimension ; i++) value += alphaVector.vector[i] * point[i];
+            for (int i = 0; i < dimension; i++) value += alphaVector.vector[i] * point[i];
             max = Math.max(value, max);
         }
         return max;
@@ -60,10 +60,10 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     public AlphaVector<T> getVector(double[] point) {
         double max = Double.NEGATIVE_INFINITY;
         AlphaVector<T> maxVector = null;
-        for(AlphaVector<T> alphaVector : alphaVectors) {
+        for (AlphaVector<T> alphaVector : alphaVectors) {
             double value = 0.0;
-            for(int i = 0 ; i < dimension ; i++) value += alphaVector.vector[i] * point[i];
-            if(value > max) {
+            for (int i = 0; i < dimension; i++) value += alphaVector.vector[i] * point[i];
+            if (value > max) {
                 max = value;
                 maxVector = alphaVector;
             }
@@ -77,8 +77,10 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
 
 
     private static boolean dominates(AlphaVector alpha1, AlphaVector alpha2) {
-        for(int i = 0 ; i < alpha1.vector.length ; i++) {
-            if(alpha1.vector[i] < alpha2.vector[i]) return false;
+        for (int i = 0; i < alpha1.vector.length; i++) {
+            if (alpha1.vector[i] < alpha2.vector[i]) {
+                return false;
+            }
         }
         return true;
     }
@@ -93,7 +95,7 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     @Override
     public IloRange constructLP(IloCplex cplex, IloNumVar[] coords, IloNumVar value) throws IloException {
         IloNumVar[] vars = new IloNumVar[coords.length + 1];
-        for(int i = 0 ; i < coords.length ; i++) vars[i] = coords[i];
+        for (int i = 0; i < coords.length; i++) vars[i] = coords[i];
         vars[coords.length] = value;
 
         int V = numVectors();
@@ -103,9 +105,9 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
         double[][] lpCoef = new double[V][dimension + 1];
 
         int i = 0;
-        for(AlphaVector<T> vector : alphaVectors) {
+        for (AlphaVector<T> vector : alphaVectors) {
             lpUb[i] = Double.POSITIVE_INFINITY;
-            for(int j = 0 ; j < dimension ; j++) {
+            for (int j = 0; j < dimension; j++) {
                 lpInd[i][j] = j;
                 lpCoef[i][j] = -vector.vector[j];
             }
@@ -123,7 +125,7 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
 
     public IloRange constructLPConditional(IloCplex cplex, IloNumVar[] coords, IloNumVar value) throws IloException {
         IloNumVar[] vars = new IloNumVar[coords.length + 1];
-        for(int i = 0 ; i < coords.length ; i++) vars[i] = coords[i];
+        for (int i = 0; i < coords.length; i++) vars[i] = coords[i];
         vars[coords.length] = value;
 
         int V = numVectors();
@@ -133,9 +135,9 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
         double[][] lpCoef = new double[V][dimension + 1];
 
         int i = 0;
-        for(AlphaVector<T> vector : alphaVectors) {
+        for (AlphaVector<T> vector : alphaVectors) {
             lpUb[i] = Double.POSITIVE_INFINITY;
-            for(int j = 0 ; j < dimension ; j++) {
+            for (int j = 0; j < dimension; j++) {
                 lpInd[i][j] = j;
                 lpCoef[i][j] = -vector.vector[j];
             }
@@ -150,10 +152,11 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
 
         return null;
     }
+
     public int auxiliaryRanges(IloRange[] dest, int offset) throws IloException {
         IloRange[] ranges = matrix.getRanges();
-        for( int i = 0 ; i < ranges.length ; i++ ) {
-            dest[offset+i] = ranges[i];
+        for (int i = 0; i < ranges.length; i++) {
+            dest[offset + i] = ranges[i];
         }
         return offset + ranges.length;
     }
@@ -180,118 +183,8 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
 
         //extract result
         this.minimalBelief = new double[dimension];
-        for ( int i=0; i<coords.length; i++ ) {
+        for (int i = 0; i < coords.length; i++) {
             minimalBelief[i] = cplex.getValue(coords[i]);
         }
     }
-
-    public void updateMinimumWithFP_bk(GeneralSolverSetting setting) throws IloException {
-        //TODO
-        if ( cplex == null ) {
-            cplex = Cplex.get();
-        }
-        cplex.clearModel();
-        IloNumVar[] coords = cplex.numVarArray(dimension, 0.0, 1.0);
-        IloNumVar value = cplex.numVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-        cplex.addEq(cplex.sum(coords), 1.0);
-
-        // False Positive constraint
-        IloNumExpr fpValue = cplex.constant(-setting.FP);
-        for ( int i=0; i<coords.length; i++ ) {
-            fpValue = cplex.sum(fpValue, cplex.prod(setting.indexedFP.get(i), coords[i]));
-        }
-        cplex.addLe(fpValue, 0);
-
-        // actions sums up to type probability
-        for (Map.Entry<UserTypeI, Double> entry : setting.prior.getProbabilityDistribution().entrySet()) {
-            IloNumExpr typePrb = cplex.constant(-entry.getValue());
-
-            for (Long threshold : setting.thresholds.values()) {
-                int index = setting.stateToIndex.get(entry.getKey()).get(threshold);
-                typePrb = cplex.sum(typePrb, coords[index]);
-
-            }
-            cplex.addEq(typePrb, 0);
-
-        }
-
-        constructLP(cplex, coords, value);
-        cplex.addMinimize(value);
-        cplex.solve();
-//        cplex.exportModel("cplex.lp");
-        minimumFP = cplex.getObjValue();
-
-        //extract result
-        this.minimalFPBelief = new double[dimension];
-        for ( int i=0; i<coords.length; i++ ) {
-            minimalFPBelief[i] = cplex.getValue(coords[i]);
-        }
-    }
-
-    public void updateMinimumWithFP(GeneralSolverSetting setting) throws IloException {
-        if ( cplex == null ) {
-            cplex = Cplex.get();
-        }
-        cplex.clearModel();
-        IloNumVar[] coords;
-        IloNumVar[] coordsForLP;
-        String[] coorNames = new String[dimension];
-        String[] coorNamesForLP = new String[dimension];
-        for ( int i=0; i< dimension; i++ ) {
-            coorNames[i] = "T" + setting.indexToState.get(i).getLeft().getId() + "_" + setting.indexToState.get(i).getRight();
-            coorNamesForLP[i] = "T" + setting.indexToState.get(i).getLeft().getId() + "_" + setting.indexToState.get(i).getRight() + "_LP";
-        }
-        if ( setting.DEFENDER_PURE_STRATEGY ) {
-            coords = cplex.numVarArray(dimension, 0.0, 1.0, IloNumVarType.Bool);
-        } else {
-            coords = cplex.numVarArray(dimension, 0.0, 1.0, coorNames);
-        }
-        coordsForLP = cplex.numVarArray(dimension, 0.0, 1.0, coorNamesForLP);
-        IloNumVar value = cplex.numVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-//        cplex.addEq(cplex.sum(coords), setting.prior.getProbabilityDistribution().size());
-
-        // False Positive constraint
-        IloNumExpr fpValue = cplex.constant(-setting.FP);
-        for ( int i=0; i<coords.length; i++ ) {
-            double typePrb = setting.prior.getProbabilityDistribution().get(setting.indexToState.get(i).getLeft());
-            fpValue = cplex.sum(fpValue, cplex.prod(setting.indexedFP.get(i) * typePrb, coords[i]));
-        }
-        cplex.addLe(fpValue, 0);
-
-        for ( int i=0; i<coords.length;i++ ) {
-            double typePrb = setting.prior.getProbabilityDistribution().get(setting.indexToState.get(i).getLeft());
-            IloNumExpr e = cplex.constant(0);
-            e = cplex.sum(e, cplex.prod(-typePrb, coords[i]));
-            e = cplex.sum(e, coordsForLP[i]);
-            cplex.addEq(e, 0);
-        }
-
-        // actions sums up to type probability
-        for (Map.Entry<UserTypeI, Double> entry : setting.prior.getProbabilityDistribution().entrySet()) {
-            IloNumExpr typePrb = cplex.constant(-1d);
-//            double prb = entry.getValue();
-
-            for (Long threshold : setting.thresholds.values()) {
-                int index = setting.stateToIndex.get(entry.getKey()).get(threshold);
-                typePrb = cplex.sum(typePrb, coords[index]);
-
-            }
-            cplex.addEq(typePrb, 0);
-
-        }
-
-        constructLP(cplex, coordsForLP, value);
-        cplex.addMinimize(value);
-        cplex.solve();
-        cplex.exportModel("cplex.lp");
-        minimumFP = cplex.getObjValue();
-
-        //extract result
-        this.minimalFPBelief = new double[dimension];
-        for ( int i=0; i<coords.length; i++ ) {
-            double typePrb = setting.prior.getProbabilityDistribution().get(setting.indexToState.get(i).getLeft());
-            minimalFPBelief[i] = cplex.getValue(coords[i]) * typePrb;
-        }
-    }
-
 }
