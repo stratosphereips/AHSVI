@@ -80,47 +80,20 @@ public class Partition {
     }
 
     public double[] nextBelief(double[] belief, int a, int o) {
-        //TODO [paper 2.update b']
+        // [paper 2.update b']
         double[] beliefNew = new double[belief.length];
+        double normConstant = 0;
         for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
                 beliefNew[s_] += pomdpProblem.actionProbabilities[s][a][s_] * belief[s];
             }
             beliefNew[s_] *= pomdpProblem.observationProbabilities[s_][a][o];
+            normConstant += beliefNew[s_];
         }
-        double normConstant = 0;
-        for ()
-        /*
-        double[] newBel = new double[belief.length];
-        double sum = 0;
-        for (int i = 0; i < belief.length; i++) {
-            if (belief[i] < Config.ZERO) {
-                continue;
-            }
-            cz.agents.deceptiongame.dynprog.auxiliary.Pair<UserTypeI, Long> userTypeIIntegerPair = setting.indexToState.get(i);
-            if (userTypeIIntegerPair != null) {
-                int thresholdIndex = setting.getDefendersThresholdActionInverse(userTypeIIntegerPair.getRight());
-                double prbOfNotDetecting = userTypeIIntegerPair.getLeft().getProbabilityOfNotDetectingNormalized(thresholdIndex, actionInd, observationInd, setting.IS_ADDITIVE);
-                newBel[i] = belief[i] * prbOfNotDetecting * userTypeIIntegerPair.getLeft().getProbabilityOfObservationToNextStep(observationInd);
-                if (newBel[i] < Config.ZERO) {
-                    newBel[i] = 0;
-                }
-                sum += newBel[i];
-            }
+        for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+            beliefNew[s_] /= normConstant;
         }
-
-        // normalize
-
-        if (sum < Config.ZERO || Double.isNaN(sum)) return null;
-
-        for (int i = 0; i < newBel.length; i++) {
-            newBel[i] /= sum;
-        }
-
-        double total = Arrays.stream(newBel).sum();
-        assert total <= 1 + Config.ZERO && total >= 0 - Config.ZERO;
-        return newBel;
-        */
+        return beliefNew;
     }
 
 }
