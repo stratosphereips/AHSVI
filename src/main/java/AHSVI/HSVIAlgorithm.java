@@ -1,6 +1,7 @@
 package main.java.AHSVI;
 
 import java.lang.IllegalArgumentException;
+
 import main.java.POMDPProblem.POMDPProblem;
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
@@ -12,7 +13,7 @@ public class HSVIAlgorithm {
 
     private final POMDPProblem pomdpProblem;
     private final double epsilon;
-    public Partition partition;
+    public Partition partition; //TODO are there more than one partitions?
 
     public double finalUtilityLB;
     public double finalUtilityUB;
@@ -29,13 +30,13 @@ public class HSVIAlgorithm {
         }
         this.pomdpProblem = pomdpProblem;
         this.epsilon = epsilon;
-        this.partition = new Partition(0, pomdpProblem);
+        this.partition = new Partition(pomdpProblem);
         this.partition.initValueFunctions();
     }
 
     public void solve(Partition initialPartition, double epsilon) throws IloException {
         while (widthLargerThanEps(initialPartition, pomdpProblem.initBelief)) {
-            explore(initialPartition, pomdpProblem.initBelief);
+            explore(initialPartition, pomdpProblem.initBelief, 0);
         }
 
         /*
@@ -62,10 +63,13 @@ public class HSVIAlgorithm {
         return width(partition, belief) > epsilon;
     }
 
-    private void explore(Partition partition, double[] belief) throws IloException {
+    private void explore(Partition partition, double[] belief, int t) throws IloException {
+        if (width(partition, belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {
+            return;
+        }
         Triplet<Integer, Integer, double[]> aoPair = select(partition, belief);
         if (aoPair != null) {
-            explore(partition, aoPair.getThird());
+            explore(partition, aoPair.getThird(), t + 1);
         }
 
         updateLb(partition, belief);
@@ -120,6 +124,8 @@ public class HSVIAlgorithm {
 
     private double computeQub(double[] belief, int actionIndex) {
         double immediateReward = 0;
+        //TODO complete this [paper 3.3]
+        /*
         for (int i = 0; i < belief.length; i++) {
             if (belief[i] < Config.ZERO) {
                 continue;
@@ -127,9 +133,8 @@ public class HSVIAlgorithm {
 
             for (int obInd = 0; obInd < game.thresholds.size(); obInd++) {
                 double probabilityOfObservation = userTypeIIntegerPair.getLeft().getProbabilityOfObservationToNextStep(obInd);
-                assert probabilityOfObservation <= 1d && probabilityOfObservation >= 0;
 
-                if ( probabilityOfObservation < Config.ZERO ) {
+                if (probabilityOfObservation < Config.ZERO) {
                     continue;
                 }
 
@@ -146,11 +151,11 @@ public class HSVIAlgorithm {
 
                     immediateReward += belief[i] * probabilityOfObservation * prbOfNotDetecting * (game.thresholds.get(actionIndex) + game.discount * partition.ubFunction.getValue(next));
                 }
-            }
-        }
+            }*/
+    }
 
         return immediateReward;
-    }
+}
 
     private void updateUb(Partition partition, double[] belief) throws IloException {
         double bestValue = Double.NEGATIVE_INFINITY;
@@ -194,6 +199,7 @@ public class HSVIAlgorithm {
     }
 
     private void updateLb(Partition partition, double[] belief) throws IloException {
+        //TODO [paper Alg 3]
         MultiKeyMap map = new MultiKeyMap();
 
         for (int actionInd = 0; actionInd < game.thresholds.size(); actionInd++) {

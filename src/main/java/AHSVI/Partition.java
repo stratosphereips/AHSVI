@@ -10,13 +10,11 @@ import java.util.*;
 public class Partition {
 
     private final POMDPProblem pomdpProblem;
-    protected int leaderActions;
 
     public AlphaVectorValueFunction<Integer> lbFunction;
     public PointBasedValueFunction ubFunction;
 
-    public Partition(int leaderActions, POMDPProblem pomdpProblem) {
-        this.leaderActions = leaderActions;
+    public Partition(POMDPProblem pomdpProblem) {
         this.pomdpProblem = pomdpProblem;
     }
 
@@ -29,8 +27,8 @@ public class Partition {
         //TODO is this k?
         AlphaVectorValueFunction lbF = new AlphaVectorValueFunction(pomdpProblem.getNumberOfStates());
 
-        double minRsa;
-        double[] minRa = new double[pomdpProblem.getNumberOfActions()];
+        double minRsa, minRa;
+        double R_ = Double.NEGATIVE_INFINITY;
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
             minRsa = Double.POSITIVE_INFINITY;
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
@@ -38,15 +36,12 @@ public class Partition {
                     minRsa = Math.min(minRsa, pomdpProblem.rewards[s][a]);
                 }
             }
-            minRa[a] = minRsa / (1 - pomdpProblem.discount);
+            minRa = minRsa / (1 - pomdpProblem.discount);
+            R_ = Math.max(R_, minRa);
         }
 
-        double R_ = Double.NEGATIVE_INFINITY;
-        for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
-            R_ = Math.max(R_, minRa[a]);
-        }
         double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
-        Arrays.fill(initAlpha, 0.0);
+        Arrays.fill(initAlpha, R_);
         lbFunction.addVector(initAlpha); //TODO second argument to addVector?
 
         return lbF;
@@ -55,7 +50,7 @@ public class Partition {
     private PointBasedValueFunction initUpperBound() {
         PointBasedValueFunction ubF = new PointBasedValueFunction(pomdpProblem.getNumberOfStates());
 
-        //TODO
+        //TODO what is happening here
         // set ub with perfect-information setting
         for (int state = 0; state < setting.getNumberOfStates(); state++) {
             Pair<UserTypeI, Long> userTypeIIntegerPair = setting.indexToState.get(state);
@@ -84,7 +79,18 @@ public class Partition {
         return ubF;
     }
 
-    public double[] nextBelief(double[] belief, int actionInd, int observationInd) {
+    public double[] nextBelief(double[] belief, int a, int o) {
+        //TODO [paper 2.update b']
+        double[] beliefNew = new double[belief.length];
+        for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+            for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+                beliefNew[s_] += pomdpProblem.actionProbabilities[s][a][s_] * belief[s];
+            }
+            beliefNew[s_] *= pomdpProblem.observationProbabilities[s_][a][o];
+        }
+        double normConstant = 0;
+        for ()
+        /*
         double[] newBel = new double[belief.length];
         double sum = 0;
         for (int i = 0; i < belief.length; i++) {
@@ -114,6 +120,7 @@ public class Partition {
         double total = Arrays.stream(newBel).sum();
         assert total <= 1 + Config.ZERO && total >= 0 - Config.ZERO;
         return newBel;
+        */
     }
 
 }
