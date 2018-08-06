@@ -1,6 +1,7 @@
 package main.java.AHSVI;
 
 import java.lang.IllegalArgumentException;
+import java.util.ArrayList;
 
 import main.java.POMDPProblem.POMDPProblem;
 import ilog.concert.IloException;
@@ -183,58 +184,37 @@ public class HSVIAlgorithm {
     }
 
     private void updateLb(Partition partition, double[] belief) throws IloException {
-        //TODO [paper Alg 3]
-        MultiKeyMap map = new MultiKeyMap();
-
-        for (int actionInd = 0; actionInd < game.thresholds.size(); actionInd++) {
-            for (int obInd = 0; obInd < game.thresholds.size(); obInd++) {
-                AlphaVector<Integer> alpha = null;
-
-                nextState:
-                for (int state = 0; state < belief.length; state++) {
-                    cz.agents.deceptiongame.dynprog.auxiliary.Pair<UserTypeI, Long> userType = game.indexToState.get(state);
-                    double prbOfNotDet = userType.getLeft().getProbabilityOfNotDetectingNormalized(game.getDefendersThresholdActionInverse(userType.getRight()), actionInd, obInd, game.IS_ADDITIVE);
-                    prbOfNotDet *= userType.getLeft().getProbabilityOfObservationToNextStep(obInd);
-                    if (prbOfNotDet < Config.ZERO || Double.isNaN(prbOfNotDet)) continue;
-
-                    if (alpha == null) {
-                        alpha = getBestAlphaVector(belief, actionInd, obInd);
-                        if (alpha == null) continue;
+        // [paper Alg 3]
+        ArrayList<AlphaVector<Integer>> betasAo = new ArrayList<>(pomdpProblem.getNumberOfObservations());
+        double[] betaVec;
+        double[] maxBetaVec = null;
+        double maxBetaVecValue = Double.NEGATIVE_INFINITY;
+        double sumOs_, betaVecValue;
+        int bestA = 0;
+        for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
+            for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
+                betasAo.add(partition.getAlphaDotProdArgMax(belief, a, o));
+            }
+            betaVec = new double[belief.length];
+            for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+                sumOs_ = 0;
+                for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
+                    for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+                        sumOs_ += HelperFunctions.dotProd(betasAo.get(o), s_, belief[s_]) *
+                                pomdpProblem.observationProbabilities[s_][a][o] *
+                                pomdpProblem.actionProbabilities[s][a][s_];
                     }
-                    double value = prbOfNotDet * (game.getAttackerUtilityForAction(actionInd) + game.discount * alpha.vector[state]);
-                    if (map.containsKey(actionInd, state)) {
-                        value += (double) map.get(actionInd, state);
-                    }
-                    map.put(actionInd, state, value);
                 }
+                betaVec[s] = pomdpProblem.rewards[s][a] + pomdpProblem.discount * sumOs_;
+            }
+            betaVecValue = HelperFunctions.dotProd(betaVec, belief);
+            if (betaVecValue > maxBetaVecValue) {
+                maxBetaVecValue = betaVecValue;
+                maxBetaVec = betaVec;
+                bestA = a;
             }
         }
-
-        // pick best beta_a
-        double[] bestVector = null;
-        double bestValue = -1;
-        Integer bestAction = null;
-        for (int actionInd = 0; actionInd < game.thresholds.size(); actionInd++) {
-            double[] currentVector = new double[belief.length];
-            double currentValue = 0;
-
-            for (int state = 0; state < belief.length; state++) {
-                if (map.containsKey(actionInd, state)) {
-                    currentVector[state] = (double) map.get(actionInd, state);
-                } else {
-                    currentVector[state] = 0;
-                }
-                currentValue += belief[state] * currentVector[state];
-            }
-
-            if (currentValue > bestValue) {
-                bestValue = currentValue;
-                bestVector = currentVector;
-                bestAction = actionInd;
-            }
-        }
-
-        partition.lbFunction.addVector(bestVector, bestAction);
+        partition.lbFunction.addVector(maxBetaVec, bestA);
     }
 
     private double width(Partition partition, double[] belief) {

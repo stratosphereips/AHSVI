@@ -1,9 +1,9 @@
 package main.java.AHSVI;
 
 public class AlphaVector<T> {
-    double[] vector;
-    T data;
-    boolean updated;
+    public double[] vector;
+    public T data;
+    public boolean updated;
 
     public AlphaVector(double[] vector, T data) {
         this.vector = vector;

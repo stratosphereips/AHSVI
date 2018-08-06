@@ -29,6 +29,7 @@ public class Partition {
 
         double minRsa, minRa;
         double R_ = Double.NEGATIVE_INFINITY;
+        int bestA = 0;
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
             minRsa = Double.POSITIVE_INFINITY;
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
@@ -37,12 +38,15 @@ public class Partition {
                 }
             }
             minRa = minRsa / (1 - pomdpProblem.discount);
-            R_ = Math.max(R_, minRa);
+            if (minRa > R_) {
+                R_ = minRa;
+                bestA = a;
+            }
         }
 
         double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
         Arrays.fill(initAlpha, R_);
-        lbFunction.addVector(initAlpha); //TODO second argument to addVector?
+        lbFunction.addVector(initAlpha, bestA);
 
         return lbF;
     }
@@ -52,29 +56,7 @@ public class Partition {
 
         //TODO what is happening here
         // set ub with perfect-information setting
-        for (int state = 0; state < setting.getNumberOfStates(); state++) {
-            Pair<UserTypeI, Long> userTypeIIntegerPair = setting.indexToState.get(state);
-            if (userTypeIIntegerPair != null) {
-                long threshold = userTypeIIntegerPair.getRight();
-                int thresholdIndex = setting.getDefendersThresholdActionInverse(threshold);
-
-                bestValue = -1;
-                for (int actionIndex = 0; actionIndex < setting.thresholds.size(); actionIndex++) {
-                    double v = userTypeIIntegerPair.getLeft().probabilityOfNotDetectingActionForThreshold(actionIndex, thresholdIndex, setting.IS_ADDITIVE);
-                    double expUtility = setting.getAttackerUtilityForAction(actionIndex) * v / (1 - setting.discount * v);
-                    if (expUtility > bestValue) {
-                        bestValue = expUtility;
-                    }
-                }
-            } else {
-                bestValue = 0;
-            }
-
-            double[] maxBelief = new double[minVector.length];
-            maxBelief[state] = 1.0;
-            ubFunction.addPoint(maxBelief, bestValue);
-        }
-
+        
         //TODO
         return ubF;
     }
@@ -96,4 +78,11 @@ public class Partition {
         return beliefNew;
     }
 
+    public AlphaVector<Integer> getAlphaDotProdArgMax(double[] belief) {
+        return lbFunction.getDotProdArgMax(belief);
+    }
+
+    public AlphaVector<Integer> getAlphaDotProdArgMax(double[] belief, int a, int o) {
+        return getAlphaDotProdArgMax(nextBelief(belief, a, o));
+    }
 }

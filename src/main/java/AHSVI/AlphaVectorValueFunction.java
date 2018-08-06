@@ -13,7 +13,6 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
 
     private double minimum = Double.POSITIVE_INFINITY;
     public double[] minimalBelief;
-    private IloCplex cplex;
 
 
     public AlphaVectorValueFunction(int dimension) {
@@ -57,14 +56,14 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
         return max;
     }
 
-    public AlphaVector<T> getVector(double[] point) {
-        double max = Double.NEGATIVE_INFINITY;
+    public AlphaVector<T> getDotProdArgMax(double[] belief) {
         AlphaVector<T> maxVector = null;
+        double maxDotProd = Double.NEGATIVE_INFINITY;
+        double dotProd;
         for (AlphaVector<T> alphaVector : alphaVectors) {
-            double value = 0.0;
-            for (int i = 0; i < dimension; i++) value += alphaVector.vector[i] * point[i];
-            if (value > max) {
-                max = value;
+            dotProd = HelperFunctions.dotProd(alphaVector, belief);
+            if (dotProd > maxDotProd) {
+                maxDotProd = dotProd;
                 maxVector = alphaVector;
             }
         }
