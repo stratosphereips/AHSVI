@@ -2,8 +2,6 @@ package main.java.AHSVI;
 
 import main.java.POMDPProblem.POMDPProblem;
 
-import java.util.*;
-
 /**
  * Created by wigos on 8.8.16.
  */
@@ -24,41 +22,15 @@ public class Partition {
     }
 
     private AlphaVectorValueFunction initLowerBound() {
-        //TODO is this k?
-        AlphaVectorValueFunction lbF = new AlphaVectorValueFunction(pomdpProblem.getNumberOfStates());
-
-        double minRsa, minRa;
-        double R_ = Double.NEGATIVE_INFINITY;
-        int bestA = 0;
-        for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
-            minRsa = Double.POSITIVE_INFINITY;
-            for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                if (pomdpProblem.initBelief[s] > 0) {
-                    minRsa = Math.min(minRsa, pomdpProblem.rewards[s][a]);
-                }
-            }
-            minRa = minRsa / (1 - pomdpProblem.discount);
-            if (minRa > R_) {
-                R_ = minRa;
-                bestA = a;
-            }
-        }
-
-        double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
-        Arrays.fill(initAlpha, R_);
-        lbFunction.addVector(initAlpha, bestA);
-
-        return lbF;
+        LBInitializer lbInit = new LBInitializer(pomdpProblem);
+        lbInit.computeInitialLB();
+        return lbInit.getLB();
     }
 
     private PointBasedValueFunction initUpperBound() {
-        PointBasedValueFunction ubF = new PointBasedValueFunction(pomdpProblem.getNumberOfStates());
-
-        //TODO what is happening here
-        // set ub with perfect-information setting
-        
-        //TODO
-        return ubF;
+        UBInitializer ubInit = new UBInitializer(pomdpProblem);
+        ubInit.computeInitialUB();
+        return ubInit.getUB();
     }
 
     public double[] nextBelief(double[] belief, int a, int o) {

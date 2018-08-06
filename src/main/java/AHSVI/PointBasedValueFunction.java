@@ -39,6 +39,10 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
         extremePoints = new Point[dimension];
     }
 
+    public Point<T> addPoint(double[] point) {
+        return addPoint(point, getValue(point));
+    }
+
     public Point<T> addPoint(double[] point, double value) {
         return addPoint(point, value, null);
     }
