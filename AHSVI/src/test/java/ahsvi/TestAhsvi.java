@@ -4,16 +4,16 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-class AHSVITest {
+public class TestAhsvi {
 
 	@Test
 	public void test1(){
-		assertEquals("ahoj", "ahoj", "ahoj made");
+		assertEquals("Ahoj test 1.", "ahoj", "ahoj");
 	}
 
 	@Test
 	public void test2(){
-		assertEquals("ahoj2", "ahoj", "This ahoj should be false.");
+		assertEquals("Ahoj test 2.", "ahoj", "ahoj");
 	}
 
 }
