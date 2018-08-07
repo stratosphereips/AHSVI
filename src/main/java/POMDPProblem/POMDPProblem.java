@@ -74,10 +74,6 @@ public class POMDPProblem {
     }
 
     public double getProbabilityOfObservationPlayingAction(int a, int o) {
-        System.out.println("a: " + a);
-        System.out.println("a count: " + getNumberOfActions());
-        System.out.println("o: " + o);
-        System.out.println("o count: " + getNumberOfObservations());
         double probSum = 0;
         for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
             probSum += observationProbabilities[s_][a][o];
@@ -86,12 +82,11 @@ public class POMDPProblem {
     }
 
     private double[][][] transformActionProbabilitiesToHSVI(double[][][] actionProbabilities) {
-        int statesCount = getNumberOfStates();
-        int actionsCount = getNumberOfActions();
-        double[][][] actionProbabilitiesTransformed = new double[statesCount][actionsCount][statesCount];
-        for (int a = 0; a < actionsCount; ++a) {
-            for (int s = 0; s < statesCount; ++s) {
-                for (int s_ = 0; s_ < statesCount; ++s_) {
+        double[][][] actionProbabilitiesTransformed =
+                new double[getNumberOfStates()][getNumberOfActions()][getNumberOfStates()];
+        for (int a = 0; a < getNumberOfActions(); ++a) {
+            for (int s = 0; s < getNumberOfStates(); ++s) {
+                for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
                     actionProbabilitiesTransformed[s][a][s_] = actionProbabilities[a][s][s_];
                 }
             }
