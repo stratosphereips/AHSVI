@@ -1,4 +1,4 @@
-package main.java.AHSVI;
+package AHSVI;
 
 import java.util.Arrays;
 
@@ -49,10 +49,13 @@ public class HelperFunctions {
         assert arr.length == res.length : "Resulting vector must have the same length as argument vector";
         fillArray(res, 0);
         for (int j = 0; j < arr.length; ++j) {
+            System.out.println("sum: " + Arrays.stream(mat[j]).sum());
             for (int p = 0; p < arr.length; ++p) {
                 res[j] += arr[p] * mat[p][j];
             }
         }
+        System.out.println(Arrays.toString(arr));
+        System.out.println(Arrays.toString(res));
     }
 
     public static void arrSub(double[] arr1, double[] arr2, double[] arrRes) {
@@ -77,9 +80,9 @@ public class HelperFunctions {
     }
 
     public static double infinityNorm(double[] arr) {
-        int infN = -1;
+        double infN = -1;
         for (int i = 0; i < arr.length; ++i) {
-            infN = Math.max(infN, (int) Math.abs(arr[i]));
+            infN = Math.max(infN, Math.abs(arr[i]));
         }
         return infN;
     }

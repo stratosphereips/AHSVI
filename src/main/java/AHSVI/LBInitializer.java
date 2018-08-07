@@ -1,8 +1,6 @@
-package main.java.AHSVI;
+package AHSVI;
 
-import main.java.POMDPProblem.POMDPProblem;
-
-import java.util.Arrays;
+import POMDPProblem.POMDPProblem;
 
 public class LBInitializer {
 

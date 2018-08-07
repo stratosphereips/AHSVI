@@ -1,9 +1,9 @@
-package main.java.AHSVI;
+package AHSVI;
 
 import java.lang.IllegalArgumentException;
 import java.util.ArrayList;
 
-import main.java.POMDPProblem.POMDPProblem;
+import POMDPProblem.POMDPProblem;
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
 
@@ -35,57 +35,41 @@ public class HSVIAlgorithm {
         this.partition.initValueFunctions();
     }
 
-    public void solve(Partition initialPartition, double epsilon) throws IloException {
-        while (widthLargerThanEps(initialPartition, pomdpProblem.initBelief)) {
-            explore(initialPartition, pomdpProblem.initBelief, 0);
+    public void solve() throws IloException {
+        while (widthLargerThanEps(pomdpProblem.initBelief)) {
+            explore(pomdpProblem.initBelief, 0);
         }
-
-        /*
-        while (true) {
-            minLB = this.partition.lbFunction.getValue(pomdpProblem.initBelief);
-            minUB = this.partition.ubFunction.getValue(pomdpProblem.initBelief);
-
-            if ((minUB - minLB) / minUB < epsilon / 100) {
-                break;
-            }
-
-            ePrime = epsilon / 100d; //TODO why epsilon / 100
-
-            explore(initialPartition, pomdpProblem.initBelief, ePrime, 0);
-        }
-        */
 
         this.finalUtilityLB = partition.lbFunction.getValue(pomdpProblem.initBelief);
         this.finalUtilityUB = partition.ubFunction.getValue(pomdpProblem.initBelief);
 
     }
 
-    private boolean widthLargerThanEps(Partition partition, double[] belief) {
-        return width(partition, belief) > epsilon;
+    private boolean widthLargerThanEps(double[] belief) {
+        return width(belief) > epsilon;
     }
 
-    private void explore(Partition partition, double[] belief, int t) throws IloException {
-        if (width(partition, belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {
+    private void explore(double[] belief, int t) throws IloException {
+        if (width(belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {
             return;
         }
-        Triplet<Integer, Integer, double[]> tripletAOBelief = select(partition, belief);
+        Triplet<Integer, Integer, double[]> tripletAOBelief = select(belief);
         if (tripletAOBelief != null) {
-            explore(partition, tripletAOBelief.getThird(), t + 1);
+            explore(tripletAOBelief.getThird(), t + 1);
         }
 
-        updateLb(partition, belief);
-        updateUb(partition, belief);
+        updateLb(belief);
+        updateUb(belief);
     }
 
-    private Triplet<Integer, Integer, double[]> select(Partition partition, double[] belief) {
+    private Triplet<Integer, Integer, double[]> select(double[] belief) {
         Triplet<Integer, Integer, double[]> best = null;
 
         int bestA = 0;
         double valueOfBestA = computeQ(belief, 0);
         double value;
-        int actionsCount = pomdpProblem.actionNames.size();
-        if (actionsCount > 1) {
-            for (int a = 1; a < actionsCount; ++a) {
+        if (pomdpProblem.getNumberOfActions() > 1) {
+            for (int a = 1; a < pomdpProblem.getNumberOfActions(); ++a) {
                 // compute lower QV
                 value = computeQ(belief, a);
                 if (value > valueOfBestA) {
@@ -98,13 +82,12 @@ public class HSVIAlgorithm {
         // compute best observation
         int bestO = 0;
         double valueOfBestO = 0;
-        int observationsCount = pomdpProblem.observationNames.size();
         double prb, excess;
-        for (int o = 0; o < observationsCount; ++o) {
+        for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
             double[] nextBelief = partition.nextBelief(belief, bestA, o);
             if (nextBelief != null) {
                 prb = pomdpProblem.getProbabilityOfObservationPlayingAction(bestA, o);
-                excess = width(partition, nextBelief) - epsilon;
+                excess = width(nextBelief) - epsilon;
                 value = prb * excess;
                 if (value > valueOfBestO) {
                     bestO = o;
@@ -150,7 +133,7 @@ public class HSVIAlgorithm {
         return maxQa;
     }
 
-    private void updateUb(Partition partition, double[] belief) throws IloException {
+    private void updateUb(double[] belief) throws IloException {
         partition.ubFunction.addPoint(belief, computeHV(belief));
     }
 
@@ -183,7 +166,7 @@ public class HSVIAlgorithm {
 
     }
 
-    private void updateLb(Partition partition, double[] belief) throws IloException {
+    private void updateLb(double[] belief) throws IloException {
         // [paper Alg 3]
         ArrayList<AlphaVector<Integer>> betasAo = new ArrayList<>(pomdpProblem.getNumberOfObservations());
         double[] betaVec;
@@ -217,7 +200,7 @@ public class HSVIAlgorithm {
         partition.lbFunction.addVector(maxBetaVec, bestA);
     }
 
-    private double width(Partition partition, double[] belief) {
+    private double width(double[] belief) {
         return partition.ubFunction.getValue(belief) - partition.lbFunction.getValue(belief);
     }
 

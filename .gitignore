@@ -3,6 +3,9 @@
 out
 main.java.java.AHSVI.iml
 
+# Maven
+target/*
+
 # Prerequisites
 *.d
 

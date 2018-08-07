@@ -1,6 +1,6 @@
-package main.java.AHSVI;
+package AHSVI;
 
-import main.java.POMDPProblem.POMDPProblem;
+import POMDPProblem.POMDPProblem;
 
 /**
  * Created by wigos on 8.8.16.

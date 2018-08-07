@@ -1,4 +1,4 @@
-package main.java.AHSVI;
+package AHSVI;
 
 public class Config {
     public static final double ZERO = 1e-6;

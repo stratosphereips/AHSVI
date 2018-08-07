@@ -1,4 +1,4 @@
-package main.java.AHSVI;
+package AHSVI;
 
 import ilog.concert.*;
 import ilog.cplex.IloCplex;

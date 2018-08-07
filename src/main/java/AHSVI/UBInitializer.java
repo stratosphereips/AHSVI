@@ -1,10 +1,11 @@
-package main.java.AHSVI;
+package AHSVI;
 
-import main.java.POMDPProblem.POMDPProblem;
+import POMDPProblem.POMDPProblem;
+import java.util.Arrays;
 
 public class UBInitializer {
     private static final double EPS = 0.05;
-    private static final int MAX_ITER_N = 1000000;
+    private static final int MAX_ITER_N = 100;
 
     private final POMDPProblem pomdpProblem;
     private final PointBasedValueFunction ubF;
@@ -37,7 +38,12 @@ public class UBInitializer {
     public void computeInitialUB() {
         // TODO https://github.com/trey0/zmdp/blob/master/src/pomdpBounds/FullObsUBInitializer.cc
         double[] alpha = valueIteration();
-        ubF.addPoint(alpha);
+        double[] ubPoint;
+        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+            ubPoint = new double[pomdpProblem.getNumberOfStates()];
+            ubPoint[s] = alpha[s];
+            ubF.addPoint(ubPoint);
+        }
     }
 
     public PointBasedValueFunction getUB() {
@@ -47,13 +53,17 @@ public class UBInitializer {
     private double[][][] transformActionProbabilities() {
         double[][][] actionProbabilitiesTransformed =
                 new double[pomdpProblem.getNumberOfActions()]
-                        [pomdpProblem.getNumberOfActions()]
-                        [pomdpProblem.getNumberOfActions()];
-        for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
-            for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s) {
-                    actionProbabilitiesTransformed[a][s][s_] = pomdpProblem.actionProbabilities[s][a][s_];
+                        [pomdpProblem.getNumberOfStates()]
+                        [pomdpProblem.getNumberOfStates()];
+        double sum;
+        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+            for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
+                sum = 0;
+                for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+                    actionProbabilitiesTransformed[a][s_][s] = pomdpProblem.actionProbabilities[s][a][s_];
+                    sum += pomdpProblem.actionProbabilities[s][a][s_];
                 }
+                assert Math.abs(1 - sum) < Config.ZERO;
             }
         }
         return actionProbabilitiesTransformed;
@@ -78,6 +88,9 @@ public class UBInitializer {
         //        copy_from_column( R_xa, pomdp->R, a );
         //        result += R_xa;
         HelperFunctions.matrixProd(alpha, actionProbabilities[a], result);
+        System.out.println("alpha x result");
+        System.out.println(Arrays.toString(alpha) + "  " + Arrays.stream(alpha).sum());
+        System.out.println(Arrays.toString(result) + "  " + Arrays.stream(result).sum());
         HelperFunctions.arrScalarProd(result, pomdpProblem.discount);
         HelperFunctions.arrAdd(result, rewards[a]);
     }
@@ -95,6 +108,7 @@ public class UBInitializer {
         }
 
         HelperFunctions.arrSub(alpha, nextAlpha, naa); // naa serves here as tmp array
+        System.out.println(Arrays.toString(naa));
         HelperFunctions.copyArray(nextAlpha, alpha);
         return HelperFunctions.infinityNorm(naa); // compute max residual using infinity norm (max of abs values)
     }
@@ -105,7 +119,10 @@ public class UBInitializer {
         double[] nextAlpha = new double[pomdpProblem.getNumberOfStates()];
         double[] naa = new double[pomdpProblem.getNumberOfStates()];
         for (int i = 0; i < maxIterN && residual > eps; ++i) {
+            System.out.println(Arrays.toString(alpha));
             residual = valueIterationOneStep(nextAlpha, naa);
+            System.out.println("residual " + residual);
+            System.out.println("discount" + pomdpProblem.discount);
         }
         return alpha;
     }

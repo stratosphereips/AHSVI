@@ -1,4 +1,4 @@
-package main.java.AHSVI;
+package AHSVI;
 
 public class AlphaVector<T> {
     public double[] vector;

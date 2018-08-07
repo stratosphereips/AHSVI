@@ -1,4 +1,4 @@
-package main.java.AHSVI;
+package AHSVI;
 
 import ilog.concert.IloException;
 import ilog.concert.IloLPMatrix;

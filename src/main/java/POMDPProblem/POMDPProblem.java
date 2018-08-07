@@ -1,4 +1,4 @@
-package main.java.POMDPProblem;
+package POMDPProblem;
 
 import java.util.*;
 
@@ -28,11 +28,12 @@ public class POMDPProblem {
                         double[] initBelief,
                         boolean minimize) {
         this.stateNames = new ArrayList<>(stateNames);
-        this.stateNameToIndex = stateNameToIndex;
         this.actionNames = new ArrayList<>(actionNames);
+        this.observationNames = new ArrayList<>(observationNames);
+
+        this.stateNameToIndex = stateNameToIndex;
         this.actionNameToIndex = actionNameToIndex;
         this.actionProbabilities = transformActionProbabilitiesToHSVI(actionProbabilities);
-        this.observationNames = new ArrayList<>(observationNames);
         this.observationNameToIndex = observationNameToIndex;
         this.observationProbabilities = transformObservationProbabilitiesToHSVI(observationProbabilities);
         this.rewards = transformRewardsToHSVI(rewards);
@@ -73,16 +74,20 @@ public class POMDPProblem {
     }
 
     public double getProbabilityOfObservationPlayingAction(int a, int o) {
+        System.out.println("a: " + a);
+        System.out.println("a count: " + getNumberOfActions());
+        System.out.println("o: " + o);
+        System.out.println("o count: " + getNumberOfObservations());
         double probSum = 0;
-        for (int s_ = 0; s_ < stateNames.size(); ++s_) {
-            probSum += observationProbabilities[a][s_][o];
+        for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+            probSum += observationProbabilities[s_][a][o];
         }
         return probSum;
     }
 
     private double[][][] transformActionProbabilitiesToHSVI(double[][][] actionProbabilities) {
-        int statesCount = actionProbabilities[0].length;
-        int actionsCount = actionProbabilities.length;
+        int statesCount = getNumberOfStates();
+        int actionsCount = getNumberOfActions();
         double[][][] actionProbabilitiesTransformed = new double[statesCount][actionsCount][statesCount];
         for (int a = 0; a < actionsCount; ++a) {
             for (int s = 0; s < statesCount; ++s) {
@@ -95,14 +100,12 @@ public class POMDPProblem {
     }
 
     private double[][][] transformObservationProbabilitiesToHSVI(double[][][] observationProbabilities) {
-        int actionsCount = observationProbabilities[0].length;
-        int statesCount = observationProbabilities.length;
-        int observationsCount = observationProbabilities[0][0].length;
-        double[][][] observationProbabilitiesTransformed = new double[actionsCount][statesCount][observationsCount];
-        for (int a = 0; a < actionsCount; ++a) {
-            for (int s = 0; s < statesCount; ++s) {
-                for (int o = 0; o < statesCount; ++o) {
-                    observationProbabilitiesTransformed[s][a][o] = observationProbabilities[a][s][o];
+        double[][][] observationProbabilitiesTransformed =
+                new double[getNumberOfStates()][getNumberOfActions()][getNumberOfObservations()];
+        for (int a = 0; a < getNumberOfActions(); ++a) {
+            for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+                for (int o = 0; o < getNumberOfObservations(); ++o) {
+                    observationProbabilitiesTransformed[s_][a][o] = observationProbabilities[a][s_][o];
                 }
             }
         }
@@ -125,5 +128,32 @@ public class POMDPProblem {
             }
         }
         return rewardsTransformed;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("POMDPProblem");
+        sb.append("\\\n\tStates:{");
+        for (String s : stateNames) {
+            sb.append(s);
+            sb.append(',');
+        }
+        sb.append('}');
+        sb.append("\\\n\tActions:{");
+        for (String a : actionNames) {
+            sb.append(a);
+            sb.append(',');
+        }
+        sb.append('}');
+        sb.append("\\\n\tObservations:{");
+        for (String o : observationNames) {
+            sb.append(o);
+            sb.append(',');
+        }
+        sb.append('}');
+
+        sb.append("\\\n\tTransition probabilities");
+
+        return sb.toString();
     }
 }

@@ -1,4 +1,4 @@
-package main.java.AHSVI;
+package AHSVI;
 
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
@@ -6,7 +6,6 @@ import ilog.cplex.IloCplex;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterable<AlphaVector<T>> {
     private List<AlphaVector<T>> alphaVectors;
