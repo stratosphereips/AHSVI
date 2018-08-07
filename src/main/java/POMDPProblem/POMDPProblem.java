@@ -25,8 +25,8 @@ public class POMDPProblem {
                         double[][][] observationProbabilities, //op[a][s_][o]
                         double[][][][] rewards, //r[a][s][s_][o]
                         double discount,
-                        boolean minimize,
-                        double[] initBelief) {
+                        double[] initBelief,
+                        boolean minimize) {
         this.stateNames = new ArrayList<>(stateNames);
         this.stateNameToIndex = stateNameToIndex;
         this.actionNames = new ArrayList<>(actionNames);
@@ -37,9 +37,8 @@ public class POMDPProblem {
         this.observationProbabilities = transformObservationProbabilitiesToHSVI(observationProbabilities);
         this.rewards = transformRewardsToHSVI(rewards);
         this.discount = discount;
-        this.minimize = minimize;
         this.initBelief = initBelief;
-
+        this.minimize = minimize;
     }
 
     public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
@@ -49,7 +48,7 @@ public class POMDPProblem {
                         double[][][] observationProbabilities,
                         double[][][][] rewards,
                         double discount,
-                        boolean minimize) {
+                        double[] initBelief) {
         this(stateNames, stateNameToIndex,
                 actionNames, actionNameToIndex,
                 actionProbabilities,
@@ -57,8 +56,8 @@ public class POMDPProblem {
                 observationProbabilities,
                 rewards,
                 discount,
-                minimize,
-                null);
+                initBelief,
+                false);
     }
 
     public int getNumberOfStates() {

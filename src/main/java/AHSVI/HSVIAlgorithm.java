@@ -68,9 +68,9 @@ public class HSVIAlgorithm {
         if (width(partition, belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {
             return;
         }
-        Triplet<Integer, Integer, double[]> aoPair = select(partition, belief);
-        if (aoPair != null) {
-            explore(partition, aoPair.getThird(), t + 1);
+        Triplet<Integer, Integer, double[]> tripletAOBelief = select(partition, belief);
+        if (tripletAOBelief != null) {
+            explore(partition, tripletAOBelief.getThird(), t + 1);
         }
 
         updateLb(partition, belief);
