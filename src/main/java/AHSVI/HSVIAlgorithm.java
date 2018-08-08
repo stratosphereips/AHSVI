@@ -36,8 +36,33 @@ public class HSVIAlgorithm {
     }
 
     public void solve() throws IloException {
+        int iter = 0;
+        double lbVal, ubVal, lastLbVal, lastUbVal;
+        System.out.println("###########################################################################");
+        System.out.println("###########################################################################");
+        ++iter;
+        lbVal = partition.lbFunction.getValue(pomdpProblem.initBelief);
+        ubVal = partition.ubFunction.getValue(pomdpProblem.initBelief);
+        System.out.println("Solve iteration: " + iter);
+        System.out.println("LB in init belief: " + lbVal);
+        System.out.println("UB in init belief: " + ubVal);
+        lastLbVal = lbVal;
+        lastUbVal = ubVal;
         while (widthLargerThanEps(pomdpProblem.initBelief)) {
             explore(pomdpProblem.initBelief, 0);
+
+            System.out.println("###########################################################################");
+            System.out.println("###########################################################################");
+            ++iter;
+            lbVal = partition.lbFunction.getValue(pomdpProblem.initBelief);
+            ubVal = partition.ubFunction.getValue(pomdpProblem.initBelief);
+            System.out.println("Solve iteration: " + iter);
+            System.out.println("LB in init belief: " + lbVal);
+            System.out.println("Diff to last iteration: " + (lastLbVal - lbVal));
+            System.out.println("UB in init belief: " + ubVal);
+            System.out.println("Diff to last iteration: " + (lastUbVal - ubVal));
+            lastLbVal = lbVal;
+            lastUbVal = ubVal;
         }
 
         this.finalUtilityLB = partition.lbFunction.getValue(pomdpProblem.initBelief);
