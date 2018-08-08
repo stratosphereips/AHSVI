@@ -78,7 +78,7 @@ public class HSVIAlgorithm {
         if (width(belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {
             return;
         }
-        double[] nextBelief = select(belief);
+        double[] nextBelief = select(belief, t);
         if (nextBelief != null) {
             explore(nextBelief, t + 1);
         }
@@ -87,7 +87,7 @@ public class HSVIAlgorithm {
         updateUb(belief);
     }
 
-    private double[] select(double[] belief) {
+    private double[] select(double[] belief, int t) {
         int bestA = 0;
         double valueOfBestA = computeQ(belief, 0);
         double value;
@@ -110,8 +110,8 @@ public class HSVIAlgorithm {
         for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
             nextBelief = partition.nextBelief(belief, bestA, o);
             if (nextBelief != null) {
-                prb = pomdpProblem.getProbabilityOfObservationPlayingAction(bestA, o);
-                excess = width(nextBelief) - epsilon;
+                prb = pomdpProblem.getProbabilityOfObservationPlayingAction(bestA, o); // TODO Fix this (it should take belief as arg)
+                excess = width(nextBelief) - epsilon * Math.pow(pomdpProblem.discount, -t); // TODO added * gamma^-t
                 value = prb * excess;
                 if (value > valueOfBestO) {
                     valueOfBestO = value;
