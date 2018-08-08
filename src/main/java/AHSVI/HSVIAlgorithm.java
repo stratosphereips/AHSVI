@@ -117,7 +117,7 @@ public class HSVIAlgorithm {
                 for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
                     nextBel = partition.nextBelief(belief, a, o);
                     if (nextBel != null) {
-                        observationsValuesSubSum += pomdpProblem.observationProbabilities[s_][a][o] *
+                        observationsValuesSubSum += pomdpProblem.actionProbabilities[s][a][s_] * pomdpProblem.observationProbabilities[s_][a][o] *
                                 partition.ubFunction.getValue(nextBel);
                     }
                 }
