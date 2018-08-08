@@ -3,10 +3,7 @@ package AHSVI;
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterable<AlphaVector<T>> {
     private List<AlphaVector<T>> alphaVectors;
@@ -57,23 +54,25 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     }
 
     public AlphaVector<T> getDotProdArgMax(double[] belief) {
-        System.out.println("Computing argmax alphaVec for belief: " + Arrays.toString(belief));
+        //System.out.println("Computing argmax alphaVec for belief: " + Arrays.toString(belief));
         if (belief == null) {
             return null;
         }
         AlphaVector<T> maxVector = null;
         double maxDotProd = Double.NEGATIVE_INFINITY;
         double dotProd;
+        // TODO RANDOOOOOOOOOOM
+        Random rand = new Random(System.currentTimeMillis());
         for (AlphaVector<T> alphaVector : alphaVectors) {
             dotProd = HelperFunctions.dotProd(alphaVector, belief);
-            System.out.println("\t\tVector: " + alphaVector);
-            System.out.println("\t\tValue: " + dotProd);
-            if (dotProd > maxDotProd) {
+            //System.out.println("\t\tVector: " + alphaVector);
+            //System.out.println("\t\tValue: " + dotProd);
+            if (dotProd > maxDotProd || (dotProd - maxDotProd < Config.ZERO && rand.nextDouble() < 0.5)) {
                 maxDotProd = dotProd;
                 maxVector = alphaVector;
             }
         }
-        System.out.println("\tArgmax: " + maxVector); // TODO  print
+        //System.out.println("\tArgmax: " + maxVector); // TODO  print
         return maxVector;
     }
 

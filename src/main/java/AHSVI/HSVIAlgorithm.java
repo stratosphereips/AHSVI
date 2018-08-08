@@ -183,7 +183,6 @@ public class HSVIAlgorithm {
                     if (beta == null) {
                         continue;
                     }
-                    System.out.println(beta); // TODO print
                     for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
                         sumOs_ += beta.vector[s_] *
                                 pomdpProblem.observationProbabilities[s_][a][o] *
