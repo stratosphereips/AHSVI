@@ -553,6 +553,12 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
         }
     }
 
+    @Override
+    public String toString() {
+        return "PointBasedValueFunction{" +
+                "points=" + points +
+                '}';
+    }
 
     public void commit() {
 //        throw new NotImplementedException();

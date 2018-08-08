@@ -2,6 +2,8 @@ package AHSVI;
 
 import POMDPProblem.POMDPProblem;
 
+import java.util.Arrays;
+
 public class LBInitializer {
 
     private POMDPProblem pomdpProblem;
@@ -20,10 +22,9 @@ public class LBInitializer {
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
             minRsa = Double.POSITIVE_INFINITY;
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                if (pomdpProblem.initBelief[s] > 0) {
-                    minRsa = Math.min(minRsa, pomdpProblem.rewards[s][a]);
-                }
+                minRsa = Math.min(minRsa, pomdpProblem.rewards[s][a]);
             }
+
             minRa = minRsa / (1 - pomdpProblem.discount);
             if (minRa > R_) {
                 R_ = minRa;
@@ -33,10 +34,11 @@ public class LBInitializer {
 
         double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
         HelperFunctions.fillArray(initAlpha, R_);
+        System.out.println("Initial LB alpha vector: " + Arrays.toString(initAlpha)); //TODO print
         lbF.addVector(initAlpha, bestA);
     }
 
-    public  AlphaVectorValueFunction<Integer> getLB() {
+    public AlphaVectorValueFunction<Integer> getLB() {
         return lbF;
     }
 }

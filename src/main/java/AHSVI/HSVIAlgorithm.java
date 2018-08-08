@@ -2,6 +2,7 @@ package AHSVI;
 
 import java.lang.IllegalArgumentException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import POMDPProblem.POMDPProblem;
 import ilog.concert.IloException;
@@ -18,7 +19,6 @@ public class HSVIAlgorithm {
 
     public double finalUtilityLB;
     public double finalUtilityUB;
-    public double minLB, minUB;
 
     public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon) {
         try {
@@ -53,18 +53,16 @@ public class HSVIAlgorithm {
         if (width(belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {
             return;
         }
-        Triplet<Integer, Integer, double[]> tripletAOBelief = select(belief);
-        if (tripletAOBelief != null) {
-            explore(tripletAOBelief.getThird(), t + 1);
+        double[] nextBelief = select(belief);
+        if (nextBelief != null) {
+            explore(nextBelief, t + 1);
         }
 
         updateLb(belief);
         updateUb(belief);
     }
 
-    private Triplet<Integer, Integer, double[]> select(double[] belief) {
-        Triplet<Integer, Integer, double[]> best = null;
-
+    private double[] select(double[] belief) {
         int bestA = 0;
         double valueOfBestA = computeQ(belief, 0);
         double value;
@@ -80,28 +78,30 @@ public class HSVIAlgorithm {
         }
 
         // compute best observation
-        int bestO = 0;
+        double[] bestNextBelief = null;
+        double[] nextBelief;
         double valueOfBestO = 0;
         double prb, excess;
         for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
-            double[] nextBelief = partition.nextBelief(belief, bestA, o);
+            nextBelief = partition.nextBelief(belief, bestA, o);
             if (nextBelief != null) {
                 prb = pomdpProblem.getProbabilityOfObservationPlayingAction(bestA, o);
                 excess = width(nextBelief) - epsilon;
                 value = prb * excess;
                 if (value > valueOfBestO) {
-                    bestO = o;
                     valueOfBestO = value;
+                    bestNextBelief = nextBelief;
                 }
             }
         }
 
-        double[] nextBel = partition.nextBelief(belief, bestA, bestO);
-        if (valueOfBestO > 0) {
-            best = new Triplet<>(bestA, bestO, nextBel);
+        if (valueOfBestO <= 0) {
+            bestNextBelief = null;
         }
 
-        return best;
+        System.out.println("Belief: " + Arrays.toString(belief));
+        System.out.println("Next belief: " + Arrays.toString(bestNextBelief));
+        return bestNextBelief;
 
     }
 
@@ -109,13 +109,17 @@ public class HSVIAlgorithm {
         double rewardsSum = 0;
         double observationsValuesSum = 0;
         double observationsValuesSubSum;
+        double[] nextBel;
         for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-            rewardsSum += pomdpProblem.rewards[s][a];
+            rewardsSum += pomdpProblem.rewards[s][a] * belief[s];
             observationsValuesSubSum = 0;
             for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
                 for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                    observationsValuesSubSum += pomdpProblem.actionProbabilities[s][a][s_] *
-                            pomdpProblem.observationProbabilities[s_][a][o];
+                    nextBel = partition.nextBelief(belief, a, o);
+                    if (nextBel != null) {
+                        observationsValuesSubSum += pomdpProblem.observationProbabilities[s_][a][o] *
+                                partition.ubFunction.getValue(nextBel);
+                    }
                 }
             }
             observationsValuesSum += belief[s] * observationsValuesSubSum;
@@ -133,37 +137,8 @@ public class HSVIAlgorithm {
         return maxQa;
     }
 
-    private void updateUb(double[] belief) throws IloException {
+    private void updateUb(double[] belief) {
         partition.ubFunction.addPoint(belief, computeHV(belief));
-    }
-
-    private double multiply(double[] a, double[] b) {
-        assert a.length == b.length;
-        double value = 0;
-        for (int i = 0; i < a.length; i++) {
-            value += a[i] * b[i];
-        }
-        return value;
-    }
-
-    private AlphaVector<Integer> getBestAlphaVector(double[] belief, int action, int observation) {
-        double[] nextBelief = partition.nextBelief(belief, action, observation);
-        if (nextBelief == null) return null;
-        // find best alpha vector
-        AlphaVector<Integer> bestAlpha = null;
-        double valueOfBestAlpha = -1;
-
-        for (AlphaVector<Integer> alphaVector : partition.lbFunction.getVectors()) {
-            // multiplication
-            double value = multiply(alphaVector.vector, nextBelief);
-            if (value > valueOfBestAlpha) {
-                bestAlpha = alphaVector;
-                valueOfBestAlpha = value;
-            }
-        }
-        if (bestAlpha == null) throw new RuntimeException();
-        return bestAlpha;
-
     }
 
     private void updateLb(double[] belief) throws IloException {
@@ -174,6 +149,7 @@ public class HSVIAlgorithm {
         double maxBetaVecValue = Double.NEGATIVE_INFINITY;
         double sumOs_, betaVecValue;
         int bestA = 0;
+        AlphaVector<Integer> beta;
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
             for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
                 betasAo.add(partition.getAlphaDotProdArgMax(belief, a, o));
@@ -182,8 +158,13 @@ public class HSVIAlgorithm {
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
                 sumOs_ = 0;
                 for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
+                    beta = betasAo.get(o);
+                    if (beta == null) {
+                        continue;
+                    }
+                    System.out.println(beta); // TODO print
                     for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                        sumOs_ += HelperFunctions.dotProd(betasAo.get(o), s_, belief[s_]) *
+                        sumOs_ += HelperFunctions.dotProd(beta, s_, belief[s_]) *
                                 pomdpProblem.observationProbabilities[s_][a][o] *
                                 pomdpProblem.actionProbabilities[s][a][s_];
                     }

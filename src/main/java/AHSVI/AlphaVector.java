@@ -1,5 +1,7 @@
 package AHSVI;
 
+import java.util.Arrays;
+
 public class AlphaVector<T> {
     public double[] vector;
     public T data;
@@ -16,5 +18,13 @@ public class AlphaVector<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "AlphaVector{" +
+                "vector=" + Arrays.toString(vector) +
+                ", data=" + data +
+                '}';
     }
 }
