@@ -73,10 +73,15 @@ public class POMDPProblem {
         return observationNames.size();
     }
 
-    public double getProbabilityOfObservationPlayingAction(int a, int o) {
+    public double getProbabilityOfObservationPlayingAction(int o, double[] belief, int a) {
         double probSum = 0;
-        for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
-            probSum += observationProbabilities[s_][a][o];
+        double probSubSum;
+        for (int s = 0; s < getNumberOfStates(); ++s) {
+            probSubSum = 0;
+            for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+                probSubSum += actionProbabilities[s][a][s_] * observationProbabilities[s_][a][o];
+            }
+            probSum += belief[s] * probSubSum;
         }
         return probSum;
     }

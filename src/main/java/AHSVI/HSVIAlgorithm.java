@@ -110,18 +110,14 @@ public class HSVIAlgorithm {
         for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
             nextBelief = partition.nextBelief(belief, bestA, o);
             if (nextBelief != null) {
-                prb = pomdpProblem.getProbabilityOfObservationPlayingAction(bestA, o); // TODO Fix this (it should take belief as arg)
-                excess = width(nextBelief) - epsilon * Math.pow(pomdpProblem.discount, -t); // TODO added * gamma^-t
+                prb = pomdpProblem.getProbabilityOfObservationPlayingAction(o, belief, bestA); // TODO Fix this (it should take belief as arg)
+                excess = width(nextBelief) - epsilon * Math.pow(pomdpProblem.discount, -(t + 1)); // TODO added * gamma^-t
                 value = prb * excess;
                 if (value > valueOfBestO) {
                     valueOfBestO = value;
                     bestNextBelief = nextBelief;
                 }
             }
-        }
-
-        if (valueOfBestO <= 0) {
-            bestNextBelief = null;
         }
 
         System.out.println("Belief: " + Arrays.toString(belief));
@@ -189,7 +185,7 @@ public class HSVIAlgorithm {
                     }
                     System.out.println(beta); // TODO print
                     for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                        sumOs_ += HelperFunctions.dotProd(beta, s_, belief[s_]) *
+                        sumOs_ += beta.vector[s_] *
                                 pomdpProblem.observationProbabilities[s_][a][o] *
                                 pomdpProblem.actionProbabilities[s][a][s_];
                     }
