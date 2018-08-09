@@ -1,8 +1,8 @@
 package AHSVI;
 
 import java.lang.IllegalArgumentException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
+import java.util.stream.Stream;
 
 import POMDPProblem.POMDPProblem;
 import ilog.concert.IloException;
@@ -120,8 +120,8 @@ public class HSVIAlgorithm {
             }
         }
 
-        System.out.println("Belief: " + Arrays.toString(belief));
-        System.out.println("Next belief: " + Arrays.toString(bestNextBelief));
+//        System.out.println("Belief: " + Arrays.toString(belief));
+//        System.out.println("Next belief: " + Arrays.toString(bestNextBelief));
         return bestNextBelief;
 
     }
@@ -162,48 +162,108 @@ public class HSVIAlgorithm {
         partition.ubFunction.addPoint(belief, computeHV(belief));
     }
 
+
+	private void updateLb_old(double[] belief) {
+		// [paper Alg 3]
+		ArrayList<AlphaVector<Integer>> betasAo = new ArrayList<>(pomdpProblem.getNumberOfObservations());
+		double[] betaVec;
+		double[] maxBetaVec = null;
+		double maxBetaVecValue = Double.NEGATIVE_INFINITY;
+		double sumOs_, betaVecValue;
+		int bestA = 0;
+		AlphaVector<Integer> beta;
+		for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
+			for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
+				betasAo.add(partition.getAlphaDotProdArgMax(belief, a, o));
+			}
+			betaVec = new double[belief.length];
+			for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+				sumOs_ = 0;
+				for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
+					beta = betasAo.get(o);
+					if (beta == null) {
+						continue;
+					}
+					for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+						sumOs_ += beta.vector[s_] *
+										pomdpProblem.observationProbabilities[s_][a][o] *
+										pomdpProblem.actionProbabilities[s][a][s_];
+					}
+				}
+				betaVec[s] = pomdpProblem.rewards[s][a] + pomdpProblem.discount * sumOs_;
+			}
+			if (partition.lbFunction.contains(betaVec)) {
+				continue;
+			}
+			betaVecValue = HelperFunctions.dotProd(betaVec, belief);
+			if (betaVecValue > maxBetaVecValue) {
+				maxBetaVecValue = betaVecValue;
+				maxBetaVec = betaVec;
+				bestA = a;
+			}
+		}
+		if (maxBetaVec != null) {
+			partition.lbFunction.addVector(maxBetaVec, bestA);
+		}
+	}
     private void updateLb(double[] belief) {
-        // [paper Alg 3]
-        ArrayList<AlphaVector<Integer>> betasAo = new ArrayList<>(pomdpProblem.getNumberOfObservations());
-        double[] betaVec;
-        double[] maxBetaVec = null;
-        double maxBetaVecValue = Double.NEGATIVE_INFINITY;
-        double sumOs_, betaVecValue;
-        int bestA = 0;
-        AlphaVector<Integer> beta;
-        for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
-            for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
-                betasAo.add(partition.getAlphaDotProdArgMax(belief, a, o));
-            }
-            betaVec = new double[belief.length];
-            for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                sumOs_ = 0;
-                for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
-                    beta = betasAo.get(o);
-                    if (beta == null) {
-                        continue;
-                    }
-                    for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                        sumOs_ += beta.vector[s_] *
-                                pomdpProblem.observationProbabilities[s_][a][o] *
-                                pomdpProblem.actionProbabilities[s][a][s_];
-                    }
-                }
-                betaVec[s] = pomdpProblem.rewards[s][a] + pomdpProblem.discount * sumOs_;
-            }
-            if (partition.lbFunction.contains(betaVec)) {
-                continue;
-            }
-            betaVecValue = HelperFunctions.dotProd(betaVec, belief);
-            if (betaVecValue > maxBetaVecValue) {
-                maxBetaVecValue = betaVecValue;
-                maxBetaVec = betaVec;
-                bestA = a;
-            }
-        }
-        if (maxBetaVec != null) {
-            partition.lbFunction.addVector(maxBetaVec, bestA);
-        }
+    	// first part
+	    Map<Integer, Map<Integer, AlphaVector<Integer>>> betaAO = new HashMap<>();
+	    for (int a = 0; a < pomdpProblem.getNumberOfActions(); a++) {
+	    	betaAO.put(a, new HashMap<>());
+		    for (int o = 0; o < pomdpProblem.getNumberOfObservations(); o++) {
+			    double[] nextBelief = partition.nextBelief(belief, a, o);
+			    if (nextBelief == null) {
+				    betaAO.get(a).put(o, null);
+				    continue;
+			    };
+			    AlphaVector<Integer> maxVector = null;
+			    double maxDotProd = Double.NEGATIVE_INFINITY;
+			    double dotProd;
+			    for (AlphaVector<Integer> alphaVector : partition.lbFunction.alphaVectors) {
+				    dotProd = HelperFunctions.dotProd(alphaVector, nextBelief);
+				    if ( dotProd > maxDotProd ) {
+				    	maxDotProd = dotProd;
+				    	maxVector = alphaVector;
+				    }
+			    }
+			    betaAO.get(a).put(o, maxVector);
+		    }
+	    }
+
+	     // second part
+	    Map<Integer, Double[]> betaA = new HashMap<>();
+	    for (int a = 0; a < pomdpProblem.getNumberOfActions(); a++) {
+		    Double[] betaVec = new Double[pomdpProblem.getNumberOfStates()];
+		    for (int s = 0; s < pomdpProblem.getNumberOfStates(); s++) {
+		    	double sumOs_ = 0;
+			    for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); s_++) {
+				    for (int o = 0; o < pomdpProblem.getNumberOfObservations(); o++) {
+				    	if ( betaAO.get(a).get(o) != null ) {
+						    sumOs_ += betaAO.get(a).get(o).vector[s_] * pomdpProblem.observationProbabilities[s_][a][o] * pomdpProblem.actionProbabilities[s][a][s_];
+					    }
+				    }
+			    }
+			    betaVec[s] = pomdpProblem.rewards[s][a] + pomdpProblem.discount * sumOs_;
+		    }
+		    betaA.put(a, betaVec);
+	    }
+
+
+	    // part 3
+	    double maxVal = Double.NEGATIVE_INFINITY;
+	    Double[] maxVec = null;
+	    int bestA = 0;
+	    for (Integer integer : betaA.keySet()) {
+		    double value = HelperFunctions.dotProd(betaA.get(integer), belief);
+		    if ( value > maxVal ) {
+		    	maxVal = value;
+		    	maxVec = betaA.get(integer);
+		    	bestA = integer;
+		    }
+	    }
+
+	    partition.lbFunction.addVector(Stream.of(maxVec).mapToDouble(Double::doubleValue).toArray(), bestA);
     }
 
     private void updateLb2(double[] belief) {

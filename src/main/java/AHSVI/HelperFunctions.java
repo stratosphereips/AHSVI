@@ -14,6 +14,16 @@ public class HelperFunctions {
         }
         return sum;
     }
+	public static double dotProd(Double[] vector1, double[] vector2) {
+		double sum = 0;
+		int v1Len = vector1.length;
+		int v2Len = vector2.length;
+		assert v1Len == v2Len : "Vectors in dot product must be of the same length.";
+		for (int i = 0; i < v1Len; ++i) {
+			sum += vector1[i] * vector2[i];
+		}
+		return sum;
+	}
 
     public static <T> double dotProd(AlphaVector<T> alphaVector, double[] vector) {
         return dotProd(alphaVector.vector, vector);
@@ -95,4 +105,5 @@ public class HelperFunctions {
     public static void copyArray(double[] arrSource, double[] arrDestination) {
         System.arraycopy(arrSource, 0, arrDestination, 0, arrDestination.length);
     }
+
 }

@@ -9,7 +9,7 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     // TODO RANDOOOOOOOOOOM
     Random rand;
 
-    private List<AlphaVector<T>> alphaVectors;
+    public List<AlphaVector<T>> alphaVectors;
 
     private double minimum = Double.POSITIVE_INFINITY;
     public double[] minimalBelief;
@@ -90,22 +90,22 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
             dotProd = HelperFunctions.dotProd(alphaVector, belief);
             //System.out.println("\t\tVector: " + alphaVector);
             //System.out.println("\t\tValue: " + dotProd);
-            /*if (dotProd > maxDotProd) {
-                maxDotProd = dotProd;
-                maxVector =alphaVector;
-            }*/
             if (dotProd > maxDotProd) {
                 maxDotProd = dotProd;
-                bestAlphas.clear();
-                bestAlphas.add(alphaVector);
-            } else if (dotProd - maxDotProd < Config.ZERO) {
-                bestAlphas.add(alphaVector);
+                maxVector =alphaVector;
             }
+//            if (dotProd > maxDotProd) {
+//                maxDotProd = dotProd;
+//                bestAlphas.clear();
+//                bestAlphas.add(alphaVector);
+//            } else if (dotProd - maxDotProd < Config.ZERO) {
+//                bestAlphas.add(alphaVector);
+//            }
         }
         //System.out.println("\tArgmax: " + maxVector); // TODO  print
-        if (!bestAlphas.isEmpty()) {
-            maxVector = bestAlphas.get(rand.nextInt(bestAlphas.size()));
-        }
+//        if (!bestAlphas.isEmpty()) {
+//            maxVector = bestAlphas.get(rand.nextInt(bestAlphas.size()));
+//        }
         return maxVector;
     }
 
