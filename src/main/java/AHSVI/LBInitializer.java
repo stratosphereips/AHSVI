@@ -14,8 +14,14 @@ public class LBInitializer {
         lbF = new AlphaVectorValueFunction(pomdpProblem.getNumberOfStates());
     }
 
+    private void fixedInit() {
+        lbF.addVector(new double[pomdpProblem.getNumberOfStates()], 0);
+    }
+
     public void computeInitialLB() {
         // [paper 3.2]
+        fixedInit();
+        /*
         double minRsa, minRa;
         double R_ = Double.NEGATIVE_INFINITY;
         int bestA = 0;
@@ -35,7 +41,8 @@ public class LBInitializer {
         double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
         HelperFunctions.fillArray(initAlpha, R_);
         System.out.println("Initial LB alpha vector: " + Arrays.toString(initAlpha)); //TODO print
-        lbF.addVector(initAlpha, bestA);
+
+        lbF.addVector(initAlpha, bestA);*/
     }
 
     public AlphaVectorValueFunction<Integer> getLB() {

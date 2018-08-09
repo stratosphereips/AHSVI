@@ -101,7 +101,7 @@ public class POMDPFileReader {
         observationProbabilities[0][1][0] = 1.0;
 
         rewards[0][0][1][0] = 1.0;
-        rewards[0][1][0][0] = 1.0;
+        rewards[0][1][0][0] = 0.0;
 
         // init belief was not in the original POMDP file
         initBelief[0] = 1.0;

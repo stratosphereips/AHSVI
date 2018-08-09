@@ -6,6 +6,9 @@ import ilog.cplex.IloCplex;
 import java.util.*;
 
 public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterable<AlphaVector<T>> {
+    // TODO RANDOOOOOOOOOOM
+    Random rand;
+
     private List<AlphaVector<T>> alphaVectors;
 
     private double minimum = Double.POSITIVE_INFINITY;
@@ -18,7 +21,28 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
 
     public AlphaVectorValueFunction(int dimension, Object data) {
         super(dimension, data);
+        rand = new Random(System.currentTimeMillis());
         alphaVectors = new LinkedList<>();
+    }
+
+    public boolean contains(double[] vector) {
+        for (AlphaVector<T> alpha : alphaVectors) {
+            if (Arrays.equals(alpha.vector, vector)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean contains(AlphaVector<T> alphaVector) {
+        return alphaVectors.contains(alphaVector);
+    }
+
+    @Override
+    public void removeDominated() {
+        LinkedList<AlphaVector<T>> alphasToRemove = new LinkedList<>();
+        double[] belief = new double[alphaVectors.get(0).vector.length];
+        // TODO remove dominated
     }
 
     public AlphaVector<T> addVector(double[] alphaVector) {
@@ -58,21 +82,30 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
         if (belief == null) {
             return null;
         }
+        LinkedList<AlphaVector<T>> bestAlphas = new LinkedList<>();
         AlphaVector<T> maxVector = null;
         double maxDotProd = Double.NEGATIVE_INFINITY;
         double dotProd;
-        // TODO RANDOOOOOOOOOOM
-        Random rand = new Random(System.currentTimeMillis());
         for (AlphaVector<T> alphaVector : alphaVectors) {
             dotProd = HelperFunctions.dotProd(alphaVector, belief);
             //System.out.println("\t\tVector: " + alphaVector);
             //System.out.println("\t\tValue: " + dotProd);
-            if (dotProd > maxDotProd || (dotProd - maxDotProd < Config.ZERO && rand.nextDouble() < 0.5)) {
+            /*if (dotProd > maxDotProd) {
                 maxDotProd = dotProd;
-                maxVector = alphaVector;
+                maxVector =alphaVector;
+            }*/
+            if (dotProd > maxDotProd) {
+                maxDotProd = dotProd;
+                bestAlphas.clear();
+                bestAlphas.add(alphaVector);
+            } else if (dotProd - maxDotProd < Config.ZERO) {
+                bestAlphas.add(alphaVector);
             }
         }
         //System.out.println("\tArgmax: " + maxVector); // TODO  print
+        if (!bestAlphas.isEmpty()) {
+            maxVector = bestAlphas.get(rand.nextInt(bestAlphas.size()));
+        }
         return maxVector;
     }
 

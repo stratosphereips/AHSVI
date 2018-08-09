@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 /**
  * Created by wigos on 16.5.16.
  */
-public class PointBasedValueFunction<T extends Dominable> extends ValueFunction implements Iterable<PointBasedValueFunction.Point<T>> {
+public class PointBasedValueFunction<T> extends ValueFunction implements Iterable<PointBasedValueFunction.Point<T>> {
     public static double RANDOMIZE = Double.NaN;
     public static boolean CACHED_CPLEX = true;
 
@@ -37,6 +37,33 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
         super(dimension, data);
         points = new LinkedList<>();
         extremePoints = new Point[dimension];
+    }
+
+    @Override
+    public void removeDominated() {
+        List<Point<T>> newPoints = new LinkedList<>();
+        Iterator<Point<T>> it = points.iterator();
+        int removed = 0;
+        while (it.hasNext()) {
+            Point<T> current = it.next();
+            if (current.value - getValue(current.coordinates) > Config.ZERO) {
+                removed++;
+            } else {
+                newPoints.add(current);
+            }
+        }
+        nPoints -= removed;
+        points = newPoints;
+
+        if (cachedCplex != null) {
+            try {
+                cachedCplex.clearModel();
+                rebuildModel(new double[dimension]);
+            } catch (IloException iloe) {
+                iloe.printStackTrace();
+                System.exit(1);
+            }
+        }
     }
 
     public Point<T> addPoint(double[] point) {
@@ -168,34 +195,6 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
                 if (getValue(point.coordinates) < point.value) it.remove();
             }
         }
-    }
-
-    public int removeDominated() {
-        List<Point<T>> newPoints = new LinkedList<>();
-        Iterator<Point<T>> it = points.iterator();
-        int removed = 0;
-        while (it.hasNext()) {
-            Point<T> current = it.next();
-            if (current.value - getValue(current.coordinates) > Config.ZERO) {
-                removed++;
-            } else {
-                newPoints.add(current);
-            }
-        }
-        nPoints -= removed;
-        points = newPoints;
-
-        if (cachedCplex != null) {
-            try {
-                cachedCplex.clearModel();
-                rebuildModel(new double[dimension]);
-            } catch (IloException iloe) {
-                iloe.printStackTrace();
-                System.exit(1);
-            }
-        }
-
-        return removed;
     }
 
     public int numPoints() {

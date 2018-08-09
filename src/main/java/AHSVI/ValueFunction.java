@@ -18,6 +18,8 @@ public abstract class ValueFunction {
 
     public abstract IloRange constructLP(IloCplex cplex, IloNumVar[] coords, IloNumVar value) throws IloException;
 
+    public abstract void removeDominated();
+
     public Object getData() {
         return data;
     }

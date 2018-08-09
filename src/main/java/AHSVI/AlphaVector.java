@@ -27,4 +27,17 @@ public class AlphaVector<T> {
                 ", data=" + data +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AlphaVector<?> that = (AlphaVector<?>) o;
+        return Arrays.equals(vector, that.vector);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(vector);
+    }
 }

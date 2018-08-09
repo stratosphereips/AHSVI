@@ -58,9 +58,9 @@ public class HSVIAlgorithm {
             ubVal = partition.ubFunction.getValue(pomdpProblem.initBelief);
             System.out.println("Solve iteration: " + iter);
             System.out.println("LB in init belief: " + lbVal);
-            System.out.println("Diff to last iteration: " + (lastLbVal - lbVal));
+            System.out.println("Diff to last iteration: " + (lbVal - lastLbVal));
             System.out.println("UB in init belief: " + ubVal);
-            System.out.println("Diff to last iteration: " + (lastUbVal - ubVal));
+            System.out.println("Diff to last iteration: " + (ubVal - lastUbVal));
             lastLbVal = lbVal;
             lastUbVal = ubVal;
         }
@@ -162,7 +162,7 @@ public class HSVIAlgorithm {
         partition.ubFunction.addPoint(belief, computeHV(belief));
     }
 
-    private void updateLb(double[] belief) throws IloException {
+    private void updateLb(double[] belief) {
         // [paper Alg 3]
         ArrayList<AlphaVector<Integer>> betasAo = new ArrayList<>(pomdpProblem.getNumberOfObservations());
         double[] betaVec;
@@ -180,6 +180,53 @@ public class HSVIAlgorithm {
                 sumOs_ = 0;
                 for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
                     beta = betasAo.get(o);
+                    if (beta == null) {
+                        continue;
+                    }
+                    for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+                        sumOs_ += beta.vector[s_] *
+                                pomdpProblem.observationProbabilities[s_][a][o] *
+                                pomdpProblem.actionProbabilities[s][a][s_];
+                    }
+                }
+                betaVec[s] = pomdpProblem.rewards[s][a] + pomdpProblem.discount * sumOs_;
+            }
+            if (partition.lbFunction.contains(betaVec)) {
+                continue;
+            }
+            betaVecValue = HelperFunctions.dotProd(betaVec, belief);
+            if (betaVecValue > maxBetaVecValue) {
+                maxBetaVecValue = betaVecValue;
+                maxBetaVec = betaVec;
+                bestA = a;
+            }
+        }
+        if (maxBetaVec != null) {
+            partition.lbFunction.addVector(maxBetaVec, bestA);
+        }
+    }
+
+    private void updateLb2(double[] belief) {
+        // [paper Alg 3]
+        ArrayList<ArrayList<AlphaVector<Integer>>> betasAo = new ArrayList<>(pomdpProblem.getNumberOfActions());
+        double[] betaVec;
+        double[] maxBetaVec = null;
+        double maxBetaVecValue = Double.NEGATIVE_INFINITY;
+        double sumOs_, betaVecValue;
+        int bestA = 0;
+        AlphaVector<Integer> beta;
+        for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
+            betasAo.add(new ArrayList<>(pomdpProblem.getNumberOfObservations()));
+            for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
+                betasAo.get(a).add(partition.getAlphaDotProdArgMax(belief, a, o));
+            }
+        }
+        for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
+            betaVec = new double[belief.length];
+            for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+                sumOs_ = 0;
+                for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
+                    beta = betasAo.get(a).get(o);
                     if (beta == null) {
                         continue;
                     }
