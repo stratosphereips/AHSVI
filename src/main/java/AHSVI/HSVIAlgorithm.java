@@ -93,7 +93,7 @@ public class HSVIAlgorithm {
         return width(belief) > epsilon;
     }
 
-    public void solve() throws IloException {
+    public void solve() {
         int iter = 0;
         double lbVal, ubVal, lastLbVal, lastUbVal;
         System.out.println("###########################################################################");
@@ -116,16 +116,15 @@ public class HSVIAlgorithm {
             ubVal = ubFunction.getValue(pomdpProblem.initBelief);
             System.out.println("Solve iteration: " + iter);
             System.out.println("LB in init belief: " + lbVal);
-            System.out.println("Diff to last iteration: " + (lbVal - lastLbVal));
+            System.out.printf("Diff to last iteration: %.20f\n", (lbVal - lastLbVal));
             System.out.println("UB in init belief: " + ubVal);
-            System.out.println("Diff to last iteration: " + (ubVal - lastUbVal));
+            System.out.printf("Diff to last iteration: %.20f\n", (ubVal - lastUbVal));
             lastLbVal = lbVal;
             lastUbVal = ubVal;
         }
     }
 
-    private void explore(double[] belief, int t) throws IloException {
-        System.out.println("DEPTH: " + t);
+    private void explore(double[] belief, int t) {
         if (width(belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {// TODO float instability
             return;
         }

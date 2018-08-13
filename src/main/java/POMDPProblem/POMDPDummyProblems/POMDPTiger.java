@@ -8,31 +8,22 @@ import java.util.HashMap;
 public class POMDPTiger implements POMDPDummyProblemI {
     @Override
     public POMDPProblem load() {
+        // preamble
+        double discount = 0.9;
 
-        int statesCount = 2;
-        int actionsCount = 3;
-        int observationsCount = 2;
 
         ArrayList<String> stateNames = new ArrayList<>();
         HashMap<String, Integer> stateNameToIndex = new HashMap<>();
-        ArrayList<String> actionNames = new ArrayList<>();
-        HashMap<String, Integer> actionNameToIndex = new HashMap<>();
-        double[][][] actionProbabilities = new double[actionsCount][statesCount][statesCount];
-        ArrayList<String> observationNames = new ArrayList<>();
-        HashMap<String, Integer> observationNameToIndex = new HashMap<>();
-        double[][][] observationProbabilities = new double[actionsCount][statesCount][observationsCount];
-        double[][][][] rewards = new double[actionsCount][statesCount][statesCount][observationsCount];
-        double discount;
-        double[] initBelief = new double[statesCount];
-
-        // preamble
-        discount = 0.9;
 
         stateNames.add("TL");
         stateNames.add("TR");
         for (int i = 0; i < stateNames.size(); ++i) {
             stateNameToIndex.put(stateNames.get(i), i);
         }
+
+
+        ArrayList<String> actionNames = new ArrayList<>();
+        HashMap<String, Integer> actionNameToIndex = new HashMap<>();
 
         actionNames.add("L");
         actionNames.add("OL");
@@ -41,13 +32,21 @@ public class POMDPTiger implements POMDPDummyProblemI {
             actionNameToIndex.put(actionNames.get(i), i);
         }
 
+
+        ArrayList<String> observationNames = new ArrayList<>();
+        HashMap<String, Integer> observationNameToIndex = new HashMap<>();
+
         observationNames.add("TL");
         observationNames.add("TR");
         for (int i = 0; i < observationNames.size(); ++i) {
             observationNameToIndex.put(observationNames.get(i), i);
         }
 
+
         // pomdp body
+        double[][][] actionProbabilities =
+                new double[actionNames.size()][stateNames.size()][stateNames.size()];
+
         actionProbabilities[0][0][0] = 1.0;
         actionProbabilities[0][0][1] = 0.0;
         actionProbabilities[0][1][0] = 0.0;
@@ -64,6 +63,9 @@ public class POMDPTiger implements POMDPDummyProblemI {
         actionProbabilities[0][1][1] = 0.5;
 
 
+        double[][][] observationProbabilities =
+                new double[actionNames.size()][stateNames.size()][observationNames.size()];
+
         observationProbabilities[0][0][0] = 0.85;
         observationProbabilities[0][0][1] = 0.15;
         observationProbabilities[0][1][0] = 0.15;
@@ -78,6 +80,10 @@ public class POMDPTiger implements POMDPDummyProblemI {
         observationProbabilities[2][0][1] = 0.5;
         observationProbabilities[2][1][0] = 0.5;
         observationProbabilities[2][1][1] = 0.5;
+
+
+        double[][][][] rewards =
+                new double[actionNames.size()][stateNames.size()][stateNames.size()][observationNames.size()];
 
         for (int o = 0; o < observationNames.size(); ++o) {
             rewards[0][0][0][o] = -1;
@@ -95,6 +101,9 @@ public class POMDPTiger implements POMDPDummyProblemI {
             rewards[2][1][0][o] = +10;
             rewards[2][1][1][o] = -100;
         }
+
+
+        double[] initBelief = new double[stateNames.size()];
 
         initBelief[0] = 0.5;
         initBelief[1] = 0.5;

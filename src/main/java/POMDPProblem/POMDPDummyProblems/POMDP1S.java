@@ -8,35 +8,29 @@ import java.util.HashMap;
 public class POMDP1S implements POMDPDummyProblemI {
     @Override
     public POMDPProblem load() {
+        // preamble
+        double discount = 0.75;
 
-        int statesCount = 1;
-        int actionsCount = 1;
-        int observationsCount = 1;
 
         ArrayList<String> stateNames = new ArrayList<>();
         HashMap<String, Integer> stateNameToIndex = new HashMap<>();
-        ArrayList<String> actionNames = new ArrayList<>();
-        HashMap<String, Integer> actionNameToIndex = new HashMap<>();
-        double[][][] actionProbabilities = new double[actionsCount][statesCount][statesCount];
-        ArrayList<String> observationNames = new ArrayList<>();
-        HashMap<String, Integer> observationNameToIndex = new HashMap<>();
-        double[][][] observationProbabilities = new double[actionsCount][statesCount][observationsCount];
-        double[][][][] rewards = new double[actionsCount][statesCount][statesCount][observationsCount];
-        double discount;
-        double[] initBelief = new double[statesCount];
-
-        // preamble
-        discount = 0.5;
-
         stateNames.add("s");
         for (int i = 0; i < stateNames.size(); ++i) {
             stateNameToIndex.put(stateNames.get(i), i);
         }
 
+
+        ArrayList<String> actionNames = new ArrayList<>();
+        HashMap<String, Integer> actionNameToIndex = new HashMap<>();
+
         actionNames.add("a");
         for (int i = 0; i < actionNames.size(); ++i) {
             actionNameToIndex.put(actionNames.get(i), i);
         }
+
+
+        ArrayList<String> observationNames = new ArrayList<>();
+        HashMap<String, Integer> observationNameToIndex = new HashMap<>();
 
         observationNames.add("nothing");
         for (int i = 0; i < observationNames.size(); ++i) {
@@ -44,12 +38,25 @@ public class POMDP1S implements POMDPDummyProblemI {
         }
 
         // pomdp body
+        double[][][] actionProbabilities =
+                new double[actionNames.size()][stateNames.size()][stateNames.size()];
+
         actionProbabilities[0][0][0] = 1.0;
 
 
+        double[][][] observationProbabilities =
+                new double[actionNames.size()][stateNames.size()][observationNames.size()];
+
         observationProbabilities[0][0][0] = 1.0;
 
+
+        double[][][][] rewards =
+                new double[actionNames.size()][stateNames.size()][stateNames.size()][observationNames.size()];
+
         rewards[0][0][0][0] = 1.0;
+
+
+        double[] initBelief = new double[stateNames.size()];
 
         initBelief[0] = 1.0;
 
