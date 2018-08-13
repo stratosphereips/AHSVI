@@ -19,6 +19,8 @@ public class POMDPDummyProblems implements POMDPDummyProblemI {
                 return new POMDP1D().load();
             case "tiger":
                 return new POMDPTiger().load();
+            case "tiger-grid":
+                return new POMDPTigerGrid().load();
             default:
                 throw new IllegalArgumentException("No such dummy POMDP");
         }

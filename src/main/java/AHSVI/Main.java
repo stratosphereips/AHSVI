@@ -18,6 +18,7 @@ public class Main {
         String POMDP_2S = "2s";
         String POMDP_1D = "1d";
         String POMDP_TIGER = "tiger";
+        String POMDP_TIGERGRID = "tiger-grid";
 
         // =======================================
         // =          S E T T I N G S            =
@@ -26,6 +27,7 @@ public class Main {
         //String pomdpFileName = POMDP_2S;
         String pomdpFileName = POMDP_1D;
         //String pomdpFileName = POMDP_TIGER;
+        //String pomdpFileName = POMDP_TIGERGRID;
         double epsilon = 0.000001;
 
         // =======================================
