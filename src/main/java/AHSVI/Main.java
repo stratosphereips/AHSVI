@@ -26,7 +26,7 @@ public class Main {
         //String pomdpFileName = POMDP_2S;
         String pomdpFileName = POMDP_1D;
         //String pomdpFileName = POMDP_TIGER;
-        double epsilon = 0.00001;
+        double epsilon = 0.000001;
 
         // =======================================
 
