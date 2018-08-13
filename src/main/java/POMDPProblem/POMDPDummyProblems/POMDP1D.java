@@ -8,8 +8,6 @@ import java.util.HashMap;
 public class POMDP1D implements POMDPDummyProblemI {
     @Override
     public POMDPProblem load() {
-        System.out.println("Loading dummy 1d.POMDP");
-
         int statesCount = 4;
         int actionsCount = 2;
         int observationsCount = 2;

@@ -17,9 +17,6 @@ public class HSVIAlgorithm {
     private final double epsilon;
     public Partition partition; //TODO are there more than one partitions?
 
-    public double finalUtilityLB;
-    public double finalUtilityUB;
-
     public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon) {
         try {
             Cplex.get().setParam(IloCplex.IntParam.RootAlg, 2);
@@ -33,6 +30,14 @@ public class HSVIAlgorithm {
         this.epsilon = epsilon;
         this.partition = new Partition(pomdpProblem);
         this.partition.initValueFunctions();
+    }
+
+    public double getLBValueInInitBelief() {
+        return partition.lbFunction.getValue(pomdpProblem.initBelief);
+    }
+
+    public double getUBValueInInitBelief() {
+        return partition.ubFunction.getValue(pomdpProblem.initBelief);
     }
 
     public void solve() throws IloException {
@@ -64,10 +69,6 @@ public class HSVIAlgorithm {
             lastLbVal = lbVal;
             lastUbVal = ubVal;
         }
-
-        this.finalUtilityLB = partition.lbFunction.getValue(pomdpProblem.initBelief);
-        this.finalUtilityUB = partition.ubFunction.getValue(pomdpProblem.initBelief);
-
     }
 
     private boolean widthLargerThanEps(double[] belief) {

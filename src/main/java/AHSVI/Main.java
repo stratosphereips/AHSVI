@@ -24,8 +24,8 @@ public class Main {
 
         //String pomdpFileName = POMDP_1S;
         //String pomdpFileName = POMDP_2S;
-        String pomdpFileName = POMDP_1D;
-        //String pomdpFileName = POMDP_TIGER;
+        //String pomdpFileName = POMDP_1D;
+        String pomdpFileName = POMDP_TIGER;
         double epsilon = 0.0001;
 
         // =======================================
@@ -44,7 +44,7 @@ public class Main {
             System.exit(2);
         }
 
-        System.out.println("Final utility LB: " + hsviAlgorithm.finalUtilityLB);
-        System.out.println("Final utility UB: " + hsviAlgorithm.finalUtilityUB);
+        System.out.println("Final utility LB: " + hsviAlgorithm.getLBValueInInitBelief());
+        System.out.println("Final utility UB: " + hsviAlgorithm.getUBValueInInitBelief());
     }
 }

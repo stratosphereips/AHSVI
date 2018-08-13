@@ -10,7 +10,6 @@ public class POMDPDummyProblems implements POMDPDummyProblemI {
     }
 
     public POMDPProblem load() {
-        System.out.println(pomdpProblemName);
         switch (pomdpProblemName) {
             case "1s":
                 return new POMDP1S().load();
