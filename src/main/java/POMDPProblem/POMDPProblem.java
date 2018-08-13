@@ -153,6 +153,7 @@ public class POMDPProblem {
         sb.append('}');
 
         sb.append("\\\n\tTransition probabilities");
+        sb.append("\\\n\t\tTODO"); //TODO POMDPProblem toString()
 
         return sb.toString();
     }

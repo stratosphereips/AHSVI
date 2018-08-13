@@ -12,13 +12,22 @@ public class Main {
 
         String RESOURCES_FOLDER_NAME = "src" + File.separator + "main" + File.separator + "resources" + File.separator;
         String POMDP_EXT = ".POMDP";
-        String POMDP_1D = "1d";
+
+        // some POMDP problems that can be loaded
         String POMDP_1S = "1s";
+        String POMDP_2S = "2s";
+        String POMDP_1D = "1d";
+        String POMDP_TIGER = "tiger";
 
         // =======================================
         // =          S E T T I N G S            =
+
+        //String pomdpFileName = POMDP_1S;
+        //String pomdpFileName = POMDP_2S;
         String pomdpFileName = POMDP_1D;
-        double epsilon = 0.001;
+        //String pomdpFileName = POMDP_TIGER;
+        double epsilon = 0.0001;
+
         // =======================================
 
         String pomdpFilePathStr = RESOURCES_FOLDER_NAME + pomdpFileName + POMDP_EXT;
@@ -26,7 +35,7 @@ public class Main {
         pomdpFileReader.loadProblem();
 
         POMDPProblem pomdpProblem = pomdpFileReader.getPomdpProblem();
-        System.out.println(pomdpProblem);
+        // System.out.println(pomdpProblem);
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(pomdpProblem, epsilon);
         try {
             hsviAlgorithm.solve();
