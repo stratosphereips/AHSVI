@@ -18,7 +18,7 @@ public class AHSVITest {
                 ub - lb <= eps);
     }
 
-    public void testDummyPOMDP(String pomdpProblemName, double epsilon) {
+    public HSVIAlgorithm testDummyPOMDP(String pomdpProblemName, double epsilon) {
         System.out.printf("* TESTING \"%s\" DUMMY POMDP PROBLEM\n", pomdpProblemName);
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(new POMDPDummyProblems(pomdpProblemName).load(), epsilon);
         try {
@@ -28,6 +28,8 @@ public class AHSVITest {
         }
         testUBGteUB(hsviAlgorithm.getUBValueInInitBelief(), hsviAlgorithm.getLBValueInInitBelief());
         testUBCloseToLB(hsviAlgorithm.getUBValueInInitBelief(), hsviAlgorithm.getLBValueInInitBelief(), epsilon);
+
+        return hsviAlgorithm;
     }
 
     @Test(timeout = 300)
@@ -47,8 +49,10 @@ public class AHSVITest {
     @Test(timeout = 1000)
     public void test1DPOMDP() {
         String pomdpProblemName = "1d";
-        double epsilon = 0.0001;
-        testDummyPOMDP(pomdpProblemName, epsilon);
+        double epsilon = 0.00001;
+        double expectedValueInInitBelief = 1.360922;
+        HSVIAlgorithm hsviAlgorithm = testDummyPOMDP(pomdpProblemName, epsilon);
+        assertEquals(expectedValueInInitBelief, hsviAlgorithm.getUBValueInInitBelief(), epsilon);
     }
 
     @Test(timeout = 300)
