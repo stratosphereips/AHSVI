@@ -1,5 +1,6 @@
-package AHSVI;
+package HSVI;
 
+import AHSVI.Config;
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
 
@@ -37,6 +38,24 @@ public class PointBasedValueFunction<T> extends ValueFunction implements Iterabl
         super(dimension, data);
         points = new LinkedList<>();
         extremePoints = new Point[dimension];
+    }
+
+    public List<Point<T>> getPoints() {
+        return points;
+    }
+
+    @Override
+    public double[] getBeliefInMinimum() {
+        // TODO just find min among UB points?
+        double[] beliefInMin = null;
+        double minValue = Double.POSITIVE_INFINITY;
+        for (Point<T> point : points) {
+            if (point.getValue() < minValue) {
+                minValue = point.getValue();
+                beliefInMin = point.getCoordinates();
+            }
+        }
+        return beliefInMin;
     }
 
     @Override

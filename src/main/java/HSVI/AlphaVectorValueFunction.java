@@ -1,4 +1,4 @@
-package AHSVI;
+package HSVI;
 
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
@@ -6,8 +6,6 @@ import ilog.cplex.IloCplex;
 import java.util.*;
 
 public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterable<AlphaVector<T>> {
-    // TODO RANDOOOOOOOOOOM
-    Random rand;
 
     public List<AlphaVector<T>> alphaVectors;
 
@@ -21,8 +19,19 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
 
     public AlphaVectorValueFunction(int dimension, Object data) {
         super(dimension, data);
-        rand = new Random(System.currentTimeMillis());
         alphaVectors = new LinkedList<>();
+    }
+
+    public List<AlphaVector<T>> getAlphaVectors() {
+        return alphaVectors;
+    }
+
+    @Override
+    public double[] getBeliefInMinimum() {
+        double[] beliefInMin = null;
+
+
+        return beliefInMin;
     }
 
     public boolean contains(double[] vector) {

@@ -1,6 +1,6 @@
 package AHSVI;
 
-import ilog.concert.IloException;
+import HSVI.HSVIAlgorithm;
 import POMDPProblem.POMDPFileReader;
 import POMDPProblem.POMDPProblem;
 
@@ -39,12 +39,7 @@ public class Main {
         POMDPProblem pomdpProblem = pomdpFileReader.getPomdpProblem();
         // System.out.println(pomdpProblem);
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(pomdpProblem, epsilon);
-        try {
-            hsviAlgorithm.solve();
-        } catch (IloException e) {
-            e.printStackTrace();
-            System.exit(2);
-        }
+        hsviAlgorithm.solve();
 
         System.out.println("Final utility LB: " + hsviAlgorithm.getLBValueInInitBelief());
         System.out.println("Final utility UB: " + hsviAlgorithm.getUBValueInInitBelief());

@@ -1,4 +1,4 @@
-package AHSVI;
+package HSVI;
 
 import java.util.Arrays;
 

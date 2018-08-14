@@ -1,7 +1,7 @@
 package AHSVI;
 
+import HSVI.HSVIAlgorithm;
 import POMDPProblem.POMDPDummyProblems.POMDPDummyProblems;
-import ilog.concert.IloException;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -21,11 +21,7 @@ public class AHSVITest {
     public HSVIAlgorithm testDummyPOMDP(String pomdpProblemName, double epsilon) {
         System.out.printf("* TESTING \"%s\" DUMMY POMDP PROBLEM\n", pomdpProblemName);
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(new POMDPDummyProblems(pomdpProblemName).load(), epsilon);
-        try {
-            hsviAlgorithm.solve();
-        } catch (IloException e) {
-            e.printStackTrace();
-        }
+        hsviAlgorithm.solve();
         testUBGteUB(hsviAlgorithm.getUBValueInInitBelief(), hsviAlgorithm.getLBValueInInitBelief());
         testUBCloseToLB(hsviAlgorithm.getUBValueInInitBelief(), hsviAlgorithm.getLBValueInInitBelief(), epsilon);
 

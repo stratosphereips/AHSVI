@@ -1,9 +1,9 @@
-package AHSVI;
+package HSVI;
 
 import java.lang.IllegalArgumentException;
 import java.util.*;
-import java.util.stream.Stream;
 
+import AHSVI.Config;
 import POMDPProblem.POMDPProblem;
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
@@ -33,12 +33,28 @@ public class HSVIAlgorithm {
         this.initValueFunctions();
     }
 
+    public double getLBValueInBelief(double[] belief) {
+        return lbFunction.getValue(belief);
+    }
+
+    public AlphaVectorValueFunction<Integer> getLbFunction() {
+        return lbFunction;
+    }
+
+    public PointBasedValueFunction getUbFunction() {
+        return ubFunction;
+    }
+
     public double getLBValueInInitBelief() {
-        return lbFunction.getValue(pomdpProblem.initBelief);
+        return getLBValueInBelief(pomdpProblem.initBelief);
+    }
+
+    public double getUBValueInBelief(double[] belief) {
+        return ubFunction.getValue(belief);
     }
 
     public double getUBValueInInitBelief() {
-        return ubFunction.getValue(pomdpProblem.initBelief);
+        return getUBValueInBelief(pomdpProblem.initBelief);
     }
 
     private void initValueFunctions() {
@@ -125,6 +141,7 @@ public class HSVIAlgorithm {
     }
 
     private void explore(double[] belief, int t) {
+        System.out.println(t);
         if (width(belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {// TODO float instability
             return;
         }
@@ -135,6 +152,7 @@ public class HSVIAlgorithm {
 
         updateLb(belief);
         updateUb(belief);
+        System.out.println(t);
     }
 
     private double[] select(double[] belief, int t) {
@@ -155,13 +173,13 @@ public class HSVIAlgorithm {
         // compute best observation
         double[] bestNextBelief = null;
         double[] nextBelief;
-        double valueOfBestO = 0;
+        double valueOfBestO = 0; // TODO Double.NEGATIVE_INFINITY; why 0?
         double prb, excess;
         for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
             nextBelief = nextBelief(belief, bestA, o);
             if (nextBelief != null) {
-                prb = pomdpProblem.getProbabilityOfObservationPlayingAction(o, belief, bestA); // TODO Fix this (it should take belief as arg)
-                excess = width(nextBelief) - epsilon * Math.pow(pomdpProblem.discount, -(t + 1)); // TODO added * gamma^-t
+                prb = pomdpProblem.getProbabilityOfObservationPlayingAction(o, belief, bestA);
+                excess = width(nextBelief) - epsilon * Math.pow(pomdpProblem.discount, -(t + 1));
                 value = prb * excess;
                 if (value > valueOfBestO) {
                     valueOfBestO = value;

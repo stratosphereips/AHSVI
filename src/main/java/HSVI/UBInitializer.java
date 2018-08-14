@@ -1,4 +1,4 @@
-package AHSVI;
+package HSVI;
 
 import POMDPProblem.POMDPProblem;
 
@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 public class UBInitializer {
     private static final double EPS = 0.001;
-    private static final int MAX_ITER_N = -1;
+    private static final int MAX_ITER_N = 10000; // TODO constant?
 
     private final POMDPProblem pomdpProblem;
     private final PointBasedValueFunction ubF;

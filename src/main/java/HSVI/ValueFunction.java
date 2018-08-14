@@ -1,4 +1,4 @@
-package AHSVI;
+package HSVI;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumVar;
@@ -15,6 +15,8 @@ public abstract class ValueFunction {
     }
 
     public abstract double getValue(double[] point);
+
+    public abstract double[] getBeliefInMinimum();
 
     public abstract IloRange constructLP(IloCplex cplex, IloNumVar[] coords, IloNumVar value) throws IloException;
 

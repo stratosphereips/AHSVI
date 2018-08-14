@@ -52,15 +52,15 @@ public class POMDPTiger implements POMDPDummyProblemI {
         actionProbabilities[0][1][0] = 0.0;
         actionProbabilities[0][1][1] = 1.0;
 
-        actionProbabilities[0][0][0] = 0.5;
-        actionProbabilities[0][0][1] = 0.5;
-        actionProbabilities[0][1][0] = 0.5;
-        actionProbabilities[0][1][1] = 0.5;
+        actionProbabilities[1][0][0] = 0.5;
+        actionProbabilities[1][0][1] = 0.5;
+        actionProbabilities[1][1][0] = 0.5;
+        actionProbabilities[1][1][1] = 0.5;
 
-        actionProbabilities[0][0][0] = 0.5;
-        actionProbabilities[0][0][1] = 0.5;
-        actionProbabilities[0][1][0] = 0.5;
-        actionProbabilities[0][1][1] = 0.5;
+        actionProbabilities[2][0][0] = 0.5;
+        actionProbabilities[2][0][1] = 0.5;
+        actionProbabilities[2][1][0] = 0.5;
+        actionProbabilities[2][1][1] = 0.5;
 
 
         double[][][] observationProbabilities =

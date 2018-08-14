@@ -65,7 +65,7 @@ public class POMDP1D implements POMDPDummyProblemI {
 
         actionProbabilities[0][3][0] = 1./3.;
         actionProbabilities[0][3][1] = 1./3.;
-        actionProbabilities[0][3][2] = 1. /3.;
+        actionProbabilities[0][3][2] = 1./3.;
         actionProbabilities[0][3][3] = 0.0;
 
         actionProbabilities[1][0][0] = 0.0;

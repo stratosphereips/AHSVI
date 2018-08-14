@@ -1,5 +1,7 @@
 package POMDPProblem;
 
+import AHSVI.Config;
+
 import java.util.*;
 
 public class POMDPProblem {
@@ -40,6 +42,11 @@ public class POMDPProblem {
         this.discount = discount;
         this.initBelief = initBelief;
         this.minimize = minimize;
+
+        assert areActionProbabilitiesCorrect(): "Transition probabilities are probably incorrect";
+        assert areObservationProbabilitiesCorrect(): "Observation probabilities are probably incorrect";
+        assert 0 <= discount && discount <= 1: "Discount must be between 0 and 1";
+
     }
 
     public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
@@ -71,6 +78,38 @@ public class POMDPProblem {
 
     public int getNumberOfObservations() {
         return observationNames.size();
+    }
+
+    public boolean areActionProbabilitiesCorrect() {
+        double probSum;
+        for (int s = 0; s < getNumberOfStates(); ++s) {
+            for (int a = 0; a < getNumberOfActions(); ++a) {
+                probSum = 0;
+                for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+                    probSum += actionProbabilities[s][a][s_];
+                }
+                if (Math.abs(probSum - 1) > Config.ZERO) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean areObservationProbabilitiesCorrect() {
+        double probSum;
+        for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+            for (int a = 0; a < getNumberOfActions(); ++a) {
+                probSum = 0;
+                for (int o = 0; o < getNumberOfObservations(); ++o) {
+                    probSum += observationProbabilities[s_][a][o];
+                }
+                if (Math.abs(probSum - 1) > Config.ZERO) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public double getProbabilityOfObservationPlayingAction(int o, double[] belief, int a) {
