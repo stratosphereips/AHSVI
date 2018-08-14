@@ -6,6 +6,9 @@ out
 # Maven
 target/*
 
+# Program output
+*.lp
+
 # Prerequisites
 *.d
 

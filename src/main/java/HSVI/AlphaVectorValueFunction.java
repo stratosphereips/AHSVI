@@ -28,8 +28,27 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
 
     @Override
     public double[] getBeliefInMinimum() {
+        // TODO make this smarter
         double[] beliefInMin = null;
+        try {
+            IloCplex model = new IloCplex();
+            model.setOut(null);
+            model.setWarning(null);
 
+            IloNumExpr obj = model.numVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+            IloNumVar[] beliefVars = model.numVarArray(dimension, 0.0, 1.0);
+            model.addEq(model.sum(beliefVars), 1.0);
+            for (AlphaVector<T> alphaVector : alphaVectors) {
+                model.addGe(obj, model.scalProd(alphaVector.vector, beliefVars));
+            }
+            model.exportModel("min_belief.lp");
+            model.addMinimize(obj);
+            model.solve();
+            return model.getValues(beliefVars);
+
+        } catch (IloException e) {
+            e.printStackTrace();
+        }
 
         return beliefInMin;
     }

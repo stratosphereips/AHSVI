@@ -17,7 +17,7 @@ public class POMDPProblem {
     //                                              end-state s_ ... p = observationProbabilities[s_][a][o]
     public final double[][] rewards; // reward r for playing action a in state s ... r = rewards[s][a]
     public final double discount;
-    public final double[] initBelief;
+    public double[] initBelief;
     public final boolean minimize;
 
     public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,

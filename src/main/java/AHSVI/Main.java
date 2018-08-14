@@ -35,13 +35,21 @@ public class Main {
         String pomdpFilePathStr = RESOURCES_FOLDER_NAME + pomdpFileName + POMDP_EXT;
         POMDPFileReader pomdpFileReader = new POMDPFileReader(pomdpFilePathStr, true);
         pomdpFileReader.loadProblem();
-
         POMDPProblem pomdpProblem = pomdpFileReader.getPomdpProblem();
+
+        pomdpProblem.initBelief = new double[pomdpProblem.getNumberOfStates()];
+        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+            pomdpProblem.initBelief[s] = 1/pomdpProblem.getNumberOfStates();
+        }
+        AHSVIAlgorithm ahsviAlgorithm = new AHSVIAlgorithm(pomdpProblem, epsilon);
+        ahsviAlgorithm.solve();
+        /*
         // System.out.println(pomdpProblem);
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(pomdpProblem, epsilon);
         hsviAlgorithm.solve();
 
         System.out.println("Final utility LB: " + hsviAlgorithm.getLBValueInInitBelief());
         System.out.println("Final utility UB: " + hsviAlgorithm.getUBValueInInitBelief());
+        */
     }
 }

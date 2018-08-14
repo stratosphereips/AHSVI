@@ -25,9 +25,6 @@ public class HSVIAlgorithm {
         } catch (IloException e) {
             e.printStackTrace();
         }
-        if (pomdpProblem.initBelief == null) {
-            throw new IllegalArgumentException("You have to specify initial belief");
-        }
         this.pomdpProblem = pomdpProblem;
         this.epsilon = epsilon;
         this.initValueFunctions();
