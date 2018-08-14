@@ -56,8 +56,8 @@ public class HSVIAlgorithm {
 
     private void initValueFunctions() {
         lbFunction = initLowerBound();
-        System.out.println("LB value in initial belief: " + lbFunction.getValue(pomdpProblem.initBelief)); // TODO print
         ubFunction = initUpperBound();
+        System.out.println("LB value in initial belief: " + lbFunction.getValue(pomdpProblem.initBelief)); // TODO print
         System.out.println("UB value in initial belief: " + ubFunction.getValue(pomdpProblem.initBelief)); // TODO print
         System.out.println(ubFunction);
     }
@@ -79,6 +79,9 @@ public class HSVIAlgorithm {
         double[] beliefNew = new double[belief.length];
         double normConstant = 0;
         for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+            if (pomdpProblem.observationProbabilities[s_][a][o] < Config.ZERO) {
+                continue;
+            }
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
                 beliefNew[s_] += pomdpProblem.actionProbabilities[s][a][s_] * belief[s];
             }
@@ -129,16 +132,18 @@ public class HSVIAlgorithm {
             ubVal = ubFunction.getValue(pomdpProblem.initBelief);
             System.out.println("Solve iteration: " + iter);
             System.out.println("LB in init belief: " + lbVal);
-            System.out.printf("Diff to last iteration: %.20f\n", (lbVal - lastLbVal));
+            System.out.printf(" ----- Diff to last iteration: %.20f\n", (lbVal - lastLbVal));
+            System.out.println("LB size: " + lbFunction.getAlphaVectors().size());
             System.out.println("UB in init belief: " + ubVal);
-            System.out.printf("Diff to last iteration: %.20f\n", (ubVal - lastUbVal));
+            System.out.printf(" ----- Diff to last iteration: %.20f\n", (ubVal - lastUbVal));
+            System.out.println("UB size: " + ubFunction.getPoints().size());
+
             lastLbVal = lbVal;
             lastUbVal = ubVal;
         }
     }
 
     private void explore(double[] belief, int t) {
-        System.out.println(t);
         if (width(belief) <= epsilon * Math.pow(pomdpProblem.discount, -t)) {// TODO float instability
             return;
         }
@@ -149,7 +154,6 @@ public class HSVIAlgorithm {
 
         updateLb(belief);
         updateUb(belief);
-        System.out.println(t);
     }
 
     private double[] select(double[] belief, int t) {
@@ -197,12 +201,19 @@ public class HSVIAlgorithm {
         double observationsValuesSubSum;
         double[] nextBel;
         for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+            if (belief[s] < Config.ZERO) {
+                continue;
+            }
             rewardsSum += pomdpProblem.rewards[s][a] * belief[s];
             observationsValuesSubSum = 0;
-            for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
-                for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+            for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+                if (pomdpProblem.actionProbabilities[s][a][s_] < Config.ZERO) {
+                    continue;
+                }
+                for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
                     nextBel = nextBelief(belief, a, o);
-                    if (nextBel != null) {
+                    if (nextBel != null &&
+                            pomdpProblem.observationProbabilities[s_][a][o] > Config.ZERO) {
                         observationsValuesSubSum += pomdpProblem.actionProbabilities[s][a][s_] * pomdpProblem.observationProbabilities[s_][a][o] *
                                 ubFunction.getValue(nextBel);
                     }

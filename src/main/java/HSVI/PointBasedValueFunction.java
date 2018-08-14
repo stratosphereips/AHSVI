@@ -45,6 +45,11 @@ public class PointBasedValueFunction<T> extends ValueFunction implements Iterabl
     }
 
     @Override
+    public int size() {
+        return points.size();
+    }
+
+    @Override
     public double[] getBeliefInMinimum() {
         // TODO just find min among UB points?
         double[] beliefInMin = null;

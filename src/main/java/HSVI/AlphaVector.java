@@ -3,9 +3,11 @@ package HSVI;
 import java.util.Arrays;
 
 public class AlphaVector<T> {
+
     public double[] vector;
     public T data;
     public boolean updated;
+
 
     public AlphaVector(double[] vector, T data) {
         this.vector = vector;

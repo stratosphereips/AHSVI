@@ -6,6 +6,10 @@ import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
 
 public abstract class ValueFunction {
+    protected static double pruningGrowthRatio = 0.1;
+
+    protected int lastPrunedSize = 1;
+
     int dimension;
     Object data;
 
@@ -14,11 +18,11 @@ public abstract class ValueFunction {
         this.data = data;
     }
 
+    public abstract int size();
+
     public abstract double getValue(double[] point);
 
     public abstract double[] getBeliefInMinimum();
-
-    public abstract IloRange constructLP(IloCplex cplex, IloNumVar[] coords, IloNumVar value) throws IloException;
 
     public abstract void removeDominated();
 

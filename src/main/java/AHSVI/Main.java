@@ -25,10 +25,10 @@ public class Main {
 
         //String pomdpFileName = POMDP_1S;
         //String pomdpFileName = POMDP_2S;
-        String pomdpFileName = POMDP_1D;
+        //String pomdpFileName = POMDP_1D;
         //String pomdpFileName = POMDP_TIGER;
-        //String pomdpFileName = POMDP_TIGERGRID;
-        double epsilon = 0.000001;
+        String pomdpFileName = POMDP_TIGERGRID;
+        double epsilon = 0.1;
 
         // =======================================
 
@@ -37,19 +37,28 @@ public class Main {
         pomdpFileReader.loadProblem();
         POMDPProblem pomdpProblem = pomdpFileReader.getPomdpProblem();
 
+        // =======================================
+        // =               A H S V I             =
+
+        /*
         pomdpProblem.initBelief = new double[pomdpProblem.getNumberOfStates()];
         for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
             pomdpProblem.initBelief[s] = 1/pomdpProblem.getNumberOfStates();
         }
         AHSVIAlgorithm ahsviAlgorithm = new AHSVIAlgorithm(pomdpProblem, epsilon);
         ahsviAlgorithm.solve();
-        /*
+        */
         // System.out.println(pomdpProblem);
+
+
+        // =======================================
+        // =                H S V I              =
+
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(pomdpProblem, epsilon);
         hsviAlgorithm.solve();
 
         System.out.println("Final utility LB: " + hsviAlgorithm.getLBValueInInitBelief());
         System.out.println("Final utility UB: " + hsviAlgorithm.getUBValueInInitBelief());
-        */
+
     }
 }
