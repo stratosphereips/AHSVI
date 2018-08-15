@@ -3,6 +3,7 @@ package hsvi;
 import java.util.*;
 
 import ahsvi.Config;
+import helpers.HelperFunctions;
 import hsvi.bounds.*;
 import pomdpproblem.POMDPProblem;
 
@@ -71,8 +72,8 @@ public class HSVIAlgorithm {
         List<UBPoint> initialUBPoints = ubInit.getInitialUbPoints();
 
         UpperBound up;
-        up = new CplexLPUpperBound(pomdpProblem.getNumberOfStates(), initialUBPoints);
-        //up = new SawtoothUpperBound(pomdpProblem.getNumberOfStates(), initialUBPoints);
+        //up = new CplexLPUpperBound(pomdpProblem.getNumberOfStates(), initialUBPoints);
+        up = new SawtoothUpperBound(pomdpProblem.getNumberOfStates(), initialUBPoints);
         return up;
     }
 

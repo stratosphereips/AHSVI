@@ -1,6 +1,6 @@
 package hsvi.bounds;
 
-import hsvi.HelperFunctions;
+import helpers.HelperFunctions;
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
 

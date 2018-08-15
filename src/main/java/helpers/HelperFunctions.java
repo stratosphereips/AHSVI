@@ -1,4 +1,4 @@
-package hsvi;
+package helpers;
 
 import hsvi.bounds.LBAlphaVector;
 
