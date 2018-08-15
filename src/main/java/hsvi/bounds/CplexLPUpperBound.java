@@ -10,25 +10,24 @@ import java.util.stream.IntStream;
 /**
  * Created by wigos on 16.5.16.
  */
-public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLPUpperBound.Point<T>> {
+public class CplexLPUpperBound extends UpperBound {
+    private IloCplex cplex;
     public static double RANDOMIZE = Double.NaN;
     public static boolean CACHED_CPLEX = true;
 
-    private List<Point<T>> points;
     private int nPoints = 0;
     private IloNumVar[] alphas;
 
-    private Point[] extremePoints;
+    private UBPoint[] extremePoints;
 
     private double maximum = Double.NEGATIVE_INFINITY;
-    private IloCplex cplex;
 
     private IloCplex cachedCplex = null;
     private IloNumVar cachedValueVar = null;
     private IloLPMatrix cachedLPMatrix = null;
     private IloRange[] cachedLPRanges = null;
     public double minimum;
-    public Point minimalBelief;
+    public UBPoint minimalBelief;
 
     public CplexLPUpperBound(int dimension) {
         this(dimension, null);
@@ -36,17 +35,14 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
 
     public CplexLPUpperBound(int dimension, Object data) {
         super(dimension, data);
-        points = new LinkedList<>();
-        extremePoints = new Point[dimension];
-    }
-
-    public List<Point<T>> getPoints() {
-        return points;
-    }
-
-    @Override
-    public int size() {
-        return points.size();
+        try {
+            cplex = new IloCplex();
+            cplex.setParam(IloCplex.IntParam.RootAlg, 2);
+        } catch (IloException e) {
+            e.printStackTrace();
+            System.exit(10);
+        }
+        extremePoints = new UBPoint[dimension];
     }
 
     @Override
@@ -54,7 +50,7 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
         // TODO just find min among UB points?
         double[] beliefInMin = null;
         double minValue = Double.POSITIVE_INFINITY;
-        for (Point<T> point : points) {
+        for (UBPoint point : points) {
             if (point.getValue() < minValue) {
                 minValue = point.getValue();
                 beliefInMin = point.getCoordinates();
@@ -65,11 +61,11 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
 
     @Override
     public void removeDominated() {
-        List<Point<T>> newPoints = new LinkedList<>();
-        Iterator<Point<T>> it = points.iterator();
+        List<UBPoint> newPoints = new LinkedList<>();
+        Iterator<UBPoint> it = points.iterator();
         int removed = 0;
         while (it.hasNext()) {
-            Point<T> current = it.next();
+            UBPoint current = it.next();
             if (current.value - getValue(current.coordinates) > Config.ZERO) {
                 removed++;
             } else {
@@ -90,20 +86,20 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
         }
     }
 
-    public Point<T> addPoint(double[] point) {
+    public UBPoint addPoint(double[] point) {
         return addPoint(point, getValue(point));
     }
 
-    public Point<T> addPoint(double[] point, double value) {
-        return addPoint(point, value, null);
+    public UBPoint addPoint(double[] point, double value) {
+        return addPoint(point, value, -1);
     }
 
-    public Point<T> addPoint(double[] point, double value, T data) {
+    public UBPoint addPoint(double[] point, double value, int data) {
         int extremeId = extremeId(point);
         if (extremeId >= 0) {
-            Point<T> extremePoint = (Point<T>) extremePoints[extremeId];
+            UBPoint extremePoint = (UBPoint) extremePoints[extremeId];
             if (extremePoint == null) {
-                extremePoint = new Point<>(point, Double.POSITIVE_INFINITY, data);
+                extremePoint = new UBPoint(point, Double.POSITIVE_INFINITY, data);
                 extremePoints[extremeId] = extremePoint;
                 extremePoint.extreme = true;
                 extremePoint.extremeId = extremeId;
@@ -168,7 +164,7 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
 
             return extremePoint;
         } else {
-            Point<T> pointObj = new Point<>(point, value, data);
+            UBPoint pointObj = new UBPoint(point, value, data);
             points.add(pointObj);
             nPoints++;
 
@@ -212,9 +208,9 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
     public void randomDelete() {
         int count = points.size();
         double prob = 10.0 / count;
-        Iterator<Point<T>> it = points.iterator();
+        Iterator<UBPoint> it = points.iterator();
         while (it.hasNext()) {
-            Point<T> point = it.next();
+           UBPoint point = it.next();
             if (Math.random() < prob) {
                 if (getValue(point.coordinates) < point.value) it.remove();
             }
@@ -309,7 +305,7 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
     public double getValueST(double[] point) {
 
         // not implemented yet
-        for (Point<T> point2 : this.points) {
+        for (UBPoint point2 : this.points) {
             double value = evaluateSTAtPoint(point, point2);
         }
 
@@ -317,7 +313,7 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
 
     }
 
-    private double evaluateSTAtPoint(double[] point, Point<T> point2) {
+    private double evaluateSTAtPoint(double[] point, UBPoint point2) {
 
         double[] vector = getDirectionalVector(point, point2);
         double minK = 1d;
@@ -342,7 +338,7 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
 
     }
 
-    private double[] getDirectionalVector(double[] point, Point<T> point2) {
+    private double[] getDirectionalVector(double[] point, UBPoint point2) {
         return IntStream.range(0, point.length)
                 .mapToDouble(i -> point2.coordinates[i] - point[i])
                 .toArray();
@@ -385,15 +381,14 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
     }
 
     public IloRange constructLPSlow(IloNumExpr[] coords, IloNumVar value) throws IloException {
-        IloCplex cplex = Cplex.get();
         IloNumVar[] alphas = cplex.numVarArray(nPoints, 0, 1);
         IloNumExpr[] coordSum = new IloNumExpr[dimension];
         for (int i = 0; i < dimension; i++) coordSum[i] = cplex.numExpr();
         IloNumExpr valueExpr = cplex.numExpr();
 
-        Iterator<Point<T>> it = points.iterator();
+        Iterator<UBPoint> it = points.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Point current = it.next();
+            UBPoint current = it.next();
             for (int j = 0; j < dimension; j++) {
                 coordSum[j] = cplex.sum(coordSum[j], cplex.prod(current.coordinates[j], alphas[i]));
             }
@@ -461,9 +456,9 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
     }
 
     private void buildMatrix(int[][] ind, double[][] val) {
-        Iterator<Point<T>> it = points.iterator();
+        Iterator<UBPoint> it = points.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Point current = it.next();
+            UBPoint current = it.next();
             for (int j = 0; j < dimension; j++) {
                 ind[j][i] = i;
                 val[j][i] = current.coordinates[j];
@@ -479,7 +474,7 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
         IloLPMatrix matrix = cplex.addLPMatrix();
         alphas = cplex.numVarArray(nPoints, 0, 1);
 
-        Cplex.addCols(matrix, alphas, new IloNumVar[]{value}, coordVars);
+        addCols(matrix, alphas, new IloNumVar[]{value}, coordVars);
 
         double[] lb = new double[dimension + 1];
         double[] ub = new double[dimension + 1];
@@ -514,15 +509,6 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
         return matrix.getRange(dimension);
     }
 
-    @Override
-    public Iterator<Point<T>> iterator() {
-        return points.iterator();
-    }
-
-    public double getMaximum() {
-        return maximum;
-    }
-
     private static int extremeId(double[] belief) {
         for (int i = 0; i < belief.length; i++) {
             if (belief[i] >= 1 - Config.ZERO) return i;
@@ -530,60 +516,30 @@ public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLP
         return -1;
     }
 
+    private static int addCols(IloLPMatrix matrix, IloNumVar[]... vars) throws IloException {
+        int totalVars = 0;
+        for(int i = 0 ; i < vars.length ; i++) totalVars += vars[i].length;
+
+        IloNumVar[] cols = new IloNumVar[totalVars];
+        int offset = 0;
+        for(int i = 0 ; i < vars.length ; i++) {
+            for(int j = 0 ; j < vars[i].length ; j++) {
+                cols[offset++] = vars[i][j];
+            }
+        }
+
+        return matrix.addCols(cols);
+    }
+
     public double[] getAlphas() throws IloException {
-        return Cplex.get().getValues(alphas);
+        return cplex.getValues(alphas);
     }
 
-    public void updateCount() {
-        nPoints = points.size();
-    }
-
-    public static class Point<T> {
-        double[] coordinates;
-        double value;
-        T data;
-        boolean extreme = false;
-        int extremeId = Integer.MIN_VALUE;
-
-        public Point(double[] coordinates, double value, T data) {
-            this.coordinates = coordinates;
-            this.value = value;
-            this.data = data;
-        }
-
-        public T getData() {
-            return data;
-        }
-
-        public void setData(T data) {
-            this.data = data;
-        }
-
-        public void setValue(double value) {
-            this.value = value;
-        }
-
-        public double getValue() {
-            return value;
-        }
-
-        public double[] getCoordinates() {
-            return coordinates;
-        }
-
-        public String toString() {
-            return Arrays.toString(coordinates) + ", Value = " + value;
-        }
-    }
 
     @Override
     public String toString() {
         return "PointBasedValueFunction{" +
                 "points=" + points +
                 '}';
-    }
-
-    public void commit() {
-//        throw new NotImplementedException();
     }
 }

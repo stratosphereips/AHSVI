@@ -1,6 +1,6 @@
 package hsvi;
 
-import hsvi.bounds.AlphaVector;
+import hsvi.bounds.LBAlphaVector;
 
 import java.util.Arrays;
 
@@ -27,11 +27,11 @@ public class HelperFunctions {
 		return sum;
 	}
 
-    public static <T> double dotProd(AlphaVector<T> alphaVector, double[] vector) {
+    public static <T> double dotProd(LBAlphaVector alphaVector, double[] vector) {
         return dotProd(alphaVector.vector, vector);
     }
 
-    public static <T> double dotProd(double[] vector, AlphaVector<T> alphaVector) {
+    public static <T> double dotProd(double[] vector, LBAlphaVector alphaVector) {
         return dotProd(alphaVector.vector, vector);
     }
 
@@ -39,7 +39,7 @@ public class HelperFunctions {
         return vector[i] * valueI;
     }
 
-    public static <T> double dotProd(AlphaVector<T> alphaVector, int i, double valueI) {
+    public static <T> double dotProd(LBAlphaVector alphaVector, int i, double valueI) {
         return dotProd(alphaVector.vector, i, valueI);
     }
 

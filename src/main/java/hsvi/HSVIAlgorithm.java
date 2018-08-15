@@ -16,15 +16,10 @@ public class HSVIAlgorithm {
     private final POMDPProblem pomdpProblem;
     private final double epsilon;
 
-    private LowerBound<Integer> lbFunction;
+    private LowerBound lbFunction;
     private CplexLPUpperBound ubFunction;
 
     public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon) {
-        try {
-            Cplex.get().setParam(IloCplex.IntParam.RootAlg, 2);
-        } catch (IloException e) {
-            e.printStackTrace();
-        }
         this.pomdpProblem = pomdpProblem;
         this.epsilon = epsilon;
         this.initValueFunctions();
@@ -34,7 +29,7 @@ public class HSVIAlgorithm {
         return lbFunction.getValue(belief);
     }
 
-    public LowerBound<Integer> getLbFunction() {
+    public LowerBound getLbFunction() {
         return lbFunction;
     }
 
@@ -97,7 +92,7 @@ public class HSVIAlgorithm {
         return beliefNew;
     }
 
-    private AlphaVector<Integer> getAlphaDotProdArgMax(double[] belief) {
+    private LBAlphaVector getAlphaDotProdArgMax(double[] belief) {
         return lbFunction.getDotProdArgMax(belief);
     }
 
@@ -241,13 +236,13 @@ public class HSVIAlgorithm {
 
     private void updateLb(double[] belief) {
         // [paper Alg 3]
-        ArrayList<AlphaVector<Integer>> betasAo = new ArrayList<>(pomdpProblem.getNumberOfObservations());
+        ArrayList<LBAlphaVector> betasAo = new ArrayList<>(pomdpProblem.getNumberOfObservations());
         double[] betaVec;
         double[] maxBetaVec = null;
         double maxBetaVecValue = Double.NEGATIVE_INFINITY;
         double sumOs_, betaVecValue;
         int bestA = 0;
-        AlphaVector<Integer> beta;
+        LBAlphaVector beta;
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
             for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
                 betasAo.add(getAlphaDotProdArgMax(nextBelief(belief, a, o)));

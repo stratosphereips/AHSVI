@@ -6,9 +6,9 @@ import ilog.cplex.IloCplex;
 
 import java.util.*;
 
-public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
+public class LowerBound extends Bound {
 
-    public List<AlphaVector<T>> alphaVectors;
+    public List<LBAlphaVector> alphaVectors;
 
     private double minimum = Double.POSITIVE_INFINITY;
     public double[] minimalBelief;
@@ -23,7 +23,7 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
         alphaVectors = new LinkedList<>();
     }
 
-    public List<AlphaVector<T>> getAlphaVectors() {
+    public List<LBAlphaVector> getAlphaVectors() {
         return alphaVectors;
     }
 
@@ -44,7 +44,7 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
             IloNumExpr obj = model.numVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
             IloNumVar[] beliefVars = model.numVarArray(dimension, 0.0, 1.0);
             model.addEq(model.sum(beliefVars), 1.0);
-            for (AlphaVector<T> alphaVector : alphaVectors) {
+            for (LBAlphaVector alphaVector : alphaVectors) {
                 model.addGe(obj, model.scalProd(alphaVector.vector, beliefVars));
             }
             model.exportModel("min_belief.lp");
@@ -60,7 +60,7 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
     }
 
     public boolean contains(double[] vector) {
-        for (AlphaVector<T> alpha : alphaVectors) {
+        for (LBAlphaVector alpha : alphaVectors) {
             if (Arrays.equals(alpha.vector, vector)) {
                 return true;
             }
@@ -68,11 +68,11 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
         return false;
     }
 
-    public boolean contains(AlphaVector<T> alphaVector) {
+    public boolean contains(LBAlphaVector alphaVector) {
         return alphaVectors.contains(alphaVector);
     }
 
-    private int dominates(AlphaVector<T> alpha1, AlphaVector<T> alpha2) {
+    private int dominates(LBAlphaVector alpha1, LBAlphaVector alpha2) {
         int state = 0; // 0 no domination, -1 alpha1 dominates, 1 alpha2 dominates
         for (int i = 0; i < dimension; i++) {
             if (alpha1.vector[i] < alpha2.vector[i]) {
@@ -89,7 +89,7 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
     @Override
     public void removeDominated() {
         TreeSet<Integer> alphasToRemoveIndexes = new TreeSet<>();
-        ArrayList<AlphaVector<T>> alphas = new ArrayList<>(alphaVectors);
+        ArrayList<LBAlphaVector> alphas = new ArrayList<>(alphaVectors);
         int dominationState;
         // TODO remove dominated
         for (int i = 0; i < alphas.size(); ++i) {
@@ -118,7 +118,7 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
     }
 
     public void addVector(double[] alphaVector, Integer data) {
-        alphaVectors.add(new AlphaVector(alphaVector, data));
+        alphaVectors.add(new LBAlphaVector(alphaVector, data));
         if (1 - (double)lastPrunedSize / size() >= pruningGrowthRatio) {
             removeDominated();
             lastPrunedSize = size();
@@ -126,7 +126,7 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
     }
 
     public void printVectors() {
-        for (AlphaVector<T> vector : alphaVectors) {
+        for (LBAlphaVector vector : alphaVectors) {
             System.out.println(vector);
         }
     }
@@ -134,20 +134,20 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
     @Override
     public double getValue(double[] point) {
         double max = Double.NEGATIVE_INFINITY;
-        for (AlphaVector<T> alphaVector : alphaVectors) {
+        for (LBAlphaVector alphaVector : alphaVectors) {
             max = Math.max(max, HelperFunctions.dotProd(alphaVector, point));
         }
         return max;
     }
 
-    public AlphaVector<T> getDotProdArgMax(double[] belief) {
+    public LBAlphaVector getDotProdArgMax(double[] belief) {
         if (belief == null) {
             return null;
         }
-        AlphaVector<T> maxVector = null;
+        LBAlphaVector maxVector = null;
         double maxDotProd = Double.NEGATIVE_INFINITY;
         double dotProd;
-        for (AlphaVector<T> alphaVector : alphaVectors) {
+        for (LBAlphaVector alphaVector : alphaVectors) {
             dotProd = HelperFunctions.dotProd(alphaVector, belief);
             if (dotProd > maxDotProd) {
                 maxDotProd = dotProd;
@@ -156,11 +156,4 @@ public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
         }
         return maxVector;
     }
-
-    @Override
-    public Iterator<AlphaVector<T>> iterator() {
-        return alphaVectors.iterator();
-    }
-
-
 }

@@ -2,31 +2,34 @@ package hsvi.bounds;
 
 import java.util.Arrays;
 
-public class AlphaVector<T> {
+public class LBAlphaVector {
 
     public double[] vector;
-    public T data;
-    public boolean updated;
+    public int a;
 
 
-    public AlphaVector(double[] vector, T data) {
+    public LBAlphaVector(double[] vector, int a) {
         this.vector = vector;
-        this.data = data;
+        this.a = a;
     }
 
     public void update(double[] vector) {
         this.vector = vector;
     }
 
-    public void setData(T data) {
-        this.data = data;
+    public void setAction(int a) {
+        this.a = a;
+    }
+
+    public int getAction() {
+        return a;
     }
 
     @Override
     public String toString() {
         return "AlphaVector{" +
                 "vector=" + Arrays.toString(vector) +
-                ", data=" + data +
+                ", a=" + a +
                 '}';
     }
 
@@ -34,7 +37,7 @@ public class AlphaVector<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AlphaVector<?> that = (AlphaVector<?>) o;
+        LBAlphaVector that = (LBAlphaVector) o;
         return Arrays.equals(vector, that.vector);
     }
 

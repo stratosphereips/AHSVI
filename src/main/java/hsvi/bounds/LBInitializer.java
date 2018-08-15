@@ -41,7 +41,7 @@ public class LBInitializer {
         lbF.addVector(initAlpha, bestA);
     }
 
-    public LowerBound<Integer> getLB() {
+    public LowerBound getLB() {
         return lbF;
     }
 }
