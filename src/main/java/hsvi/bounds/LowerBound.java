@@ -112,12 +112,16 @@ public class LowerBound extends Bound {
         }
     }
 
-    public void addVector(double[] alphaVector, Integer data) {
-        alphaVectors.add(new LBAlphaVector(alphaVector, data));
+    public void addAlphaVector(LBAlphaVector alphaVector) {
+        alphaVectors.add(alphaVector);
         if (1 - (double)lastPrunedSize / size() >= pruningGrowthRatio) {
             removeDominated();
             lastPrunedSize = size();
         }
+    }
+
+    public void addVector(double[] alphaVector, Integer data) {
+        addAlphaVector(new LBAlphaVector(alphaVector, data));
     }
 
     public void printVectors() {

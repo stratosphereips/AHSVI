@@ -8,15 +8,15 @@ import java.util.Arrays;
 public class LBInitializer {
 
     private POMDPProblem pomdpProblem;
-    LowerBound lbF;
+    LBAlphaVector alphaVector;
 
     public LBInitializer(POMDPProblem pomdpProblem) {
         this.pomdpProblem = pomdpProblem;
-        lbF = new LowerBound(pomdpProblem.getNumberOfStates());
+        alphaVector = null;
     }
 
     private void fixedInit() {
-        lbF.addVector(new double[pomdpProblem.getNumberOfStates()], 0);
+        alphaVector = new LBAlphaVector(new double[pomdpProblem.getNumberOfStates()], 0);
     }
 
     public void computeInitialLB() {
@@ -38,10 +38,10 @@ public class LBInitializer {
         HelperFunctions.fillArray(initAlpha, R_);
         System.out.println("Initial LB alpha vector: " + Arrays.toString(initAlpha)); //TODO print
 
-        lbF.addVector(initAlpha, bestA);
+       alphaVector = new LBAlphaVector(initAlpha, bestA);
     }
 
-    public LowerBound getLB() {
-        return lbF;
+    public LBAlphaVector getInitialAlphaVector() {
+        return alphaVector;
     }
 }

@@ -13,6 +13,14 @@ public abstract class UpperBound extends Bound {
         points = new LinkedList<>();
     }
 
+    protected void initUBPoints(List<UBPoint> initialUBPoints) {
+        if (initialUBPoints != null) {
+            for (UBPoint point : initialUBPoints) {
+                addPoint(point);
+            }
+        }
+    }
+
     public List<UBPoint> getPoints() {
         return points;
     }
@@ -37,6 +45,12 @@ public abstract class UpperBound extends Bound {
     }
 
     public abstract void addPoint(double[] belief, double value, int a);
+
+    public abstract void addPoint(UBPoint point, int a);
+
+    public void addPoint(UBPoint point) {
+        addPoint(point, -1);
+    }
 
     public void addPoint(double[] belief, double value) {
         addPoint(belief, value, -1);

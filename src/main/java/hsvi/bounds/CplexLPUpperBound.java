@@ -30,6 +30,10 @@ public class CplexLPUpperBound extends UpperBound {
     public UBPoint minimalBelief;
 
     public CplexLPUpperBound(int dimension) {
+        this(dimension, null);
+    }
+
+    public CplexLPUpperBound(int dimension, List<UBPoint> initialUBPoints) {
         super(dimension);
         try {
             cplex = new IloCplex();
@@ -39,6 +43,7 @@ public class CplexLPUpperBound extends UpperBound {
             System.exit(10);
         }
         extremePoints = new UBPoint[dimension];
+        initUBPoints(initialUBPoints);
     }
 
     @Override
@@ -66,6 +71,11 @@ public class CplexLPUpperBound extends UpperBound {
                 System.exit(1);
             }
         }
+    }
+
+    @Override
+    public void addPoint(UBPoint point, int a) {
+        addPoint(point.coordinates, point.value);
     }
 
     @Override

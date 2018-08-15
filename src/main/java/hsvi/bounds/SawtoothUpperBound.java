@@ -1,8 +1,20 @@
 package hsvi.bounds;
 
+import java.util.List;
+
 public class SawtoothUpperBound extends UpperBound {
     public SawtoothUpperBound(int dimension) {
         super(dimension);
+    }
+
+    public SawtoothUpperBound(int dimension, List<UBPoint> initialUBPoints) {
+        this(dimension);
+
+    }
+
+    @Override
+    public void addPoint(UBPoint point, int a) {
+
     }
 
     @Override

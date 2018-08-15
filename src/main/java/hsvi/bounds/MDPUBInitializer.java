@@ -3,14 +3,16 @@ package hsvi.bounds;
 import hsvi.HelperFunctions;
 import pomdpproblem.POMDPProblem;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MDPUBInitializer {
     private static final double EPS = 0.001;
     private static final int MAX_ITER_N = 10000; // TODO constant?
 
     private final POMDPProblem pomdpProblem;
-    private final CplexLPUpperBound ubF;
+    private final List<UBPoint> ubPoints;
     private final double eps;
     private final int maxIterN;
 
@@ -30,7 +32,7 @@ public class MDPUBInitializer {
         this.pomdpProblem = pomdpProblem;
         this.eps = eps;
         this.maxIterN = maxIterN;
-        ubF = new CplexLPUpperBound(pomdpProblem.getNumberOfStates());
+        ubPoints = new ArrayList<>(pomdpProblem.getNumberOfStates());
 
         alpha = initAlpha();
 
@@ -45,13 +47,13 @@ public class MDPUBInitializer {
         for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
             ubPoint = new double[pomdpProblem.getNumberOfStates()];
             ubPoint[s] = 1.0;
-            ubF.addPoint(ubPoint, alpha[s]);
+            ubPoints.add(new UBPoint(ubPoint, alpha[s]));
         }
         System.out.println("Initial UB points values: " + Arrays.toString(alpha)); // TODO print
     }
 
-    public CplexLPUpperBound getUB() {
-        return ubF;
+    public List<UBPoint> getInitialUbPoints() {
+        return ubPoints;
     }
 
     private double[] initAlpha() {

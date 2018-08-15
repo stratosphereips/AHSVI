@@ -5,8 +5,6 @@ import java.util.*;
 import ahsvi.Config;
 import hsvi.bounds.*;
 import pomdpproblem.POMDPProblem;
-import ilog.concert.IloException;
-import ilog.cplex.IloCplex;
 
 /**
  * Created by wigos on 3.8.16.
@@ -17,7 +15,7 @@ public class HSVIAlgorithm {
     private final double epsilon;
 
     private LowerBound lbFunction;
-    private CplexLPUpperBound ubFunction;
+    private UpperBound ubFunction;
 
     public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon) {
         this.pomdpProblem = pomdpProblem;
@@ -33,7 +31,7 @@ public class HSVIAlgorithm {
         return lbFunction;
     }
 
-    public CplexLPUpperBound getUbFunction() {
+    public UpperBound getUbFunction() {
         return ubFunction;
     }
 
@@ -60,13 +58,22 @@ public class HSVIAlgorithm {
     private LowerBound initLowerBound() {
         LBInitializer lbInit = new LBInitializer(pomdpProblem);
         lbInit.computeInitialLB();
-        return lbInit.getLB();
+        LBAlphaVector initialLBAlphaVector = lbInit.getInitialAlphaVector();
+
+        LowerBound lb = new LowerBound(pomdpProblem.getNumberOfStates());
+        lb.addAlphaVector(initialLBAlphaVector);
+        return lb;
     }
 
-    private CplexLPUpperBound initUpperBound() {
+    private UpperBound initUpperBound() {
         MDPUBInitializer ubInit = new MDPUBInitializer(pomdpProblem);
         ubInit.computeInitialUB();
-        return ubInit.getUB();
+        List<UBPoint> initialUBPoints = ubInit.getInitialUbPoints();
+
+        UpperBound up;
+        up = new CplexLPUpperBound(pomdpProblem.getNumberOfStates(), initialUBPoints);
+        //up = new SawtoothUpperBound(pomdpProblem.getNumberOfStates(), initialUBPoints);
+        return up;
     }
 
     private double[] nextBelief(double[] belief, int a, int o) {

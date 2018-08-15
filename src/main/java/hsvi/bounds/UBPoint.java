@@ -15,6 +15,10 @@ public class UBPoint {
         this.data = data;
     }
 
+    public UBPoint(double[] coordinates, double value) {
+        this(coordinates, value, -1);
+    }
+
     public int getData() {
         return data;
     }
