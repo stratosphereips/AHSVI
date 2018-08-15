@@ -1,4 +1,4 @@
-package hsvi;
+package hsvi.bounds;
 
 import ahsvi.Config;
 import ilog.concert.*;
@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 /**
  * Created by wigos on 16.5.16.
  */
-public class PointBasedValueFunction<T> extends ValueFunction implements Iterable<PointBasedValueFunction.Point<T>> {
+public class CplexLPUpperBound<T> extends UpperBound implements Iterable<CplexLPUpperBound.Point<T>> {
     public static double RANDOMIZE = Double.NaN;
     public static boolean CACHED_CPLEX = true;
 
@@ -30,11 +30,11 @@ public class PointBasedValueFunction<T> extends ValueFunction implements Iterabl
     public double minimum;
     public Point minimalBelief;
 
-    public PointBasedValueFunction(int dimension) {
+    public CplexLPUpperBound(int dimension) {
         this(dimension, null);
     }
 
-    public PointBasedValueFunction(int dimension, Object data) {
+    public CplexLPUpperBound(int dimension, Object data) {
         super(dimension, data);
         points = new LinkedList<>();
         extremePoints = new Point[dimension];

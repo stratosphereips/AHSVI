@@ -1,15 +1,16 @@
-package hsvi;
+package hsvi.bounds;
 
+import hsvi.HelperFunctions;
 import pomdpproblem.POMDPProblem;
 
 import java.util.Arrays;
 
-public class UBInitializer {
+public class MDPUBInitializer {
     private static final double EPS = 0.001;
     private static final int MAX_ITER_N = 10000; // TODO constant?
 
     private final POMDPProblem pomdpProblem;
-    private final PointBasedValueFunction ubF;
+    private final CplexLPUpperBound ubF;
     private final double eps;
     private final int maxIterN;
 
@@ -17,19 +18,19 @@ public class UBInitializer {
     private final double[][] rewards; // r[a][s]
     private final double[] alpha;
 
-    public UBInitializer(POMDPProblem pomdpProblem) {
+    public MDPUBInitializer(POMDPProblem pomdpProblem) {
         this(pomdpProblem, EPS, MAX_ITER_N);
     }
 
-    public UBInitializer(POMDPProblem pomdpProblem, double eps) {
+    public MDPUBInitializer(POMDPProblem pomdpProblem, double eps) {
         this(pomdpProblem, eps, MAX_ITER_N);
     }
 
-    public UBInitializer(POMDPProblem pomdpProblem, double eps, int maxIterN) {
+    public MDPUBInitializer(POMDPProblem pomdpProblem, double eps, int maxIterN) {
         this.pomdpProblem = pomdpProblem;
         this.eps = eps;
         this.maxIterN = maxIterN;
-        ubF = new PointBasedValueFunction(pomdpProblem.getNumberOfStates());
+        ubF = new CplexLPUpperBound(pomdpProblem.getNumberOfStates());
 
         alpha = initAlpha();
 
@@ -49,7 +50,7 @@ public class UBInitializer {
         System.out.println("Initial UB points values: " + Arrays.toString(alpha)); // TODO print
     }
 
-    public PointBasedValueFunction getUB() {
+    public CplexLPUpperBound getUB() {
         return ubF;
     }
 

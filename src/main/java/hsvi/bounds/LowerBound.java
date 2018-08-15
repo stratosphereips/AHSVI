@@ -1,11 +1,12 @@
-package hsvi;
+package hsvi.bounds;
 
+import hsvi.HelperFunctions;
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
 
 import java.util.*;
 
-public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterable<AlphaVector<T>> {
+public class LowerBound<T> extends Bound implements Iterable<AlphaVector<T>> {
 
     public List<AlphaVector<T>> alphaVectors;
 
@@ -13,11 +14,11 @@ public class AlphaVectorValueFunction<T> extends ValueFunction implements Iterab
     public double[] minimalBelief;
 
 
-    public AlphaVectorValueFunction(int dimension) {
+    public LowerBound(int dimension) {
         this(dimension, null);
     }
 
-    public AlphaVectorValueFunction(int dimension, Object data) {
+    public LowerBound(int dimension, Object data) {
         super(dimension, data);
         alphaVectors = new LinkedList<>();
     }

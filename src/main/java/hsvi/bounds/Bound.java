@@ -1,6 +1,6 @@
-package hsvi;
+package hsvi.bounds;
 
-public abstract class ValueFunction {
+public abstract class Bound {
     protected static double pruningGrowthRatio = 0.1;
 
     protected int lastPrunedSize = 1;
@@ -8,7 +8,7 @@ public abstract class ValueFunction {
     int dimension;
     Object data;
 
-    public ValueFunction(int dimension, Object data) {
+    public Bound(int dimension, Object data) {
         this.dimension = dimension;
         this.data = data;
     }

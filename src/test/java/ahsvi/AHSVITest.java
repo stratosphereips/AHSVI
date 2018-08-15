@@ -31,22 +31,22 @@ public class AHSVITest {
     @Test(timeout = 300)
     public void test1SPOMDP() {
         String pomdpProblemName = "1s";
-        double epsilon = 0.000000001;
+        double epsilon = Config.ZERO;
         testDummyPOMDP(pomdpProblemName, epsilon);
     }
 
     @Test(timeout = 300)
     public void test2SPOMDP() {
         String pomdpProblemName = "2s";
-        double epsilon = 0.0000000001;
+        double epsilon = Config.ZERO;
         testDummyPOMDP(pomdpProblemName, epsilon);
     }
 
     @Test(timeout = 1000)
     public void test1DPOMDP() {
         String pomdpProblemName = "1d";
-        double epsilon = 0.00001;
-        double expectedValueInInitBelief = 1.360922;
+        double epsilon = Config.ZERO;
+        double expectedValueInInitBelief = 1.3609185;
         HSVIAlgorithm hsviAlgorithm = testDummyPOMDP(pomdpProblemName, epsilon);
         assertEquals(expectedValueInInitBelief, hsviAlgorithm.getUBValueInInitBelief(), epsilon);
     }
@@ -54,7 +54,7 @@ public class AHSVITest {
     @Test(timeout = 300)
     public void testTigerPOMDP() {
         String pomdpProblemName = "tiger";
-        double epsilon = 0.0000000000001;
+        double epsilon = Config.ZERO;
         testDummyPOMDP(pomdpProblemName, epsilon);
     }
 }

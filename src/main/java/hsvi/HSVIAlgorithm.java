@@ -3,6 +3,7 @@ package hsvi;
 import java.util.*;
 
 import ahsvi.Config;
+import hsvi.bounds.*;
 import pomdpproblem.POMDPProblem;
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
@@ -15,8 +16,8 @@ public class HSVIAlgorithm {
     private final POMDPProblem pomdpProblem;
     private final double epsilon;
 
-    private AlphaVectorValueFunction<Integer> lbFunction;
-    private PointBasedValueFunction ubFunction;
+    private LowerBound<Integer> lbFunction;
+    private CplexLPUpperBound ubFunction;
 
     public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon) {
         try {
@@ -33,11 +34,11 @@ public class HSVIAlgorithm {
         return lbFunction.getValue(belief);
     }
 
-    public AlphaVectorValueFunction<Integer> getLbFunction() {
+    public LowerBound<Integer> getLbFunction() {
         return lbFunction;
     }
 
-    public PointBasedValueFunction getUbFunction() {
+    public CplexLPUpperBound getUbFunction() {
         return ubFunction;
     }
 
@@ -61,14 +62,14 @@ public class HSVIAlgorithm {
         System.out.println(ubFunction);
     }
 
-    private AlphaVectorValueFunction initLowerBound() {
+    private LowerBound initLowerBound() {
         LBInitializer lbInit = new LBInitializer(pomdpProblem);
         lbInit.computeInitialLB();
         return lbInit.getLB();
     }
 
-    private PointBasedValueFunction initUpperBound() {
-        UBInitializer ubInit = new UBInitializer(pomdpProblem);
+    private CplexLPUpperBound initUpperBound() {
+        MDPUBInitializer ubInit = new MDPUBInitializer(pomdpProblem);
         ubInit.computeInitialUB();
         return ubInit.getUB();
     }

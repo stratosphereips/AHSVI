@@ -1,5 +1,6 @@
-package hsvi;
+package hsvi.bounds;
 
+import hsvi.HelperFunctions;
 import pomdpproblem.POMDPProblem;
 
 import java.util.Arrays;
@@ -7,11 +8,11 @@ import java.util.Arrays;
 public class LBInitializer {
 
     private POMDPProblem pomdpProblem;
-    AlphaVectorValueFunction lbF;
+    LowerBound lbF;
 
     public LBInitializer(POMDPProblem pomdpProblem) {
         this.pomdpProblem = pomdpProblem;
-        lbF = new AlphaVectorValueFunction(pomdpProblem.getNumberOfStates());
+        lbF = new LowerBound(pomdpProblem.getNumberOfStates());
     }
 
     private void fixedInit() {
@@ -40,7 +41,7 @@ public class LBInitializer {
         lbF.addVector(initAlpha, bestA);
     }
 
-    public AlphaVectorValueFunction<Integer> getLB() {
+    public LowerBound<Integer> getLB() {
         return lbF;
     }
 }

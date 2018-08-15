@@ -1,5 +1,7 @@
 package hsvi;
 
+import hsvi.bounds.AlphaVector;
+
 import java.util.Arrays;
 
 public class HelperFunctions {

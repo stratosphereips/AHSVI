@@ -1,4 +1,4 @@
-package hsvi;
+package hsvi.bounds;
 
 import java.util.Arrays;
 
