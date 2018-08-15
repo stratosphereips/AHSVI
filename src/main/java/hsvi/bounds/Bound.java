@@ -1,16 +1,17 @@
 package hsvi.bounds;
 
 public abstract class Bound {
-    protected static double pruningGrowthRatio = 0.1;
+    private static final double PRUNING_GROWTH_RATIO = 0.1;
 
-    protected int lastPrunedSize = 1;
+    protected double pruningGrowthRatio;
+    protected int lastPrunedSize;
 
     int dimension;
-    Object data;
 
-    public Bound(int dimension, Object data) {
+    public Bound(int dimension) {
         this.dimension = dimension;
-        this.data = data;
+        pruningGrowthRatio = PRUNING_GROWTH_RATIO;
+        lastPrunedSize = 1;
     }
 
     public abstract int size();
@@ -20,8 +21,4 @@ public abstract class Bound {
     public abstract double[] getBeliefInMinimum();
 
     public abstract void removeDominated();
-
-    public Object getData() {
-        return data;
-    }
 }

@@ -13,13 +13,8 @@ public class LowerBound extends Bound {
     private double minimum = Double.POSITIVE_INFINITY;
     public double[] minimalBelief;
 
-
     public LowerBound(int dimension) {
-        this(dimension, null);
-    }
-
-    public LowerBound(int dimension, Object data) {
-        super(dimension, data);
+        super(dimension);
         alphaVectors = new LinkedList<>();
     }
 

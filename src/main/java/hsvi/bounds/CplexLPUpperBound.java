@@ -30,11 +30,7 @@ public class CplexLPUpperBound extends UpperBound {
     public UBPoint minimalBelief;
 
     public CplexLPUpperBound(int dimension) {
-        this(dimension, null);
-    }
-
-    public CplexLPUpperBound(int dimension, Object data) {
-        super(dimension, data);
+        super(dimension);
         try {
             cplex = new IloCplex();
             cplex.setParam(IloCplex.IntParam.RootAlg, 2);
@@ -43,20 +39,6 @@ public class CplexLPUpperBound extends UpperBound {
             System.exit(10);
         }
         extremePoints = new UBPoint[dimension];
-    }
-
-    @Override
-    public double[] getBeliefInMinimum() {
-        // TODO just find min among UB points?
-        double[] beliefInMin = null;
-        double minValue = Double.POSITIVE_INFINITY;
-        for (UBPoint point : points) {
-            if (point.getValue() < minValue) {
-                minValue = point.getValue();
-                beliefInMin = point.getCoordinates();
-            }
-        }
-        return beliefInMin;
     }
 
     @Override
@@ -86,15 +68,8 @@ public class CplexLPUpperBound extends UpperBound {
         }
     }
 
-    public UBPoint addPoint(double[] point) {
-        return addPoint(point, getValue(point));
-    }
-
-    public UBPoint addPoint(double[] point, double value) {
-        return addPoint(point, value, -1);
-    }
-
-    public UBPoint addPoint(double[] point, double value, int data) {
+    @Override
+    public void addPoint(double[] point, double value, int data) {
         int extremeId = extremeId(point);
         if (extremeId >= 0) {
             UBPoint extremePoint = (UBPoint) extremePoints[extremeId];
@@ -161,8 +136,6 @@ public class CplexLPUpperBound extends UpperBound {
                     }
                 }
             }
-
-            return extremePoint;
         } else {
             UBPoint pointObj = new UBPoint(point, value, data);
             points.add(pointObj);
@@ -187,8 +160,6 @@ public class CplexLPUpperBound extends UpperBound {
                     System.exit(1);
                 }
             }
-
-            return pointObj;
         }
     }
 
