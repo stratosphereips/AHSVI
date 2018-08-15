@@ -1,7 +1,7 @@
-package AHSVI;
+package ahsvi;
 
-import HSVI.HSVIAlgorithm;
-import POMDPProblem.POMDPProblem;
+import hsvi.HSVIAlgorithm;
+import pomdpproblem.POMDPProblem;
 
 import java.util.Arrays;
 

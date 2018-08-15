@@ -1,11 +1,7 @@
-package POMDPProblem;
+package pomdpproblem;
 
-import POMDPProblem.POMDPDummyProblems.POMDPDummyProblems;
+import pomdpproblem.pomdpdummyproblems.POMDPDummyProblems;
 import org.apache.commons.io.FilenameUtils;
-
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class POMDPFileReader {
 

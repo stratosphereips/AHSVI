@@ -1,6 +1,6 @@
-package POMDPProblem;
+package pomdpproblem;
 
-import AHSVI.Config;
+import ahsvi.Config;
 
 import java.util.*;
 
@@ -171,7 +171,7 @@ public class POMDPProblem {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("POMDPProblem");
+        StringBuilder sb = new StringBuilder("pomdpproblem");
         sb.append("\\\n\tStates:{");
         for (String s : stateNames) {
             sb.append(s);
@@ -192,7 +192,7 @@ public class POMDPProblem {
         sb.append('}');
 
         sb.append("\\\n\tTransition probabilities");
-        sb.append("\\\n\t\tTODO"); //TODO POMDPProblem toString()
+        sb.append("\\\n\t\tTODO"); //TODO pomdpproblem toString()
 
         return sb.toString();
     }

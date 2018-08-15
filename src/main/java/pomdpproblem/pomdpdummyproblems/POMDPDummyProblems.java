@@ -1,6 +1,6 @@
-package POMDPProblem.POMDPDummyProblems;
+package pomdpproblem.pomdpdummyproblems;
 
-import POMDPProblem.POMDPProblem;
+import pomdpproblem.POMDPProblem;
 
 public class POMDPDummyProblems implements POMDPDummyProblemI {
     private final String pomdpProblemName;

@@ -1,9 +1,4 @@
-package HSVI;
-
-import ilog.concert.IloException;
-import ilog.concert.IloNumVar;
-import ilog.concert.IloRange;
-import ilog.cplex.IloCplex;
+package hsvi;
 
 public abstract class ValueFunction {
     protected static double pruningGrowthRatio = 0.1;

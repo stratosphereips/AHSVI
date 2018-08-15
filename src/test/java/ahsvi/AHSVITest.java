@@ -1,7 +1,7 @@
-package AHSVI;
+package ahsvi;
 
-import HSVI.HSVIAlgorithm;
-import POMDPProblem.POMDPDummyProblems.POMDPDummyProblems;
+import hsvi.HSVIAlgorithm;
+import pomdpproblem.pomdpdummyproblems.POMDPDummyProblems;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

@@ -1,6 +1,6 @@
-package POMDPProblem.POMDPDummyProblems;
+package pomdpproblem.pomdpdummyproblems;
 
-import POMDPProblem.POMDPProblem;
+import pomdpproblem.POMDPProblem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.Iterator;
 public class POMDPTigerGrid implements POMDPDummyProblemI {
     @Override
     public POMDPProblem load() {
-        // POMDPProblem input format
+        // pomdpproblem input format
         // transition probabilities ap[a][s][s_]
         // obsrevation probabilities op[a][s_][o]
         // rewards r[a][s][s_][o]

@@ -1,6 +1,6 @@
-package HSVI;
+package hsvi;
 
-import POMDPProblem.POMDPProblem;
+import pomdpproblem.POMDPProblem;
 
 import java.util.Arrays;
 

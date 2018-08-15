@@ -1,10 +1,9 @@
-package HSVI;
+package hsvi;
 
-import java.lang.IllegalArgumentException;
 import java.util.*;
 
-import AHSVI.Config;
-import POMDPProblem.POMDPProblem;
+import ahsvi.Config;
+import pomdpproblem.POMDPProblem;
 import ilog.concert.IloException;
 import ilog.cplex.IloCplex;
 

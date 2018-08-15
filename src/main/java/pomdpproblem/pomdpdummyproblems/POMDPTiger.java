@@ -1,6 +1,6 @@
-package POMDPProblem.POMDPDummyProblems;
+package pomdpproblem.pomdpdummyproblems;
 
-import POMDPProblem.POMDPProblem;
+import pomdpproblem.POMDPProblem;
 
 import java.util.ArrayList;
 import java.util.HashMap;

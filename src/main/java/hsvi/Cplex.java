@@ -1,4 +1,4 @@
-package HSVI;
+package hsvi;
 
 import ilog.concert.IloException;
 import ilog.concert.IloLPMatrix;

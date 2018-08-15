@@ -1,6 +1,6 @@
-package HSVI;
+package hsvi;
 
-import AHSVI.Config;
+import ahsvi.Config;
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
 
