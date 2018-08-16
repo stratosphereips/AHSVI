@@ -8,6 +8,7 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
+        long time = System.currentTimeMillis();
         System.out.println("Starting POMDP solver");
 
         String RESOURCES_FOLDER_NAME = "src" + File.separator + "main" + File.separator + "resources" + File.separator;
@@ -28,7 +29,7 @@ public class Main {
         String pomdpFileName = POMDP_1D;
         //String pomdpFileName = POMDP_TIGER;
         //String pomdpFileName = POMDP_TIGERGRID;
-        double epsilon = 0.1;
+        double epsilon = 0.000001;
 
         // =======================================
 
@@ -60,5 +61,6 @@ public class Main {
         System.out.println("Final utility LB: " + hsviAlgorithm.getLBValueInInitBelief());
         System.out.println("Final utility UB: " + hsviAlgorithm.getUBValueInInitBelief());
 
+        System.out.println(System.currentTimeMillis() - time);
     }
 }

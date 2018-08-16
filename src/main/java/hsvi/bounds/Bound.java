@@ -16,9 +16,16 @@ public abstract class Bound {
 
     public abstract int size();
 
-    public abstract double getValue(double[] point);
+    public abstract double getValue(double[] belief);
 
     public abstract double[] getBeliefInMinimum();
 
     public abstract void removeDominated();
+
+    protected void maybePrune() {
+        if (1 - (double)lastPrunedSize / size() >= pruningGrowthRatio) {
+            removeDominated();
+            lastPrunedSize = size();
+        }
+    }
 }

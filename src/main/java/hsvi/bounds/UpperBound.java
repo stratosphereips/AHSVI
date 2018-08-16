@@ -1,6 +1,7 @@
 package hsvi.bounds;
 
-import java.util.Arrays;
+import ahsvi.Config;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,10 +14,13 @@ public abstract class UpperBound extends Bound {
         points = new LinkedList<>();
     }
 
-    protected void initUBPoints(List<UBPoint> initialUBPoints) {
-        if (initialUBPoints != null) {
-            for (UBPoint point : initialUBPoints) {
-                addPoint(point);
+    protected void initUBPoints(double[] initialUBExtremePointsValues) {
+        double[] extremeBelief;
+        if (initialUBExtremePointsValues != null) {
+            for (int s = 0; s < dimension; ++s) {
+                extremeBelief = new double[dimension];
+                extremeBelief[s] = 1;
+                addPoint(extremeBelief, initialUBExtremePointsValues[s]);
             }
         }
     }
@@ -38,7 +42,7 @@ public abstract class UpperBound extends Bound {
         for (UBPoint point : points) {
             if (point.getValue() < minValue) {
                 minValue = point.getValue();
-                beliefInMin = point.getCoordinates();
+                beliefInMin = point.getBelief();
             }
         }
         return beliefInMin;
@@ -58,5 +62,12 @@ public abstract class UpperBound extends Bound {
 
     public void addPoint(double[] belief) {
         addPoint(belief, getValue(belief));
+    }
+
+    protected static int extremePointId(double[] belief) {
+        for (int i = 0; i < belief.length; i++) {
+            if (belief[i] >= 1 - Config.ZERO) return i;
+        }
+        return -1;
     }
 }

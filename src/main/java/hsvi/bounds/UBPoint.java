@@ -3,20 +3,20 @@ package hsvi.bounds;
 import java.util.Arrays;
 
 public class UBPoint {
-    double[] coordinates;
+    double[] belief;
     double value;
     int data;
     boolean extreme = false;
     int extremeId = Integer.MIN_VALUE;
 
-    public UBPoint(double[] coordinates, double value, int data) {
-        this.coordinates = coordinates;
+    public UBPoint(double[] belief, double value, int data) {
+        this.belief = belief;
         this.value = value;
         this.data = data;
     }
 
-    public UBPoint(double[] coordinates, double value) {
-        this(coordinates, value, -1);
+    public UBPoint(double[] belief, double value) {
+        this(belief, value, -1);
     }
 
     public int getData() {
@@ -35,11 +35,11 @@ public class UBPoint {
         return value;
     }
 
-    public double[] getCoordinates() {
-        return coordinates;
+    public double[] getBelief() {
+        return belief;
     }
 
     public String toString() {
-        return Arrays.toString(coordinates) + ", Value = " + value;
+        return Arrays.toString(belief) + ", Value = " + value;
     }
 }

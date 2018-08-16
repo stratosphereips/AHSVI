@@ -17,6 +17,7 @@ public class HSVIAlgorithm {
 
     private LowerBound lbFunction;
     private UpperBound ubFunction;
+    private UpperBound ubC;
 
     public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon) {
         this.pomdpProblem = pomdpProblem;
@@ -69,11 +70,12 @@ public class HSVIAlgorithm {
     private UpperBound initUpperBound() {
         MDPUBInitializer ubInit = new MDPUBInitializer(pomdpProblem);
         ubInit.computeInitialUB();
-        List<UBPoint> initialUBPoints = ubInit.getInitialUbPoints();
+        double[] initialUBExtremePointsValue = ubInit.getInitialUbExtremePointsValues();
 
         UpperBound up;
-        //up = new CplexLPUpperBound(pomdpProblem.getNumberOfStates(), initialUBPoints);
-        up = new SawtoothUpperBound(pomdpProblem.getNumberOfStates(), initialUBPoints);
+        //up = new CplexLPUpperBound(pomdpProblem.getNumberOfStates(), initialUBExtremePointsValue);
+        //ubC = new CplexLPUpperBound(pomdpProblem.getNumberOfStates(), initialUBExtremePointsValue);
+        up = new SawtoothUpperBound(pomdpProblem.getNumberOfStates(), initialUBExtremePointsValue);
         return up;
     }
 
@@ -217,8 +219,18 @@ public class HSVIAlgorithm {
                     nextBel = nextBelief(belief, a, o);
                     if (nextBel != null &&
                             pomdpProblem.observationProbabilities[s_][a][o] > Config.ZERO) {
+//                        double value = ubC.getValue(nextBel);
+//                        double value1 = ubFunction.getValue(nextBel);
+//                        System.out.println(value1 - value );
+
+//                        if ( value1 - value < -Config.ZERO ) {
+//                            System.out.println("Wrong");
+//                            value1 = ubFunction.getValue(nextBel);
+
+//                        }
                         observationsValuesSubSum += pomdpProblem.actionProbabilities[s][a][s_] * pomdpProblem.observationProbabilities[s_][a][o] *
                                 ubFunction.getValue(nextBel);
+
                     }
                 }
             }
@@ -238,7 +250,11 @@ public class HSVIAlgorithm {
     }
 
     private void updateUb(double[] belief) {
-        ubFunction.addPoint(belief, computeHV(belief));
+        double p = computeHV(belief);
+        ubFunction.addPoint(belief, p);
+        //ubC.addPoint(belief, p);
+        //System.out.println("UBF" + ", " + ubFunction.getPoints());
+        //System.out.println("UFC" + ", " + ubC.getPoints());
     }
 
 

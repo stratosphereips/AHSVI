@@ -114,10 +114,7 @@ public class LowerBound extends Bound {
 
     public void addAlphaVector(LBAlphaVector alphaVector) {
         alphaVectors.add(alphaVector);
-        if (1 - (double)lastPrunedSize / size() >= pruningGrowthRatio) {
-            removeDominated();
-            lastPrunedSize = size();
-        }
+        maybePrune();
     }
 
     public void addVector(double[] alphaVector, Integer data) {
@@ -131,10 +128,10 @@ public class LowerBound extends Bound {
     }
 
     @Override
-    public double getValue(double[] point) {
+    public double getValue(double[] belief) {
         double max = Double.NEGATIVE_INFINITY;
         for (LBAlphaVector alphaVector : alphaVectors) {
-            max = Math.max(max, HelperFunctions.dotProd(alphaVector, point));
+            max = Math.max(max, HelperFunctions.dotProd(alphaVector, belief));
         }
         return max;
     }

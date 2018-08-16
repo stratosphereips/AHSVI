@@ -12,7 +12,7 @@ public class MDPUBInitializer {
     private static final int MAX_ITER_N = 10000; // TODO constant?
 
     private final POMDPProblem pomdpProblem;
-    private final List<UBPoint> ubPoints;
+    private final double[] ubExtremePointsValues;
     private final double eps;
     private final int maxIterN;
 
@@ -32,7 +32,7 @@ public class MDPUBInitializer {
         this.pomdpProblem = pomdpProblem;
         this.eps = eps;
         this.maxIterN = maxIterN;
-        ubPoints = new ArrayList<>(pomdpProblem.getNumberOfStates());
+        ubExtremePointsValues = new double[pomdpProblem.getNumberOfStates()];
 
         alpha = initAlpha();
 
@@ -43,17 +43,12 @@ public class MDPUBInitializer {
     public void computeInitialUB() {
         // https://github.com/trey0/zmdp/blob/master/src/pomdpBounds/FullObsUBInitializer.cc
         double[] alpha = valueIteration();
-        double[] ubPoint;
-        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-            ubPoint = new double[pomdpProblem.getNumberOfStates()];
-            ubPoint[s] = 1.0;
-            ubPoints.add(new UBPoint(ubPoint, alpha[s]));
-        }
+        HelperFunctions.copyArray(alpha, ubExtremePointsValues);
         System.out.println("Initial UB points values: " + Arrays.toString(alpha)); // TODO print
     }
 
-    public List<UBPoint> getInitialUbPoints() {
-        return ubPoints;
+    public double[] getInitialUbExtremePointsValues() {
+        return ubExtremePointsValues;
     }
 
     private double[] initAlpha() {

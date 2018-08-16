@@ -33,7 +33,7 @@ public class CplexLPUpperBound extends UpperBound {
         this(dimension, null);
     }
 
-    public CplexLPUpperBound(int dimension, List<UBPoint> initialUBPoints) {
+    public CplexLPUpperBound(int dimension, double[] initialUBExtremePointsValues) {
         super(dimension);
         try {
             cplex = new IloCplex();
@@ -43,7 +43,7 @@ public class CplexLPUpperBound extends UpperBound {
             System.exit(10);
         }
         extremePoints = new UBPoint[dimension];
-        initUBPoints(initialUBPoints);
+        initUBPoints(initialUBExtremePointsValues);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class CplexLPUpperBound extends UpperBound {
         int removed = 0;
         while (it.hasNext()) {
             UBPoint current = it.next();
-            if (current.value - getValue(current.coordinates) > Config.ZERO) {
+            if (current.value - getValue(current.belief) > Config.ZERO) {
                 removed++;
             } else {
                 newPoints.add(current);
@@ -75,12 +75,12 @@ public class CplexLPUpperBound extends UpperBound {
 
     @Override
     public void addPoint(UBPoint point, int a) {
-        addPoint(point.coordinates, point.value);
+        addPoint(point.belief, point.value);
     }
 
     @Override
     public void addPoint(double[] point, double value, int data) {
-        int extremeId = extremeId(point);
+        int extremeId = extremePointId(point);
         if (extremeId >= 0) {
             UBPoint extremePoint = (UBPoint) extremePoints[extremeId];
             if (extremePoint == null) {
@@ -111,7 +111,7 @@ public class CplexLPUpperBound extends UpperBound {
                     }
                 }
             }
-//            extremePoint.coordinates = point;
+//            extremePoint.belief = point;
             if (value < extremePoint.value) {
                 extremePoint.value = value;
                 extremePoint.data = data;
@@ -193,7 +193,7 @@ public class CplexLPUpperBound extends UpperBound {
         while (it.hasNext()) {
            UBPoint point = it.next();
             if (Math.random() < prob) {
-                if (getValue(point.coordinates) < point.value) it.remove();
+                if (getValue(point.belief) < point.value) it.remove();
             }
         }
     }
@@ -208,9 +208,9 @@ public class CplexLPUpperBound extends UpperBound {
     }
 
     @Override
-    public double getValue(double[] point) {
+    public double getValue(double[] belief) {
 
-        if (CACHED_CPLEX) return getValueFast(point);
+        if (CACHED_CPLEX) return getValueFast(belief);
 
         /*
         try {
@@ -301,10 +301,10 @@ public class CplexLPUpperBound extends UpperBound {
         for (int i = 0; i < vector.length; i++) {
             double k = 0;
             if (vector[i] > 0) {
-                k = point2.coordinates[i] / vector[i];
+                k = point2.belief[i] / vector[i];
             }
             if (vector[i] < 0) {
-                k = -point2.coordinates[i] / vector[i];
+                k = -point2.belief[i] / vector[i];
             }
 
             if (k > 0 && k < minK) {
@@ -312,7 +312,7 @@ public class CplexLPUpperBound extends UpperBound {
             }
         }
 
-        // compute facet coordinates
+        // compute facet belief
 
 
         return 0;
@@ -321,7 +321,7 @@ public class CplexLPUpperBound extends UpperBound {
 
     private double[] getDirectionalVector(double[] point, UBPoint point2) {
         return IntStream.range(0, point.length)
-                .mapToDouble(i -> point2.coordinates[i] - point[i])
+                .mapToDouble(i -> point2.belief[i] - point[i])
                 .toArray();
     }
 
@@ -371,7 +371,7 @@ public class CplexLPUpperBound extends UpperBound {
         for (int i = 0; it.hasNext(); i++) {
             UBPoint current = it.next();
             for (int j = 0; j < dimension; j++) {
-                coordSum[j] = cplex.sum(coordSum[j], cplex.prod(current.coordinates[j], alphas[i]));
+                coordSum[j] = cplex.sum(coordSum[j], cplex.prod(current.belief[j], alphas[i]));
             }
             valueExpr = cplex.sum(valueExpr, cplex.prod(current.value, alphas[i]));
         }
@@ -442,7 +442,7 @@ public class CplexLPUpperBound extends UpperBound {
             UBPoint current = it.next();
             for (int j = 0; j < dimension; j++) {
                 ind[j][i] = i;
-                val[j][i] = current.coordinates[j];
+                val[j][i] = current.belief[j];
             }
             ind[dimension][i] = i;
             if (Double.isNaN(RANDOMIZE)) val[dimension][i] = -current.value;
@@ -488,13 +488,6 @@ public class CplexLPUpperBound extends UpperBound {
         matrix.addRows(lb, ub, ind, val);
 
         return matrix.getRange(dimension);
-    }
-
-    private static int extremeId(double[] belief) {
-        for (int i = 0; i < belief.length; i++) {
-            if (belief[i] >= 1 - Config.ZERO) return i;
-        }
-        return -1;
     }
 
     private static int addCols(IloLPMatrix matrix, IloNumVar[]... vars) throws IloException {
