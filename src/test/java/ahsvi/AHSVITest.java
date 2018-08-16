@@ -1,5 +1,6 @@
 package ahsvi;
 
+import hsvi.Config;
 import hsvi.HSVIAlgorithm;
 import pomdpproblem.pomdpdummyproblems.POMDPDummyProblems;
 import org.junit.Test;
@@ -19,12 +20,18 @@ public class AHSVITest {
     }
 
     public HSVIAlgorithm testDummyPOMDP(String pomdpProblemName, double epsilon) {
+        return testDummyPOMDP(pomdpProblemName, epsilon, null);
+    }
+
+    public HSVIAlgorithm testDummyPOMDP(String pomdpProblemName, double epsilon, Double expectedValueInInitBelief) {
         System.out.printf("* TESTING \"%s\" DUMMY POMDP PROBLEM\n", pomdpProblemName);
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(new POMDPDummyProblems(pomdpProblemName).load(), epsilon);
         hsviAlgorithm.solve();
         testUBGteUB(hsviAlgorithm.getUBValueInInitBelief(), hsviAlgorithm.getLBValueInInitBelief());
         testUBCloseToLB(hsviAlgorithm.getUBValueInInitBelief(), hsviAlgorithm.getLBValueInInitBelief(), epsilon);
-
+        if (expectedValueInInitBelief != null) {
+            assertEquals(expectedValueInInitBelief, hsviAlgorithm.getUBValueInInitBelief(), epsilon);
+        }
         return hsviAlgorithm;
     }
 
@@ -32,14 +39,16 @@ public class AHSVITest {
     public void test1SPOMDP() {
         String pomdpProblemName = "1s";
         double epsilon = Config.ZERO;
-        testDummyPOMDP(pomdpProblemName, epsilon);
+        double expectedValueInInitBelief = 4;
+        HSVIAlgorithm hsviAlgorithm = testDummyPOMDP(pomdpProblemName, epsilon, expectedValueInInitBelief);
     }
 
     @Test(timeout = 300)
     public void test2SPOMDP() {
         String pomdpProblemName = "2s";
         double epsilon = Config.ZERO;
-        testDummyPOMDP(pomdpProblemName, epsilon);
+        double expectedValueInInitBelief = 2.2857135;
+        HSVIAlgorithm hsviAlgorithm = testDummyPOMDP(pomdpProblemName, epsilon, expectedValueInInitBelief);
     }
 
     @Test(timeout = 1000)
@@ -47,14 +56,14 @@ public class AHSVITest {
         String pomdpProblemName = "1d";
         double epsilon = Config.ZERO;
         double expectedValueInInitBelief = 1.3609185;
-        HSVIAlgorithm hsviAlgorithm = testDummyPOMDP(pomdpProblemName, epsilon);
-        assertEquals(expectedValueInInitBelief, hsviAlgorithm.getUBValueInInitBelief(), epsilon);
+        HSVIAlgorithm hsviAlgorithm = testDummyPOMDP(pomdpProblemName, epsilon, expectedValueInInitBelief);
     }
 
     @Test(timeout = 300)
     public void testTigerPOMDP() {
         String pomdpProblemName = "tiger";
         double epsilon = Config.ZERO;
-        testDummyPOMDP(pomdpProblemName, epsilon);
+        double expectedValueInInitBelief = -10;
+        HSVIAlgorithm hsviAlgorithm = testDummyPOMDP(pomdpProblemName, epsilon, expectedValueInInitBelief);
     }
 }

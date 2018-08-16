@@ -1,10 +1,11 @@
 package hsvi.bounds;
 
-import ahsvi.Config;
+import hsvi.Config;
 import helpers.HelperFunctions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.TreeSet;
 
 public class SawtoothUpperBound extends UpperBound {
 
@@ -26,6 +27,11 @@ public class SawtoothUpperBound extends UpperBound {
     }
 
     @Override
+    public int size() {
+        return super.size();
+    }
+
+    @Override
     public void addPoint(UBPoint point, int a) {
         int extremePointId = extremePointId(point.belief);
         if (extremePointId > -1) {
@@ -41,11 +47,29 @@ public class SawtoothUpperBound extends UpperBound {
         addPoint(new UBPoint(belief, value, a));
     }
 
+    @Override
+    public double[] getBeliefInMinimum() {
+        if (points.isEmpty()) {
+            double minValue = extremePointsValues[0];
+            int minValueS = 0;
+            for (int s = 1; s < dimension; ++s) {
+                if (extremePointsValues[s] < minValue) {
+                    minValue = extremePointsValues[s];
+                    minValueS = s;
+                }
+            }
+            double[] minBelief = new double[dimension];
+            minBelief[minValueS] = 1;
+            return minBelief;
+        }
+        return super.getBeliefInMinimum();
+    }
+
     private double getValueInducedByInnerPoint(UBPoint innerPoint, double[] belief,
                                                ArrayList<Integer> notZeroBeliefIndexes,
                                                ArrayList<Integer> zeroBeliefIndexes,
-                                               double valueOfBeliefOnExtremePointsPlane) {
-        double valueOfInnerPointBeliefOnExtremePointsPlane = HelperFunctions.dotProd(extremePointsValues, innerPoint.belief);
+                                               double valueOfBeliefOnExtremePointsPlane,
+                                               double valueOfInnerPointBeliefOnExtremePointsPlane) {
         if (innerPoint.getValue() >= valueOfInnerPointBeliefOnExtremePointsPlane) {
             // value of this inner point is above extreme points plane
             return Double.POSITIVE_INFINITY;
@@ -59,7 +83,7 @@ public class SawtoothUpperBound extends UpperBound {
         double minRatio = Double.POSITIVE_INFINITY;
         boolean minRationComputed = false;
         for (Integer s : notZeroBeliefIndexes) {
-            if (innerPoint.belief[s] < Config.ZERO) {
+            if (innerPoint.getBelief()[s] < Config.ZERO) {
                 // cant divide by zero
                 continue;
             }
@@ -89,16 +113,92 @@ public class SawtoothUpperBound extends UpperBound {
             }
         }
         double minValue = valueOfBeliefOnExtremePointsPlane;
+        double valueOfInnerPointBeliefOnExtremePointsPlane;
         for (UBPoint point : points) {
+        valueOfInnerPointBeliefOnExtremePointsPlane = HelperFunctions.dotProd(extremePointsValues, point.getBelief());
             minValue = Math.min(minValue, getValueInducedByInnerPoint(point, belief, notZeroBeliefIndexes,
-                    zeroBeliefIndexes, valueOfBeliefOnExtremePointsPlane));
+                    zeroBeliefIndexes, valueOfBeliefOnExtremePointsPlane, valueOfInnerPointBeliefOnExtremePointsPlane));
         }
         return minValue;
+    }
+
+    private int dominates(UBPoint p1, UBPoint p2, double[] valuesOfPointsOnExtremePointsPlane, int p1I, int p2I) {
+        // 0 no domination, -1 p1 dominates, 1 p2 dominates
+        ArrayList<Integer> notZeroBeliefIndexes = new ArrayList<>(dimension);
+        ArrayList<Integer> zeroBeliefIndexes = new ArrayList<>(dimension);
+        for (int s = 0; s < dimension; ++s) {
+            if (p1.getBelief()[s] > Config.ZERO) {
+                notZeroBeliefIndexes.add(s);
+            } else {
+                zeroBeliefIndexes.add(s);
+            }
+        }
+        double p1ValueInp2 = getValueInducedByInnerPoint(p2, p1.getBelief(), notZeroBeliefIndexes, zeroBeliefIndexes,
+                valuesOfPointsOnExtremePointsPlane[p1I], valuesOfPointsOnExtremePointsPlane[p2I]);
+        if (p1ValueInp2 < p1.getValue()) {
+            //System.out.println(p1 + " dominates " + p2);
+            return 1;
+        }
+        notZeroBeliefIndexes.clear();
+        zeroBeliefIndexes.clear();
+        for (int s = 0; s < dimension; ++s) {
+            if (p2.getBelief()[s] > Config.ZERO) {
+                notZeroBeliefIndexes.add(s);
+            } else {
+                zeroBeliefIndexes.add(s);
+            }
+        }
+        double p2ValueInp1 = getValueInducedByInnerPoint(p1, p2.getBelief(), notZeroBeliefIndexes, zeroBeliefIndexes,
+                valuesOfPointsOnExtremePointsPlane[p2I], valuesOfPointsOnExtremePointsPlane[p1I]);
+        if (p2ValueInp1 < p2.getValue()) {
+            //System.out.println(p2 + " dominates " + p1);
+            return -1;
+        }
+        return 0;
+    }
+
+    private double[] computeValuesOfPointsOnExtremePointsPlane(ArrayList<UBPoint> pointsArrayList) {
+        double[] valuesOfPointsOnExtremePointsPlane = new double[pointsArrayList.size()];
+        for (int i = 0; i < pointsArrayList.size(); ++i) {
+            valuesOfPointsOnExtremePointsPlane[i] =
+                    HelperFunctions.dotProd(extremePointsValues, pointsArrayList.get(i).getBelief());
+        }
+        return valuesOfPointsOnExtremePointsPlane;
     }
 
     @Override
     public void removeDominated() {
         System.out.println("Removing dominated");
+        TreeSet<Integer> pointsToRemoveIndexes = new TreeSet<>();
+        ArrayList<UBPoint> pointsArrayList = new ArrayList<>(points);
+        double[] valuesOfPointsOnExtremePointsPlane = computeValuesOfPointsOnExtremePointsPlane(pointsArrayList);
+        int dominationState;
+        for (int i = 0; i < pointsArrayList.size(); ++i) {
+            if (pointsToRemoveIndexes.contains(i)) {
+                continue;
+            }
+            for (int j = i + 1; j < pointsArrayList.size(); ++j) {
+                if (pointsToRemoveIndexes.contains(j)) {
+                    continue;
+                }
+                dominationState = dominates(pointsArrayList.get(i), pointsArrayList.get(j),
+                        valuesOfPointsOnExtremePointsPlane, i, j);
+                if (dominationState == -1) { // i dominates j
+                    pointsToRemoveIndexes.add(j);
+                } else if (dominationState == 1) { // j dominates i
+                    pointsToRemoveIndexes.add(i);
+                    break;
+                }
+            }
+        }
+        points.clear();
+        for (int i = 0; i < pointsArrayList.size(); ++i) {
+            if (!pointsToRemoveIndexes.contains(i)) {
+                points.add(pointsArrayList.get(i));
+            }
+        }
+        System.out.println("UB size before removing: " + pointsArrayList.size());
+        System.out.println("UB size after removing: " + points.size());
     }
 
     @Override

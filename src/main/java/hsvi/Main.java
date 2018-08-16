@@ -1,4 +1,4 @@
-package ahsvi;
+package hsvi;
 
 import hsvi.HSVIAlgorithm;
 import pomdpproblem.POMDPFileReader;
@@ -8,7 +8,6 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
-        long time = System.currentTimeMillis();
         System.out.println("Starting POMDP solver");
 
         String RESOURCES_FOLDER_NAME = "src" + File.separator + "main" + File.separator + "resources" + File.separator;
@@ -41,26 +40,29 @@ public class Main {
         // =======================================
         // =               A H S V I             =
 
-        /*
+
         pomdpProblem.initBelief = new double[pomdpProblem.getNumberOfStates()];
-        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-            pomdpProblem.initBelief[s] = 1/pomdpProblem.getNumberOfStates();
-        }
+
+//        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+//            pomdpProblem.initBelief[s] = 1/pomdpProblem.getNumberOfStates();
+//        }
+
         AHSVIAlgorithm ahsviAlgorithm = new AHSVIAlgorithm(pomdpProblem, epsilon);
         ahsviAlgorithm.solve();
-        */
-        // System.out.println(pomdpProblem);
+
+
 
 
         // =======================================
         // =                H S V I              =
 
+
+/*
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(pomdpProblem, epsilon);
         hsviAlgorithm.solve();
 
         System.out.println("Final utility LB: " + hsviAlgorithm.getLBValueInInitBelief());
         System.out.println("Final utility UB: " + hsviAlgorithm.getUBValueInInitBelief());
-
-        System.out.println(System.currentTimeMillis() - time);
+*/
     }
 }
