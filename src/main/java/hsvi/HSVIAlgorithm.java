@@ -142,6 +142,7 @@ public class HSVIAlgorithm {
             System.out.println("UB in init belief: " + ubVal);
             System.out.printf(" ----- Diff to last iteration: %.20f\n", (ubVal - lastUbVal));
             System.out.println("UB size: " + ubFunction.getPoints().size());
+            System.out.println("===========================================================================");
 
             lastLbVal = lbVal;
             lastUbVal = ubVal;
