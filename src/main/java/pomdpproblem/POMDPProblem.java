@@ -1,6 +1,6 @@
 package pomdpproblem;
 
-import ahsvi.Config;
+import hsvi.Config;
 
 import java.util.*;
 

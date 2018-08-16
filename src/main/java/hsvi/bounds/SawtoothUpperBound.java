@@ -1,6 +1,6 @@
 package hsvi.bounds;
 
-import ahsvi.Config;
+import hsvi.Config;
 import helpers.HelperFunctions;
 
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ public class SawtoothUpperBound extends UpperBound {
     public SawtoothUpperBound(int dimension) {
         super(dimension);
         extremePointsValues = new double[dimension];
-        pruningGrowthRatio = 0.25; // TODO removing occured too often
     }
 
     public SawtoothUpperBound(int dimension, double[] initialUBExtremePointsValues) {
@@ -25,6 +24,11 @@ public class SawtoothUpperBound extends UpperBound {
     @Override
     protected void initUBPoints(double[] initialUBExtremePointsValues) {
         HelperFunctions.copyArray(initialUBExtremePointsValues, extremePointsValues);
+    }
+
+    @Override
+    public int size() {
+        return super.size();
     }
 
     @Override
@@ -41,6 +45,24 @@ public class SawtoothUpperBound extends UpperBound {
     @Override
     public void addPoint(double[] belief, double value, int a) {
         addPoint(new UBPoint(belief, value, a));
+    }
+
+    @Override
+    public double[] getBeliefInMinimum() {
+        if (points.isEmpty()) {
+            double minValue = extremePointsValues[0];
+            int minValueS = 0;
+            for (int s = 1; s < dimension; ++s) {
+                if (extremePointsValues[s] < minValue) {
+                    minValue = extremePointsValues[s];
+                    minValueS = s;
+                }
+            }
+            double[] minBelief = new double[dimension];
+            minBelief[minValueS] = 1;
+            return minBelief;
+        }
+        return super.getBeliefInMinimum();
     }
 
     private double getValueInducedByInnerPoint(UBPoint innerPoint, double[] belief,
@@ -101,7 +123,7 @@ public class SawtoothUpperBound extends UpperBound {
     }
 
     private int dominates(UBPoint p1, UBPoint p2, double[] valuesOfPointsOnExtremePointsPlane, int p1I, int p2I) {
-        int state; // 0 no domination, -1 p1 dominates, 1 p2 dominates
+        // 0 no domination, -1 p1 dominates, 1 p2 dominates
         ArrayList<Integer> notZeroBeliefIndexes = new ArrayList<>(dimension);
         ArrayList<Integer> zeroBeliefIndexes = new ArrayList<>(dimension);
         for (int s = 0; s < dimension; ++s) {
@@ -113,9 +135,9 @@ public class SawtoothUpperBound extends UpperBound {
         }
         double p1ValueInp2 = getValueInducedByInnerPoint(p2, p1.getBelief(), notZeroBeliefIndexes, zeroBeliefIndexes,
                 valuesOfPointsOnExtremePointsPlane[p1I], valuesOfPointsOnExtremePointsPlane[p2I]);
-        if (p1ValueInp2 < p2.getValue()) {
+        if (p1ValueInp2 < p1.getValue()) {
             //System.out.println(p1 + " dominates " + p2);
-            return -1;
+            return 1;
         }
         notZeroBeliefIndexes.clear();
         zeroBeliefIndexes.clear();
@@ -128,9 +150,9 @@ public class SawtoothUpperBound extends UpperBound {
         }
         double p2ValueInp1 = getValueInducedByInnerPoint(p1, p2.getBelief(), notZeroBeliefIndexes, zeroBeliefIndexes,
                 valuesOfPointsOnExtremePointsPlane[p2I], valuesOfPointsOnExtremePointsPlane[p1I]);
-        if (p2ValueInp1 < p1.getValue()) {
+        if (p2ValueInp1 < p2.getValue()) {
             //System.out.println(p2 + " dominates " + p1);
-            return 1;
+            return -1;
         }
         return 0;
     }

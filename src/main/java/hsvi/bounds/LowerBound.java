@@ -10,9 +10,6 @@ public class LowerBound extends Bound {
 
     public List<LBAlphaVector> alphaVectors;
 
-    private double minimum = Double.POSITIVE_INFINITY;
-    public double[] minimalBelief;
-
     public LowerBound(int dimension) {
         super(dimension);
         alphaVectors = new LinkedList<>();
@@ -61,10 +58,6 @@ public class LowerBound extends Bound {
             }
         }
         return false;
-    }
-
-    public boolean contains(LBAlphaVector alphaVector) {
-        return alphaVectors.contains(alphaVector);
     }
 
     private int dominates(LBAlphaVector alpha1, LBAlphaVector alpha2) {
@@ -151,5 +144,12 @@ public class LowerBound extends Bound {
             }
         }
         return maxVector;
+    }
+
+    @Override
+    public String toString() {
+        return "LowerBound{" +
+                "alphaVectors=" + alphaVectors +
+                '}';
     }
 }

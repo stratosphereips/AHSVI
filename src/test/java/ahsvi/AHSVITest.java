@@ -1,5 +1,6 @@
 package ahsvi;
 
+import hsvi.Config;
 import hsvi.HSVIAlgorithm;
 import pomdpproblem.pomdpdummyproblems.POMDPDummyProblems;
 import org.junit.Test;

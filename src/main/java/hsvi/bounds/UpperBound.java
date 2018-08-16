@@ -1,6 +1,6 @@
 package hsvi.bounds;
 
-import ahsvi.Config;
+import hsvi.Config;
 
 import java.util.LinkedList;
 import java.util.List;
