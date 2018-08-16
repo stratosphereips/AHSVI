@@ -1,5 +1,6 @@
-package main.java.AHSVI;
+package hsvi.bounds;
 
+import ahsvi.Config;
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
 
@@ -9,46 +10,81 @@ import java.util.stream.IntStream;
 /**
  * Created by wigos on 16.5.16.
  */
-public class PointBasedValueFunction<T extends Dominable> extends ValueFunction implements Iterable<PointBasedValueFunction.Point<T>> {
+public class CplexLPUpperBound extends UpperBound {
+    private IloCplex cplex;
     public static double RANDOMIZE = Double.NaN;
     public static boolean CACHED_CPLEX = true;
 
-    private List<Point<T>> points;
     private int nPoints = 0;
     private IloNumVar[] alphas;
 
-    private Point[] extremePoints;
+    private UBPoint[] extremePoints;
 
     private double maximum = Double.NEGATIVE_INFINITY;
-    private IloCplex cplex;
 
     private IloCplex cachedCplex = null;
     private IloNumVar cachedValueVar = null;
     private IloLPMatrix cachedLPMatrix = null;
     private IloRange[] cachedLPRanges = null;
     public double minimum;
-    public Point minimalBelief;
+    public UBPoint minimalBelief;
 
-    public PointBasedValueFunction(int dimension) {
+    public CplexLPUpperBound(int dimension) {
         this(dimension, null);
     }
 
-    public PointBasedValueFunction(int dimension, Object data) {
-        super(dimension, data);
-        points = new LinkedList<>();
-        extremePoints = new Point[dimension];
+    public CplexLPUpperBound(int dimension, double[] initialUBExtremePointsValues) {
+        super(dimension);
+        try {
+            cplex = new IloCplex();
+            cplex.setParam(IloCplex.IntParam.RootAlg, 2);
+        } catch (IloException e) {
+            e.printStackTrace();
+            System.exit(10);
+        }
+        extremePoints = new UBPoint[dimension];
+        initUBPoints(initialUBExtremePointsValues);
     }
 
-    public Point<T> addPoint(double[] point, double value) {
-        return addPoint(point, value, null);
+    @Override
+    public void removeDominated() {
+        List<UBPoint> newPoints = new LinkedList<>();
+        Iterator<UBPoint> it = points.iterator();
+        int removed = 0;
+        while (it.hasNext()) {
+            UBPoint current = it.next();
+            if (current.value - getValue(current.belief) > Config.ZERO) {
+                removed++;
+            } else {
+                newPoints.add(current);
+            }
+        }
+        nPoints -= removed;
+        points = newPoints;
+
+        if (cachedCplex != null) {
+            try {
+                cachedCplex.clearModel();
+                rebuildModel(new double[dimension]);
+            } catch (IloException iloe) {
+                iloe.printStackTrace();
+                System.exit(1);
+            }
+        }
     }
 
-    public Point<T> addPoint(double[] point, double value, T data) {
-        int extremeId = extremeId(point);
+    @Override
+    public void addPoint(UBPoint point, int a) {
+        addPoint(point.belief, point.value);
+    }
+
+    @Override
+    public void addPoint(double[] point, double value, int data) {
+        int extremeId = extremePointId(point);
         if (extremeId >= 0) {
-            Point<T> extremePoint = (Point<T>) extremePoints[extremeId];
+            UBPoint extremePoint = (UBPoint) extremePoints[extremeId];
             if (extremePoint == null) {
-                extremePoint = new Point<>(point, Double.POSITIVE_INFINITY, data);
+                extremePoint = new UBPoint(point, Double.POSITIVE_INFINITY, data);
                 extremePoints[extremeId] = extremePoint;
                 extremePoint.extreme = true;
                 extremePoint.extremeId = extremeId;
@@ -75,7 +111,7 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
                     }
                 }
             }
-//            extremePoint.coordinates = point;
+//            extremePoint.belief = point;
             if (value < extremePoint.value) {
                 extremePoint.value = value;
                 extremePoint.data = data;
@@ -110,10 +146,8 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
                     }
                 }
             }
-
-            return extremePoint;
         } else {
-            Point<T> pointObj = new Point<>(point, value, data);
+            UBPoint pointObj = new UBPoint(point, value, data);
             points.add(pointObj);
             nPoints++;
 
@@ -136,8 +170,6 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
                     System.exit(1);
                 }
             }
-
-            return pointObj;
         }
     }
 
@@ -157,41 +189,13 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
     public void randomDelete() {
         int count = points.size();
         double prob = 10.0 / count;
-        Iterator<Point<T>> it = points.iterator();
+        Iterator<UBPoint> it = points.iterator();
         while (it.hasNext()) {
-            Point<T> point = it.next();
+           UBPoint point = it.next();
             if (Math.random() < prob) {
-                if (getValue(point.coordinates) < point.value) it.remove();
+                if (getValue(point.belief) < point.value) it.remove();
             }
         }
-    }
-
-    public int removeDominated() {
-        List<Point<T>> newPoints = new LinkedList<>();
-        Iterator<Point<T>> it = points.iterator();
-        int removed = 0;
-        while (it.hasNext()) {
-            Point<T> current = it.next();
-            if (current.value - getValue(current.coordinates) > Config.ZERO) {
-                removed++;
-            } else {
-                newPoints.add(current);
-            }
-        }
-        nPoints -= removed;
-        points = newPoints;
-
-        if (cachedCplex != null) {
-            try {
-                cachedCplex.clearModel();
-                rebuildModel(new double[dimension]);
-            } catch (IloException iloe) {
-                iloe.printStackTrace();
-                System.exit(1);
-            }
-        }
-
-        return removed;
     }
 
     public int numPoints() {
@@ -204,9 +208,9 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
     }
 
     @Override
-    public double getValue(double[] point) {
+    public double getValue(double[] belief) {
 
-        if (CACHED_CPLEX) return getValueFast(point);
+        if (CACHED_CPLEX) return getValueFast(belief);
 
         /*
         try {
@@ -282,7 +286,7 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
     public double getValueST(double[] point) {
 
         // not implemented yet
-        for (Point<T> point2 : this.points) {
+        for (UBPoint point2 : this.points) {
             double value = evaluateSTAtPoint(point, point2);
         }
 
@@ -290,17 +294,17 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
 
     }
 
-    private double evaluateSTAtPoint(double[] point, Point<T> point2) {
+    private double evaluateSTAtPoint(double[] point, UBPoint point2) {
 
         double[] vector = getDirectionalVector(point, point2);
         double minK = 1d;
         for (int i = 0; i < vector.length; i++) {
             double k = 0;
             if (vector[i] > 0) {
-                k = point2.coordinates[i] / vector[i];
+                k = point2.belief[i] / vector[i];
             }
             if (vector[i] < 0) {
-                k = -point2.coordinates[i] / vector[i];
+                k = -point2.belief[i] / vector[i];
             }
 
             if (k > 0 && k < minK) {
@@ -308,16 +312,16 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
             }
         }
 
-        // compute facet coordinates
+        // compute facet belief
 
 
         return 0;
 
     }
 
-    private double[] getDirectionalVector(double[] point, Point<T> point2) {
+    private double[] getDirectionalVector(double[] point, UBPoint point2) {
         return IntStream.range(0, point.length)
-                .mapToDouble(i -> point2.coordinates[i] - point[i])
+                .mapToDouble(i -> point2.belief[i] - point[i])
                 .toArray();
     }
 
@@ -358,17 +362,16 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
     }
 
     public IloRange constructLPSlow(IloNumExpr[] coords, IloNumVar value) throws IloException {
-        IloCplex cplex = Cplex.get();
         IloNumVar[] alphas = cplex.numVarArray(nPoints, 0, 1);
         IloNumExpr[] coordSum = new IloNumExpr[dimension];
         for (int i = 0; i < dimension; i++) coordSum[i] = cplex.numExpr();
         IloNumExpr valueExpr = cplex.numExpr();
 
-        Iterator<Point<T>> it = points.iterator();
+        Iterator<UBPoint> it = points.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Point current = it.next();
+            UBPoint current = it.next();
             for (int j = 0; j < dimension; j++) {
-                coordSum[j] = cplex.sum(coordSum[j], cplex.prod(current.coordinates[j], alphas[i]));
+                coordSum[j] = cplex.sum(coordSum[j], cplex.prod(current.belief[j], alphas[i]));
             }
             valueExpr = cplex.sum(valueExpr, cplex.prod(current.value, alphas[i]));
         }
@@ -434,12 +437,12 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
     }
 
     private void buildMatrix(int[][] ind, double[][] val) {
-        Iterator<Point<T>> it = points.iterator();
+        Iterator<UBPoint> it = points.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Point current = it.next();
+            UBPoint current = it.next();
             for (int j = 0; j < dimension; j++) {
                 ind[j][i] = i;
-                val[j][i] = current.coordinates[j];
+                val[j][i] = current.belief[j];
             }
             ind[dimension][i] = i;
             if (Double.isNaN(RANDOMIZE)) val[dimension][i] = -current.value;
@@ -452,7 +455,7 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
         IloLPMatrix matrix = cplex.addLPMatrix();
         alphas = cplex.numVarArray(nPoints, 0, 1);
 
-        Cplex.addCols(matrix, alphas, new IloNumVar[]{value}, coordVars);
+        addCols(matrix, alphas, new IloNumVar[]{value}, coordVars);
 
         double[] lb = new double[dimension + 1];
         double[] ub = new double[dimension + 1];
@@ -487,70 +490,30 @@ public class PointBasedValueFunction<T extends Dominable> extends ValueFunction 
         return matrix.getRange(dimension);
     }
 
-    @Override
-    public Iterator<Point<T>> iterator() {
-        return points.iterator();
-    }
+    private static int addCols(IloLPMatrix matrix, IloNumVar[]... vars) throws IloException {
+        int totalVars = 0;
+        for(int i = 0 ; i < vars.length ; i++) totalVars += vars[i].length;
 
-    public double getMaximum() {
-        return maximum;
-    }
-
-    private static int extremeId(double[] belief) {
-        for (int i = 0; i < belief.length; i++) {
-            if (belief[i] >= 1 - Config.ZERO) return i;
+        IloNumVar[] cols = new IloNumVar[totalVars];
+        int offset = 0;
+        for(int i = 0 ; i < vars.length ; i++) {
+            for(int j = 0 ; j < vars[i].length ; j++) {
+                cols[offset++] = vars[i][j];
+            }
         }
-        return -1;
+
+        return matrix.addCols(cols);
     }
 
     public double[] getAlphas() throws IloException {
-        return Cplex.get().getValues(alphas);
-    }
-
-    public void updateCount() {
-        nPoints = points.size();
-    }
-
-    public static class Point<T> {
-        double[] coordinates;
-        double value;
-        T data;
-        boolean extreme = false;
-        int extremeId = Integer.MIN_VALUE;
-
-        public Point(double[] coordinates, double value, T data) {
-            this.coordinates = coordinates;
-            this.value = value;
-            this.data = data;
-        }
-
-        public T getData() {
-            return data;
-        }
-
-        public void setData(T data) {
-            this.data = data;
-        }
-
-        public void setValue(double value) {
-            this.value = value;
-        }
-
-        public double getValue() {
-            return value;
-        }
-
-        public double[] getCoordinates() {
-            return coordinates;
-        }
-
-        public String toString() {
-            return Arrays.toString(coordinates) + ", Value = " + value;
-        }
+        return cplex.getValues(alphas);
     }
 
 
-    public void commit() {
-//        throw new NotImplementedException();
+    @Override
+    public String toString() {
+        return "PointBasedValueFunction{" +
+                "points=" + points +
+                '}';
     }
 }

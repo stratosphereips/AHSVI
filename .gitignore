@@ -1,7 +1,13 @@
 # IDE files
 .idea/
 out
-main.java.java.AHSVI.iml
+*.iml
+
+# Maven
+target/*
+
+# Program output
+*.lp
 
 # Prerequisites
 *.d

@@ -1,4 +1,6 @@
-package main.java.POMDPProblem;
+package pomdpproblem;
+
+import ahsvi.Config;
 
 import java.util.*;
 
@@ -15,7 +17,7 @@ public class POMDPProblem {
     //                                              end-state s_ ... p = observationProbabilities[s_][a][o]
     public final double[][] rewards; // reward r for playing action a in state s ... r = rewards[s][a]
     public final double discount;
-    public final double[] initBelief;
+    public double[] initBelief;
     public final boolean minimize;
 
     public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
@@ -25,20 +27,25 @@ public class POMDPProblem {
                         double[][][] observationProbabilities, //op[a][s_][o]
                         double[][][][] rewards, //r[a][s][s_][o]
                         double discount,
-                        boolean minimize,
-                        double[] initBelief) {
+                        double[] initBelief,
+                        boolean minimize) {
         this.stateNames = new ArrayList<>(stateNames);
-        this.stateNameToIndex = stateNameToIndex;
         this.actionNames = new ArrayList<>(actionNames);
+        this.observationNames = new ArrayList<>(observationNames);
+
+        this.stateNameToIndex = stateNameToIndex;
         this.actionNameToIndex = actionNameToIndex;
         this.actionProbabilities = transformActionProbabilitiesToHSVI(actionProbabilities);
-        this.observationNames = new ArrayList<>(observationNames);
         this.observationNameToIndex = observationNameToIndex;
         this.observationProbabilities = transformObservationProbabilitiesToHSVI(observationProbabilities);
         this.rewards = transformRewardsToHSVI(rewards);
         this.discount = discount;
-        this.minimize = minimize;
         this.initBelief = initBelief;
+        this.minimize = minimize;
+
+        assert areActionProbabilitiesCorrect(): "Transition probabilities are probably incorrect";
+        assert areObservationProbabilitiesCorrect(): "Observation probabilities are probably incorrect";
+        assert 0 <= discount && discount <= 1: "Discount must be between 0 and 1";
 
     }
 
@@ -49,7 +56,7 @@ public class POMDPProblem {
                         double[][][] observationProbabilities,
                         double[][][][] rewards,
                         double discount,
-                        boolean minimize) {
+                        double[] initBelief) {
         this(stateNames, stateNameToIndex,
                 actionNames, actionNameToIndex,
                 actionProbabilities,
@@ -57,8 +64,8 @@ public class POMDPProblem {
                 observationProbabilities,
                 rewards,
                 discount,
-                minimize,
-                null);
+                initBelief,
+                false);
     }
 
     public int getNumberOfStates() {
@@ -73,21 +80,57 @@ public class POMDPProblem {
         return observationNames.size();
     }
 
-    public double getProbabilityOfObservationPlayingAction(int a, int o) {
+    public boolean areActionProbabilitiesCorrect() {
+        double probSum;
+        for (int s = 0; s < getNumberOfStates(); ++s) {
+            for (int a = 0; a < getNumberOfActions(); ++a) {
+                probSum = 0;
+                for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+                    probSum += actionProbabilities[s][a][s_];
+                }
+                if (Math.abs(probSum - 1) > Config.ZERO) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean areObservationProbabilitiesCorrect() {
+        double probSum;
+        for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+            for (int a = 0; a < getNumberOfActions(); ++a) {
+                probSum = 0;
+                for (int o = 0; o < getNumberOfObservations(); ++o) {
+                    probSum += observationProbabilities[s_][a][o];
+                }
+                if (Math.abs(probSum - 1) > Config.ZERO) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public double getProbabilityOfObservationPlayingAction(int o, double[] belief, int a) {
         double probSum = 0;
-        for (int s_ = 0; s_ < stateNames.size(); ++s_) {
-            probSum += observationProbabilities[a][s_][o];
+        double probSubSum;
+        for (int s = 0; s < getNumberOfStates(); ++s) {
+            probSubSum = 0;
+            for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+                probSubSum += actionProbabilities[s][a][s_] * observationProbabilities[s_][a][o];
+            }
+            probSum += belief[s] * probSubSum;
         }
         return probSum;
     }
 
     private double[][][] transformActionProbabilitiesToHSVI(double[][][] actionProbabilities) {
-        int statesCount = actionProbabilities[0].length;
-        int actionsCount = actionProbabilities.length;
-        double[][][] actionProbabilitiesTransformed = new double[statesCount][actionsCount][statesCount];
-        for (int a = 0; a < actionsCount; ++a) {
-            for (int s = 0; s < statesCount; ++s) {
-                for (int s_ = 0; s_ < statesCount; ++s_) {
+        double[][][] actionProbabilitiesTransformed =
+                new double[getNumberOfStates()][getNumberOfActions()][getNumberOfStates()];
+        for (int a = 0; a < getNumberOfActions(); ++a) {
+            for (int s = 0; s < getNumberOfStates(); ++s) {
+                for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
                     actionProbabilitiesTransformed[s][a][s_] = actionProbabilities[a][s][s_];
                 }
             }
@@ -96,14 +139,12 @@ public class POMDPProblem {
     }
 
     private double[][][] transformObservationProbabilitiesToHSVI(double[][][] observationProbabilities) {
-        int actionsCount = observationProbabilities[0].length;
-        int statesCount = observationProbabilities.length;
-        int observationsCount = observationProbabilities[0][0].length;
-        double[][][] observationProbabilitiesTransformed = new double[actionsCount][statesCount][observationsCount];
-        for (int a = 0; a < actionsCount; ++a) {
-            for (int s = 0; s < statesCount; ++s) {
-                for (int o = 0; o < statesCount; ++o) {
-                    observationProbabilitiesTransformed[s][a][o] = observationProbabilities[a][s][o];
+        double[][][] observationProbabilitiesTransformed =
+                new double[getNumberOfStates()][getNumberOfActions()][getNumberOfObservations()];
+        for (int a = 0; a < getNumberOfActions(); ++a) {
+            for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+                for (int o = 0; o < getNumberOfObservations(); ++o) {
+                    observationProbabilitiesTransformed[s_][a][o] = observationProbabilities[a][s_][o];
                 }
             }
         }
@@ -126,5 +167,33 @@ public class POMDPProblem {
             }
         }
         return rewardsTransformed;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("pomdpproblem");
+        sb.append("\\\n\tStates:{");
+        for (String s : stateNames) {
+            sb.append(s);
+            sb.append(',');
+        }
+        sb.append('}');
+        sb.append("\\\n\tActions:{");
+        for (String a : actionNames) {
+            sb.append(a);
+            sb.append(',');
+        }
+        sb.append('}');
+        sb.append("\\\n\tObservations:{");
+        for (String o : observationNames) {
+            sb.append(o);
+            sb.append(',');
+        }
+        sb.append('}');
+
+        sb.append("\\\n\tTransition probabilities");
+        sb.append("\\\n\t\tTODO"); //TODO pomdpproblem toString()
+
+        return sb.toString();
     }
 }
