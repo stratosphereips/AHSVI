@@ -124,12 +124,10 @@ public class POMDP1D implements POMDPDummyProblemI {
         double[] initBelief = new double[stateNames.size()];
 
         // init belief was not in the original POMDP file
-        /*
+
         initBelief[0] = 0.333333;
         initBelief[1] = 0.333333;
         initBelief[2] = 0.333333;
-        */
-        initBelief[3] = 1.0;
 
         return new POMDPProblem(stateNames, stateNameToIndex,
                 actionNames, actionNameToIndex, actionProbabilities,

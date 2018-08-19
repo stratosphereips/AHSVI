@@ -6,7 +6,7 @@ import pomdpproblem.POMDPProblem;
 
 import java.io.File;
 
-public class Main {
+public class AHSVIMain {
     public static void main(String[] args) {
         System.out.println("Starting POMDP solver");
 
@@ -50,19 +50,5 @@ public class Main {
         AHSVIAlgorithm ahsviAlgorithm = new AHSVIAlgorithm(pomdpProblem, epsilon);
         ahsviAlgorithm.solve();
 
-
-
-
-        // =======================================
-        // =                H S V I              =
-
-
-/*
-        HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(pomdpProblem, epsilon);
-        hsviAlgorithm.solve();
-
-        System.out.println("Final utility LB: " + hsviAlgorithm.getLBValueInInitBelief());
-        System.out.println("Final utility UB: " + hsviAlgorithm.getUBValueInInitBelief());
-*/
     }
 }
