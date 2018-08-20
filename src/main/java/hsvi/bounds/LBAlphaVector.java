@@ -1,24 +1,23 @@
 package hsvi.bounds;
 
 import java.util.Arrays;
+import org.apache.commons.lang.math.NumberUtils;
 
-public class LBAlphaVector {
+public class LBAlphaVector{
 
-    public double[] vector;
-    public int a;
+    public final double[] vector;
+    private final double maxValue;
+    public final int a;
 
 
     public LBAlphaVector(double[] vector, int a) {
         this.vector = vector;
+        maxValue = NumberUtils.max(vector);
         this.a = a;
     }
 
-    public void update(double[] vector) {
-        this.vector = vector;
-    }
-
-    public void setAction(int a) {
-        this.a = a;
+    public double getMaxValue() {
+        return maxValue;
     }
 
     public int getAction() {
@@ -27,8 +26,9 @@ public class LBAlphaVector {
 
     @Override
     public String toString() {
-        return "AlphaVector{" +
+        return "LBAlphaVector{" +
                 "vector=" + Arrays.toString(vector) +
+                ", maxValue=" + maxValue +
                 ", a=" + a +
                 '}';
     }

@@ -24,9 +24,9 @@ public class HSVIMain {
 
         //String pomdpFileName = POMDP_1S;
         //String pomdpFileName = POMDP_2S;
-        String pomdpFileName = POMDP_1D;
+        //String pomdpFileName = POMDP_1D;
         //String pomdpFileName = POMDP_TIGER;
-        //String pomdpFileName = POMDP_TIGERGRID;
+        String pomdpFileName = POMDP_TIGERGRID;
         double epsilon = 0.000001;
 
         // =======================================

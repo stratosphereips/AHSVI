@@ -168,7 +168,7 @@ public class SawtoothUpperBound extends UpperBound {
 
     @Override
     public void removeDominated() {
-        System.out.println("Removing dominated");
+        System.out.println("Removing dominated - UB");
         TreeSet<Integer> pointsToRemoveIndexes = new TreeSet<>();
         ArrayList<UBPoint> pointsArrayList = new ArrayList<>(points);
         double[] valuesOfPointsOnExtremePointsPlane = computeValuesOfPointsOnExtremePointsPlane(pointsArrayList);
