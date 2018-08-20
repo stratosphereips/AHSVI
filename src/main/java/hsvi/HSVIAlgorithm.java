@@ -128,6 +128,10 @@ public class HSVIAlgorithm {
             System.out.println("###########################################################################");
             System.out.println("###########################################################################");
             ++iter;
+            if (iter % 50 == 0) {
+                System.out.println("Removing lines that are not above any other line");
+                lbFunction.removeAlphasWithNoValuesAboveOthers();
+            }
             lbVal = lbFunction.getValue(pomdpProblem.initBelief);
             ubVal = ubFunction.getValue(pomdpProblem.initBelief);
             System.out.println("Solve iteration: " + iter);

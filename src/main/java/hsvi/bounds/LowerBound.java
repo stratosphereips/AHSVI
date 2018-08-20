@@ -75,7 +75,7 @@ public class LowerBound extends Bound {
         return state;
     }
 
-    private void removePairwiseDominated() {
+    public void removePairwiseDominated() {
         System.out.println("Removing pairwise dominated - LB");
         TreeSet<Integer> alphasToRemoveIndexes = new TreeSet<>();
         ArrayList<LBAlphaVector> alphas = new ArrayList<>(alphaVectors);
@@ -116,7 +116,7 @@ public class LowerBound extends Bound {
         return map;
     }
 
-    private void removeAlphasWithNoValuesAboveOthers() {
+    public void removeAlphasWithNoValuesAboveOthers() {
         System.out.println("Removing alphas with no values above others - LB");
         System.out.println("LB size before removing: " + alphaVectors.size());
         IloCplex model = null;
@@ -155,11 +155,14 @@ public class LowerBound extends Bound {
     @Override
     public void removeDominated() {
         System.out.println("Removing dominated - LB");
+        /*
         if (pruningCounts % 20 == 0) {
             removeAlphasWithNoValuesAboveOthers();
         } else {
             removePairwiseDominated();
         }
+        */
+        removePairwiseDominated();
         ++pruningCounts;
     }
 
