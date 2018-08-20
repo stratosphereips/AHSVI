@@ -14,7 +14,6 @@ public class LowerBound extends Bound {
     public LowerBound(int dimension) {
         super(dimension);
         alphaVectors = new LinkedList<>();
-        pruningGrowthRatio = 0.6;
     }
 
     public List<LBAlphaVector> getAlphaVectors() {
@@ -119,15 +118,18 @@ public class LowerBound extends Bound {
 
     private void removeAlphasWithNoValuesAboveOthers() {
         System.out.println("Removing alphas with no values above others - LB");
+        System.out.println("LB size before removing: " + alphaVectors.size());
         IloCplex model = null;
-        LinkedList<LBAlphaVector> newAlphasVector = new LinkedList<>();
+        ListIterator<LBAlphaVector> listIt = alphaVectors.listIterator();
         try {
             model = new IloCplex();
             model.setOut(null);
             model.setWarning(null);
             IloNumVar[] beliefVars = model.numVarArray(dimension, 0.0, 1.0);
             Map<LBAlphaVector, IloNumExpr> alphaValuesMap = initExprs(model, beliefVars);
-            for (LBAlphaVector alpha : alphaVectors) {
+            LBAlphaVector alpha;
+            while (listIt.hasNext()) {
+                alpha = listIt.next();
                 model.addMinimize(model.constant(0));
                 for (LBAlphaVector other : alphaVectors) {
                     model.addGe(alphaValuesMap.get(alpha), alphaValuesMap.get(other));
@@ -135,9 +137,9 @@ public class LowerBound extends Bound {
                 model.addEq(model.sum(beliefVars), 1.0);
                 model.solve();
                 //System.out.println("Model status: " + model.getStatus());
-                if (model.getStatus() == IloCplex.Status.Feasible || model.getStatus() == IloCplex.Status.Optimal) {
-                    //System.out.println("Adding to new alphas list");
-                    newAlphasVector.add(alpha);
+                if (model.getStatus() == IloCplex.Status.Infeasible) {
+                    //System.out.println("REMOVIIIIING");
+                    listIt.remove();
                 }
                 model.clearModel();
             }
@@ -145,16 +147,20 @@ public class LowerBound extends Bound {
             e.printStackTrace();
             System.exit(10);
         }
-        System.out.println("LB size before removing: " + alphaVectors.size());
-        alphaVectors = newAlphasVector;
         System.out.println("LB size after removing: " + alphaVectors.size());
     }
+
+    int pruningCounts = 0;
 
     @Override
     public void removeDominated() {
         System.out.println("Removing dominated - LB");
-        removeAlphasWithNoValuesAboveOthers();
-        //removePairwiseDominated();
+        if (pruningCounts % 20 == 0) {
+            removeAlphasWithNoValuesAboveOthers();
+        } else {
+            removePairwiseDominated();
+        }
+        ++pruningCounts;
     }
 
     public void addAlphaVector(LBAlphaVector alphaVector) {

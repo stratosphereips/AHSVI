@@ -22,8 +22,12 @@ public abstract class Bound {
 
     public abstract void removeDominated();
 
+    public double growthRatioSinceLastPruning() {
+        return 1 - (double)lastPrunedSize / size();
+    }
+
     protected void maybePrune() {
-        if (1 - (double)lastPrunedSize / size() >= pruningGrowthRatio) {
+        if (growthRatioSinceLastPruning() >= pruningGrowthRatio) {
             removeDominated();
             lastPrunedSize = size();
         }
