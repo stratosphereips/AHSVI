@@ -128,11 +128,13 @@ public class LowerBound extends Bound {
             IloNumVar[] beliefVars = model.numVarArray(dimension, 0.0, 1.0);
             Map<LBAlphaVector, IloNumExpr> alphaValuesMap = initExprs(model, beliefVars);
             LBAlphaVector alpha;
+            IloNumExpr constrLeftSide;
             while (listIt.hasNext()) {
                 alpha = listIt.next();
+                constrLeftSide = model.sum(alphaValuesMap.get(alpha), -Config.CPLEX_EPSILON);
                 model.addMinimize(model.constant(0));
                 for (LBAlphaVector other : alphaVectors) {
-                    model.addGe(alphaValuesMap.get(alpha), alphaValuesMap.get(other));
+                    model.addGe(constrLeftSide, alphaValuesMap.get(other));
                 }
                 model.addEq(model.sum(beliefVars), 1.0);
                 model.solve();

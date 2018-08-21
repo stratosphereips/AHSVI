@@ -128,7 +128,7 @@ public class HSVIAlgorithm {
             System.out.println("###########################################################################");
             System.out.println("###########################################################################");
             ++iter;
-            if (iter % 50 == 0) {
+            if (iter % 5 == 0) {
                 System.out.println("Removing lines that are not above any other line");
                 lbFunction.removeAlphasWithNoValuesAboveOthers();
             }
