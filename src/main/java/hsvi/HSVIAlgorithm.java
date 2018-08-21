@@ -82,7 +82,7 @@ public class HSVIAlgorithm {
                 continue;
             }
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                beliefNew[s_] += pomdpProblem.actionProbabilities[s][a][s_] * belief[s];
+                beliefNew[s_] += pomdpProblem.transitionProbabilities[s][a][s_] * belief[s];
             }
             beliefNew[s_] *= pomdpProblem.observationProbabilities[s_][a][o];
             normConstant += beliefNew[s_];
@@ -216,14 +216,14 @@ public class HSVIAlgorithm {
             rewardsSum += pomdpProblem.rewards[s][a] * belief[s];
             observationsValuesSubSum = 0;
             for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                if (pomdpProblem.actionProbabilities[s][a][s_] < Config.ZERO) {
+                if (pomdpProblem.transitionProbabilities[s][a][s_] < Config.ZERO) {
                     continue;
                 }
                 for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
                     nextBel = nextBelief(belief, a, o);
                     if (nextBel != null &&
                             pomdpProblem.observationProbabilities[s_][a][o] > Config.ZERO) {
-                        observationsValuesSubSum += pomdpProblem.actionProbabilities[s][a][s_] * pomdpProblem.observationProbabilities[s_][a][o] *
+                        observationsValuesSubSum += pomdpProblem.transitionProbabilities[s][a][s_] * pomdpProblem.observationProbabilities[s_][a][o] *
                                 ubFunction.getValue(nextBel);
 
                     }
@@ -274,7 +274,7 @@ public class HSVIAlgorithm {
                     for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
                         sumOs_ += beta.vector[s_] *
                                 pomdpProblem.observationProbabilities[s_][a][o] *
-                                pomdpProblem.actionProbabilities[s][a][s_];
+                                pomdpProblem.transitionProbabilities[s][a][s_];
                     }
                 }
                 betaVec[s] = pomdpProblem.rewards[s][a] + pomdpProblem.discount * sumOs_;

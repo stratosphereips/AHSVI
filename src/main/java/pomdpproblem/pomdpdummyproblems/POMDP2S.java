@@ -40,13 +40,13 @@ public class POMDP2S implements POMDPDummyProblemI {
 
 
         // pomdp body
-        double[][][] actionProbabilities =
+        double[][][] transitionProbabilities =
                 new double[actionNames.size()][stateNames.size()][stateNames.size()];
 
-        actionProbabilities[0][0][0] = 0.0;
-        actionProbabilities[0][0][1] = 1.0;
-        actionProbabilities[0][1][0] = 1.0;
-        actionProbabilities[0][1][1] = 0.0;
+        transitionProbabilities[0][0][0] = 0.0;
+        transitionProbabilities[0][0][1] = 1.0;
+        transitionProbabilities[0][1][0] = 1.0;
+        transitionProbabilities[0][1][1] = 0.0;
 
 
         double[][][] observationProbabilities =
@@ -68,7 +68,7 @@ public class POMDP2S implements POMDPDummyProblemI {
         initBelief[0] = 1.0;
 
         return new POMDPProblem(stateNames, stateNameToIndex,
-                actionNames, actionNameToIndex, actionProbabilities,
+                actionNames, actionNameToIndex, transitionProbabilities,
                 observationNames, observationNameToIndex, observationProbabilities,
                 rewards, discount, initBelief);
     }

@@ -23,7 +23,7 @@ public class POMDPTigerGrid implements POMDPDummyProblemI {
 	    HashMap<String, Integer> stateNameToIndex = new HashMap<>();
 	    ArrayList<String> actionNames = new ArrayList<>();
 	    HashMap<String, Integer> actionNameToIndex = new HashMap<>();
-	    double[][][] actionProbabilities = new double[actionsCount][statesCount][statesCount];
+	    double[][][] transitionProbabilities = new double[actionsCount][statesCount][statesCount];
 	    ArrayList<String> observationNames = new ArrayList<>();
 	    HashMap<String, Integer> observationNameToIndex = new HashMap<>();
 	    double[][][] observationProbabilities = new double[actionsCount][statesCount][observationsCount];
@@ -594,14 +594,14 @@ public class POMDPTigerGrid implements POMDPDummyProblemI {
 
 	    for (String line : body1.split("\n")) {
 		    String[] split = line.split("(\\s+[ :]*)|([ :]*\\s+)");
-		    actionProbabilities[Integer.parseInt(split[1])][Integer.parseInt(split[2])][Integer.parseInt(split[3])] = Double.parseDouble(split[4]);
+		    transitionProbabilities[Integer.parseInt(split[1])][Integer.parseInt(split[2])][Integer.parseInt(split[3])] = Double.parseDouble(split[4]);
 	    }
 //	    System.out.println(Arrays.toString(body1.split("\n")));
 
-	    setTwithStar(statesCount, actionsCount, actionProbabilities, 8, "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0".split("\\s"));
-	    setTwithStar(statesCount, actionsCount, actionProbabilities, 9, "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0".split("\\s"));
-	    setTwithStar(statesCount, actionsCount, actionProbabilities, 10, "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0".split("\\s"));
-	    setTwithStar(statesCount, actionsCount, actionProbabilities, 11, "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0".split("\\s"));
+	    setTwithStar(statesCount, actionsCount, transitionProbabilities, 8, "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0".split("\\s"));
+	    setTwithStar(statesCount, actionsCount, transitionProbabilities, 9, "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0".split("\\s"));
+	    setTwithStar(statesCount, actionsCount, transitionProbabilities, 10, "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0".split("\\s"));
+	    setTwithStar(statesCount, actionsCount, transitionProbabilities, 11, "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0".split("\\s"));
 
 
 
@@ -724,15 +724,15 @@ public class POMDPTigerGrid implements POMDPDummyProblemI {
 					    .toArray();
 
 	    return new POMDPProblem(stateNames, stateNameToIndex,
-					    actionNames, actionNameToIndex, actionProbabilities,
+					    actionNames, actionNameToIndex, transitionProbabilities,
 					    observationNames, observationNameToIndex, observationProbabilities,
 					    rewards, discount, initBelief);
     }
 
-	private void setTwithStar(int statesCount, int actionsCount, double[][][] actionProbabilities, int fromState, String[] split) {
+	private void setTwithStar(int statesCount, int actionsCount, double[][][] transitionProbabilities, int fromState, String[] split) {
 		for ( int a=0; a<actionsCount; a++ ) {
 			for (int s_ = 0; s_ < statesCount; s_++) {
-				actionProbabilities[a][fromState][s_] = Double.parseDouble(split[s_]);
+				transitionProbabilities[a][fromState][s_] = Double.parseDouble(split[s_]);
 			}
 		}
 	}

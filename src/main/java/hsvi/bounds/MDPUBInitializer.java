@@ -3,9 +3,7 @@ package hsvi.bounds;
 import helpers.HelperFunctions;
 import pomdpproblem.POMDPProblem;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class MDPUBInitializer {
     private static final double EPS = 0.001;
@@ -16,7 +14,7 @@ public class MDPUBInitializer {
     private final double eps;
     private final int maxIterN;
 
-    private final double[][][] actionProbabilities; // p[a][s][s_]
+    private final double[][][] transitionProbabilities; // p[a][s][s_]
     private final double[][] rewards; // r[a][s]
     private final double[] alpha;
 
@@ -36,7 +34,7 @@ public class MDPUBInitializer {
 
         alpha = initAlpha();
 
-        actionProbabilities = transformActionProbabilities();
+        transitionProbabilities = transformTransitionProbabilities();
         rewards = transformRewards();
     }
 
@@ -63,19 +61,19 @@ public class MDPUBInitializer {
         return initAlpha;
     }
 
-    private double[][][] transformActionProbabilities() {
-        double[][][] actionProbabilitiesTransformed =
+    private double[][][] transformTransitionProbabilities() {
+        double[][][] transitionProbabilitiesTransformed =
                 new double[pomdpProblem.getNumberOfActions()]
                         [pomdpProblem.getNumberOfStates()]
                         [pomdpProblem.getNumberOfStates()];
         for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
             for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
                 for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                    actionProbabilitiesTransformed[a][s_][s] = pomdpProblem.actionProbabilities[s][a][s_];
+                    transitionProbabilitiesTransformed[a][s_][s] = pomdpProblem.transitionProbabilities[s][a][s_];
                 }
             }
         }
-        return actionProbabilitiesTransformed;
+        return transitionProbabilitiesTransformed;
     }
 
     private double[][] transformRewards() {
@@ -96,7 +94,7 @@ public class MDPUBInitializer {
         //        result *= pomdp->discount;
         //        copy_from_column( R_xa, pomdp->R, a );
         //        result += R_xa;
-        HelperFunctions.matrixProd(alpha, actionProbabilities[a], result);
+        HelperFunctions.matrixProd(alpha, transitionProbabilities[a], result);
         HelperFunctions.arrScalarProd(result, pomdpProblem.discount);
         HelperFunctions.arrAdd(result, rewards[a]);
     }

@@ -44,23 +44,23 @@ public class POMDPTiger implements POMDPDummyProblemI {
 
 
         // pomdp body
-        double[][][] actionProbabilities =
+        double[][][] transitionProbabilities =
                 new double[actionNames.size()][stateNames.size()][stateNames.size()];
 
-        actionProbabilities[0][0][0] = 1.0;
-        actionProbabilities[0][0][1] = 0.0;
-        actionProbabilities[0][1][0] = 0.0;
-        actionProbabilities[0][1][1] = 1.0;
+        transitionProbabilities[0][0][0] = 1.0;
+        transitionProbabilities[0][0][1] = 0.0;
+        transitionProbabilities[0][1][0] = 0.0;
+        transitionProbabilities[0][1][1] = 1.0;
 
-        actionProbabilities[1][0][0] = 0.5;
-        actionProbabilities[1][0][1] = 0.5;
-        actionProbabilities[1][1][0] = 0.5;
-        actionProbabilities[1][1][1] = 0.5;
+        transitionProbabilities[1][0][0] = 0.5;
+        transitionProbabilities[1][0][1] = 0.5;
+        transitionProbabilities[1][1][0] = 0.5;
+        transitionProbabilities[1][1][1] = 0.5;
 
-        actionProbabilities[2][0][0] = 0.5;
-        actionProbabilities[2][0][1] = 0.5;
-        actionProbabilities[2][1][0] = 0.5;
-        actionProbabilities[2][1][1] = 0.5;
+        transitionProbabilities[2][0][0] = 0.5;
+        transitionProbabilities[2][0][1] = 0.5;
+        transitionProbabilities[2][1][0] = 0.5;
+        transitionProbabilities[2][1][1] = 0.5;
 
 
         double[][][] observationProbabilities =
@@ -109,7 +109,7 @@ public class POMDPTiger implements POMDPDummyProblemI {
         initBelief[1] = 0.5;
 
         return new POMDPProblem(stateNames, stateNameToIndex,
-                actionNames, actionNameToIndex, actionProbabilities,
+                actionNames, actionNameToIndex, transitionProbabilities,
                 observationNames, observationNameToIndex, observationProbabilities,
                 rewards, discount, initBelief);
     }

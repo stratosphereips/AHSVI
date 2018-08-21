@@ -45,48 +45,48 @@ public class POMDP1D implements POMDPDummyProblemI {
 
 
         // pomdp body
-        double[][][] actionProbabilities =
+        double[][][] transitionProbabilities =
                 new double[actionNames.size()][stateNames.size()][stateNames.size()];
 
-        actionProbabilities[0][0][0] = 1.0;
-        actionProbabilities[0][0][1] = 0.0;
-        actionProbabilities[0][0][2] = 0.0;
-        actionProbabilities[0][0][3] = 0.0;
+        transitionProbabilities[0][0][0] = 1.0;
+        transitionProbabilities[0][0][1] = 0.0;
+        transitionProbabilities[0][0][2] = 0.0;
+        transitionProbabilities[0][0][3] = 0.0;
 
-        actionProbabilities[0][1][0] = 1.0;
-        actionProbabilities[0][1][1] = 0.0;
-        actionProbabilities[0][1][2] = 0.0;
-        actionProbabilities[0][1][3] = 0.0;
+        transitionProbabilities[0][1][0] = 1.0;
+        transitionProbabilities[0][1][1] = 0.0;
+        transitionProbabilities[0][1][2] = 0.0;
+        transitionProbabilities[0][1][3] = 0.0;
 
-        actionProbabilities[0][2][0] = 0.0;
-        actionProbabilities[0][2][1] = 0.0;
-        actionProbabilities[0][2][2] = 0.0;
-        actionProbabilities[0][2][3] = 1.0;
+        transitionProbabilities[0][2][0] = 0.0;
+        transitionProbabilities[0][2][1] = 0.0;
+        transitionProbabilities[0][2][2] = 0.0;
+        transitionProbabilities[0][2][3] = 1.0;
 
-        actionProbabilities[0][3][0] = 1./3.;
-        actionProbabilities[0][3][1] = 1./3.;
-        actionProbabilities[0][3][2] = 1./3.;
-        actionProbabilities[0][3][3] = 0.0;
+        transitionProbabilities[0][3][0] = 1./3.;
+        transitionProbabilities[0][3][1] = 1./3.;
+        transitionProbabilities[0][3][2] = 1./3.;
+        transitionProbabilities[0][3][3] = 0.0;
 
-        actionProbabilities[1][0][0] = 0.0;
-        actionProbabilities[1][0][1] = 1.0;
-        actionProbabilities[1][0][2] = 0.0;
-        actionProbabilities[1][0][3] = 0.0;
+        transitionProbabilities[1][0][0] = 0.0;
+        transitionProbabilities[1][0][1] = 1.0;
+        transitionProbabilities[1][0][2] = 0.0;
+        transitionProbabilities[1][0][3] = 0.0;
 
-        actionProbabilities[1][1][0] = 0.0;
-        actionProbabilities[1][1][1] = 0.0;
-        actionProbabilities[1][1][2] = 0.0;
-        actionProbabilities[1][1][3] = 1.0;
+        transitionProbabilities[1][1][0] = 0.0;
+        transitionProbabilities[1][1][1] = 0.0;
+        transitionProbabilities[1][1][2] = 0.0;
+        transitionProbabilities[1][1][3] = 1.0;
 
-        actionProbabilities[1][2][0] = 0.0;
-        actionProbabilities[1][2][1] = 0.0;
-        actionProbabilities[1][2][2] = 1.0;
-        actionProbabilities[1][2][3] = 0.0;
+        transitionProbabilities[1][2][0] = 0.0;
+        transitionProbabilities[1][2][1] = 0.0;
+        transitionProbabilities[1][2][2] = 1.0;
+        transitionProbabilities[1][2][3] = 0.0;
 
-        actionProbabilities[1][3][0] = 1./3.;
-        actionProbabilities[1][3][1] = 1./3.;
-        actionProbabilities[1][3][2] = 1./3.;
-        actionProbabilities[1][3][3] = 0.0;
+        transitionProbabilities[1][3][0] = 1./3.;
+        transitionProbabilities[1][3][1] = 1./3.;
+        transitionProbabilities[1][3][2] = 1./3.;
+        transitionProbabilities[1][3][3] = 0.0;
 
 
         double[][][] observationProbabilities =
@@ -130,7 +130,7 @@ public class POMDP1D implements POMDPDummyProblemI {
         initBelief[2] = 0.333333;
 
         return new POMDPProblem(stateNames, stateNameToIndex,
-                actionNames, actionNameToIndex, actionProbabilities,
+                actionNames, actionNameToIndex, transitionProbabilities,
                 observationNames, observationNameToIndex, observationProbabilities,
                 rewards, discount, initBelief);
     }
