@@ -44,10 +44,12 @@ public class AHSVIAlgorithm extends HSVIAlgorithm{
             System.out.println("###########################################################################");
             ++iter;
             System.out.println("Solve iteration: " + iter);
-            System.out.println("Belief in LB min: " + Arrays.toString(beliefMinLb) + " => " + valueInBeliefMinLb);
+            System.out.println("Belief in LB min: " + Arrays.toString(beliefMinLb));
+            System.out.println("Value in LB min: " + valueInBeliefMinLb);
             System.out.printf(" ----- Diff to last iteration: %.20f\n", (valueInBeliefMinLb - lastLbVal));
             System.out.println("LB size: " + lbFunction.getAlphaVectors().size());
-            System.out.println("Belief in UB min: " + Arrays.toString(beliefMinUb) + " => " + valueInBeliefMinUb);
+            System.out.println("Belief in UB min: " + Arrays.toString(beliefMinUb));
+            System.out.println("Value in UB min: " + valueInBeliefMinUb);
             System.out.printf(" ----- Diff to last iteration: %.20f\n", (valueInBeliefMinUb - lastUbVal));
             System.out.println("UB size: " + ubFunction.getPoints().size());
             System.out.println("Running time so far [s]: " + ((System.currentTimeMillis() - timeStarted) / 1000));

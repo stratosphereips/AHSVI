@@ -28,7 +28,7 @@ public class AHSVIMain {
         String pomdpFileName = POMDP_1D;
         //String pomdpFileName = POMDP_TIGER;
         //String pomdpFileName = POMDP_TIGERGRID;
-        double epsilon = 0.000001;
+        double epsilon = 1e-10;
 
         // =======================================
 
