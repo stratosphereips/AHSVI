@@ -298,7 +298,13 @@ public class HSVIAlgorithm {
                 bestA = a;
             }
         }
-        lbFunction.addVector(maxBetaVec, bestA);
+        if (maxBetaVec != null) {
+            lbFunction.addVector(maxBetaVec, bestA);
+        }
     }
 
+    public static class HSVIAlgorithmBuilder {
+        private double epsilon;
+        private POMDPProblem pomdpProblem;
+    }
 }
