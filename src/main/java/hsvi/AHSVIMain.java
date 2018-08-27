@@ -1,6 +1,7 @@
 package hsvi;
 
 import hsvi.HSVIAlgorithm;
+import networkproblem.NetworkFileReader;
 import pomdpproblem.POMDPFileReader;
 import pomdpproblem.POMDPProblem;
 
@@ -10,45 +11,31 @@ public class AHSVIMain {
     public static void main(String[] args) {
         System.out.println("Starting POMDP solver");
 
-        String RESOURCES_FOLDER_NAME = "src" + File.separator + "main" + File.separator + "resources" + File.separator;
-        String POMDP_EXT = ".POMDP";
+        String RESOURCES_FOLDER_NAME =
+                "src" + File.separator + "main" + File.separator + "resources" + File.separator + "networks"+ File.separator;
+        String POMDP_EXT = ".network";
 
-        // some POMDP problems that can be loaded
-        String POMDP_1S = "1s";
-        String POMDP_2S = "2s";
-        String POMDP_1D = "1d";
-        String POMDP_TIGER = "tiger";
-        String POMDP_TIGERGRID = "tiger-grid";
+        String DATA1 = "data1";
 
         // =======================================
         // =          S E T T I N G S            =
 
-        //String pomdpFileName = POMDP_1S;
-        //String pomdpFileName = POMDP_2S;
-        String pomdpFileName = POMDP_1D;
-        //String pomdpFileName = POMDP_TIGER;
-        //String pomdpFileName = POMDP_TIGERGRID;
+        String networksFileName = DATA1;
         double epsilon = 1e-10;
 
         // =======================================
 
-        String pomdpFilePathStr = RESOURCES_FOLDER_NAME + pomdpFileName + POMDP_EXT;
-        POMDPFileReader pomdpFileReader = new POMDPFileReader(pomdpFilePathStr, true);
-        pomdpFileReader.loadProblem();
-        POMDPProblem pomdpProblem = pomdpFileReader.getPomdpProblem();
+        String pomdpFilePathStr = RESOURCES_FOLDER_NAME + networksFileName + POMDP_EXT;
+
+        NetworkFileReader networkFileReader = new NetworkFileReader(pomdpFilePathStr);
+        networkFileReader.loadNetwork();
+        POMDPProblem pomdpProblem = networkFileReader.getPomdpProblem();
 
         // =======================================
         // =               A H S V I             =
 
-
-        pomdpProblem.initBelief = new double[pomdpProblem.getNumberOfStates()];
-
-//        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-//            pomdpProblem.initBelief[s] = 1/pomdpProblem.getNumberOfStates();
-//        }
-
-        AHSVIAlgorithm ahsviAlgorithm = new AHSVIAlgorithm(pomdpProblem, epsilon);
-        ahsviAlgorithm.solve();
+        //AHSVIAlgorithm ahsviAlgorithm = new AHSVIAlgorithm(pomdpProblem, epsilon);
+        //ahsviAlgorithm.solve();
 
     }
 }
