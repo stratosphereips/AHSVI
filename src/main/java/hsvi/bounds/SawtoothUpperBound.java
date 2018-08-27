@@ -2,12 +2,16 @@ package hsvi.bounds;
 
 import hsvi.Config;
 import helpers.HelperFunctions;
+import hsvi.CustomLogger.CustomLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 public class SawtoothUpperBound extends UpperBound {
+
+    private static final Logger LOGGER = CustomLogger.getLogger(SawtoothUpperBound.class.getName());
 
     private final double[] extremePointsValues;
 
@@ -57,7 +61,6 @@ public class SawtoothUpperBound extends UpperBound {
                 beliefInMin = point.getBelief();
             }
         }
-        int minValueS = 0;
         for (int s = 1; s < dimension; ++s) {
             if (extremePointsValues[s] < minValue) {
                 minValue = extremePointsValues[s];
@@ -110,13 +113,11 @@ public class SawtoothUpperBound extends UpperBound {
         double p1ValueInp2 = getValueInducedByInnerPoint(p2, p1.getBelief(),
                 valuesOfPointsOnExtremePointsPlane[p1I], valuesOfPointsOnExtremePointsPlane[p2I]);
         if (p1ValueInp2 < p1.getValue()) {
-            //System.out.println(p1 + " dominates " + p2);
             return 1;
         }
         double p2ValueInp1 = getValueInducedByInnerPoint(p1, p2.getBelief(),
                 valuesOfPointsOnExtremePointsPlane[p2I], valuesOfPointsOnExtremePointsPlane[p1I]);
         if (p2ValueInp1 < p2.getValue()) {
-            //System.out.println(p2 + " dominates " + p1);
             return -1;
         }
         return 0;
@@ -134,7 +135,7 @@ public class SawtoothUpperBound extends UpperBound {
 
     @Override
     public void removeDominated() {
-        System.out.println("Removing dominated - UB");
+        LOGGER.finer("Removing dominated - UB");
         TreeSet<Integer> pointsToRemoveIndexes = new TreeSet<>();
         ArrayList<UBPoint> pointsArrayList = new ArrayList<>(points);
         double[] valuesOfPointsOnExtremePointsPlane = computeValuesOfPointsOnExtremePointsPlane(pointsArrayList);
@@ -163,8 +164,8 @@ public class SawtoothUpperBound extends UpperBound {
                 points.add(pointsArrayList.get(i));
             }
         }
-        System.out.println("UB size before removing: " + pointsArrayList.size());
-        System.out.println("UB size after removing: " + points.size());
+        LOGGER.finer("UB size before removing: " + pointsArrayList.size());
+        LOGGER.finer("UB size after removing: " + points.size());
     }
 
     @Override

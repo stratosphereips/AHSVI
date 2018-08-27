@@ -1,11 +1,16 @@
 package hsvi.bounds;
 
 import helpers.HelperFunctions;
+import hsvi.CustomLogger.CustomLogger;
+import hsvi.HSVIAlgorithm;
 import pomdpproblem.POMDPProblem;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class LBInitializer {
+
+    private static final Logger LOGGER = CustomLogger.getLogger(LBInitializer.class.getName());
 
     private POMDPProblem pomdpProblem;
     LBAlphaVector alphaVector;
@@ -36,7 +41,7 @@ public class LBInitializer {
         double R_ = maxRa / (1 - pomdpProblem.discount);
         double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
         HelperFunctions.fillArray(initAlpha, R_);
-        System.out.println("Initial LB alpha vector: " + Arrays.toString(initAlpha)); //TODO print
+        LOGGER.finer("Initial LB alpha vector: " + Arrays.toString(initAlpha));
 
        alphaVector = new LBAlphaVector(initAlpha, bestA);
     }

@@ -1,7 +1,9 @@
 package hsvi;
 
 import java.util.*;
+import java.util.logging.*;
 
+import hsvi.CustomLogger.CustomLogger;
 import helpers.HelperFunctions;
 import hsvi.bounds.*;
 import pomdpproblem.POMDPProblem;
@@ -10,6 +12,8 @@ import pomdpproblem.POMDPProblem;
  * Created by wigos on 3.8.16.
  */
 public class HSVIAlgorithm {
+
+    private static final Logger LOGGER = CustomLogger.getLogger(HSVIAlgorithm.class.getName());
 
     protected final POMDPProblem pomdpProblem;
     protected final double epsilon;
@@ -21,6 +25,7 @@ public class HSVIAlgorithm {
         this.pomdpProblem = pomdpProblem;
         this.epsilon = epsilon;
         this.initValueFunctions();
+
     }
 
     public double getLBValueInBelief(double[] belief) {
@@ -112,39 +117,42 @@ public class HSVIAlgorithm {
         long timeStarted = System.currentTimeMillis();
         int iter = 0;
         double lbVal, ubVal, lastLbVal, lastUbVal;
-        System.out.println("###########################################################################");
-        System.out.println("###########################################################################");
+
+        LOGGER.fine("###########################################################################");
+        LOGGER.fine("###########################################################################");
         ++iter;
         lbVal = lbFunction.getValue(pomdpProblem.initBelief);
         ubVal = ubFunction.getValue(pomdpProblem.initBelief);
-        System.out.println("Solve iteration: " + iter);
-        System.out.println("LB in init belief: " + lbVal);
-        System.out.println("UB in init belief: " + ubVal);
+        LOGGER.fine("Solve iteration: " + iter);
+        LOGGER.fine("LB in init belief: " + lbVal);
+        LOGGER.fine("UB in init belief: " + ubVal);
         lastLbVal = lbVal;
         lastUbVal = ubVal;
         while (widthLargerThanEps(pomdpProblem.initBelief)) {
             explore(pomdpProblem.initBelief, 0, iter);
 
-            System.out.println("###########################################################################");
-            System.out.println("###########################################################################");
+            LOGGER.fine("###########################################################################");
+            LOGGER.fine("###########################################################################");
             ++iter;
-            if (iter % 5 == 0) {
-                System.out.println("Removing lines that are not above any other line");
+            /*
+            if (iter % 1000 == 0) {
+                LOGGER.finer("Removing lines that are not above any other line");
                 lbFunction.removeAlphasWithNoValuesAboveOthers();
             }
+            */
             lbVal = lbFunction.getValue(pomdpProblem.initBelief);
             ubVal = ubFunction.getValue(pomdpProblem.initBelief);
-            System.out.println("Solve iteration: " + iter);
-            System.out.println("LB in init belief: " + lbVal);
-            System.out.printf(" ----- Diff to last iteration: %.20f\n", (lbVal - lastLbVal));
-            System.out.println("LB size: " + lbFunction.getAlphaVectors().size());
-            System.out.println("UB in init belief: " + ubVal);
-            System.out.printf(" ----- Diff to last iteration: %.20f\n", (ubVal - lastUbVal));
-            System.out.println("UB size: " + ubFunction.getPoints().size());
-            System.out.println("Running time so far [s]: " + ((System.currentTimeMillis() - timeStarted) / 1000));
+            LOGGER.fine("Solve iteration: " + iter);
+            LOGGER.fine("LB in init belief: " + lbVal);
+            LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n", (lbVal - lastLbVal)));
+            LOGGER.finer("LB size: " + lbFunction.getAlphaVectors().size());
+            LOGGER.fine("UB in init belief: " + ubVal);
+            LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n", (ubVal - lastUbVal)));
+            LOGGER.finer("UB size: " + ubFunction.getPoints().size());
+            LOGGER.finer("Running time so far [s]: " + ((System.currentTimeMillis() - timeStarted) / 1000));
             assert ubVal <= lastUbVal;
             assert lbVal >= lastLbVal;
-            System.out.println("===========================================================================");
+            LOGGER.fine("===========================================================================");
 
             lastLbVal = lbVal;
             lastUbVal = ubVal;
@@ -290,9 +298,7 @@ public class HSVIAlgorithm {
                 bestA = a;
             }
         }
-        if (maxBetaVec != null) {
-            lbFunction.addVector(maxBetaVec, bestA);
-        }
+        lbFunction.addVector(maxBetaVec, bestA);
     }
 
 }

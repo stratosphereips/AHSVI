@@ -1,11 +1,17 @@
 package hsvi.bounds;
 
 import helpers.HelperFunctions;
+import hsvi.CustomLogger.CustomLogger;
+import hsvi.HSVIAlgorithm;
 import pomdpproblem.POMDPProblem;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class MDPUBInitializer {
+
+    private static final Logger LOGGER = CustomLogger.getLogger(MDPUBInitializer.class.getName());
+
     private static final double EPS = 0.001;
     private static final int MAX_ITER_N = 10000; // TODO constant?
 
@@ -42,7 +48,7 @@ public class MDPUBInitializer {
         // https://github.com/trey0/zmdp/blob/master/src/pomdpBounds/FullObsUBInitializer.cc
         double[] alpha = valueIteration();
         HelperFunctions.copyArray(alpha, ubExtremePointsValues);
-        System.out.println("Initial UB points values: " + Arrays.toString(alpha)); // TODO print
+        LOGGER.finer("Initial UB points values: " + Arrays.toString(alpha));
     }
 
     public double[] getInitialUbExtremePointsValues() {

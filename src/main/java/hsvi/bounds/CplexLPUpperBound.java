@@ -1,16 +1,22 @@
 package hsvi.bounds;
 
 import hsvi.Config;
+import hsvi.CustomLogger.CustomLogger;
+import hsvi.HSVIAlgorithm;
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 /**
  * Created by wigos on 16.5.16.
  */
 public class CplexLPUpperBound extends UpperBound {
+
+    private static final Logger LOGGER = CustomLogger.getLogger(CplexLPUpperBound.class.getName());
+
     private IloCplex cplex;
     public static double RANDOMIZE = Double.NaN;
     public static boolean CACHED_CPLEX = true;
@@ -39,7 +45,7 @@ public class CplexLPUpperBound extends UpperBound {
             cplex = new IloCplex();
             cplex.setParam(IloCplex.IntParam.RootAlg, 2);
         } catch (IloException e) {
-            e.printStackTrace();
+            LOGGER.severe(e.toString());
             System.exit(10);
         }
         extremePoints = new UBPoint[dimension];
@@ -67,7 +73,7 @@ public class CplexLPUpperBound extends UpperBound {
                 cachedCplex.clearModel();
                 rebuildModel(new double[dimension]);
             } catch (IloException iloe) {
-                iloe.printStackTrace();
+                LOGGER.severe(iloe.toString());
                 System.exit(1);
             }
         }
@@ -106,7 +112,7 @@ public class CplexLPUpperBound extends UpperBound {
 
                         cachedLPMatrix.addColumn(var, ind, val);
                     } catch (IloException e) {
-                        e.printStackTrace();
+                        LOGGER.severe(e.toString());
                         System.exit(1);
                     }
                 }
@@ -141,7 +147,7 @@ public class CplexLPUpperBound extends UpperBound {
 
                         cachedLPMatrix.setNZs(rowind, colind, val);
                     } catch (IloException iloe) {
-                        iloe.printStackTrace();
+                        LOGGER.severe(iloe.toString());
                         System.exit(1);
                     }
                 }
@@ -166,7 +172,7 @@ public class CplexLPUpperBound extends UpperBound {
 
                     cachedLPMatrix.addColumn(var, ind, val);
                 } catch (IloException e) {
-                    e.printStackTrace();
+                    LOGGER.severe(e.toString());
                     System.exit(1);
                 }
             }
@@ -347,7 +353,8 @@ public class CplexLPUpperBound extends UpperBound {
 
             return value;
         } catch (IloException iloe) {
-            iloe.printStackTrace();
+            LOGGER.severe(iloe.toString());
+            System.exit(10);
         }
 
         return Double.NaN;

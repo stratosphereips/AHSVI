@@ -2,12 +2,17 @@ package hsvi.bounds;
 
 import helpers.HelperFunctions;
 import hsvi.Config;
+import hsvi.CustomLogger.CustomLogger;
+import hsvi.HSVIAlgorithm;
 import ilog.concert.*;
 import ilog.cplex.IloCplex;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public class LowerBound extends Bound {
+
+    private static final Logger LOGGER = CustomLogger.getLogger(LowerBound.class.getName());
 
     private List<LBAlphaVector> alphaVectors;
 
@@ -46,7 +51,7 @@ public class LowerBound extends Bound {
             return model.getValues(beliefVars);
 
         } catch (IloException e) {
-            e.printStackTrace();
+            LOGGER.severe(e.toString());
         }
 
         return null;
@@ -76,7 +81,7 @@ public class LowerBound extends Bound {
     }
 
     public void removePairwiseDominated() {
-        System.out.println("Removing pairwise dominated - LB");
+        LOGGER.finer("Removing pairwise dominated - LB");
         TreeSet<Integer> alphasToRemoveIndexes = new TreeSet<>();
         ArrayList<LBAlphaVector> alphas = new ArrayList<>(alphaVectors);
         int dominationState;
@@ -104,8 +109,8 @@ public class LowerBound extends Bound {
                 alphaVectors.add(alphas.get(i));
             }
         }
-        System.out.println("LB size before removing: " + alphas.size());
-        System.out.println("LB size after removing: " + alphaVectors.size());
+        LOGGER.finer("LB size before removing: " + alphas.size());
+        LOGGER.finer("LB size after removing: " + alphaVectors.size());
     }
 
     private Map<LBAlphaVector, IloNumExpr> initExprs(IloCplex model, IloNumVar[] beliefVars) throws IloException {
@@ -117,8 +122,8 @@ public class LowerBound extends Bound {
     }
 
     public void removeAlphasWithNoValuesAboveOthers() {
-        System.out.println("Removing alphas with no values above others - LB");
-        System.out.println("LB size before removing: " + alphaVectors.size());
+        LOGGER.finer("Removing alphas with no values above others - LB");
+        LOGGER.finer("LB size before removing: " + alphaVectors.size());
         IloCplex model = null;
         ListIterator<LBAlphaVector> listIt = alphaVectors.listIterator();
         try {
@@ -138,9 +143,9 @@ public class LowerBound extends Bound {
                 }
                 model.addEq(model.sum(beliefVars), 1.0);
                 model.solve();
-                //System.out.println("Model status: " + model.getStatus());
+                //LOGGER.finer("Model status: " + model.getStatus());
                 if (model.getStatus() == IloCplex.Status.Infeasible) {
-                    //System.out.println("REMOVIIIIING");
+                    //LOGGER.finer("REMOVIIIIING");
                     listIt.remove();
                 }
                 model.clearModel();
@@ -149,14 +154,14 @@ public class LowerBound extends Bound {
             e.printStackTrace();
             System.exit(10);
         }
-        System.out.println("LB size after removing: " + alphaVectors.size());
+        LOGGER.finer("LB size after removing: " + alphaVectors.size());
     }
 
     int pruningCounts = 0;
 
     @Override
     public void removeDominated() {
-        System.out.println("Removing dominated - LB");
+        LOGGER.finer("Removing dominated - LB");
         /*
         if (pruningCounts % 20 == 0) {
             removeAlphasWithNoValuesAboveOthers();
@@ -179,7 +184,7 @@ public class LowerBound extends Bound {
 
     public void printVectors() {
         for (LBAlphaVector vector : alphaVectors) {
-            System.out.println(vector);
+            LOGGER.finer(vector.toString());
         }
     }
 

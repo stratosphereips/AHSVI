@@ -109,6 +109,18 @@ public class HelperFunctions {
         return infN;
     }
 
+    public static int indexOfMax(double[] arr) {
+        double maxValue = Double.NEGATIVE_INFINITY;
+        int maxI = 0;
+        for (int i = 0; i < arr.length; ++i) {
+            if (arr[i] > maxValue) {
+                maxValue = arr[i];
+                maxI = i;
+            }
+        }
+        return maxI;
+    }
+
     public static void fillArray(double[] arr, double num) {
         Arrays.fill(arr, num);
     }
