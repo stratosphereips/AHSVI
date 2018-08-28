@@ -6,14 +6,34 @@ import java.util.Arrays;
 public class Computer {
     private static final String PORTS_DELIM = ";";
 
-    private final ArrayList<String> openPorts;
+    private final boolean real;
+    private final ArrayList<String> ports;
 
     public Computer(String portsString) {
-        openPorts = parsePortsString(portsString);
+        real = true;
+        ports = parsePortsString(portsString);
     }
 
-    public ArrayList<String> getOpenPorts() {
-        return openPorts;
+    public Computer(boolean real, String[] ports) {
+        this.real = real;
+        this.ports = new ArrayList<>(Arrays.asList(ports));
+    }
+
+    public Computer(String[] ports) {
+        this(false, ports);
+    }
+
+    public Computer(Computer oldComputer) {
+        real = oldComputer.real;
+        ports = new ArrayList<>(oldComputer.ports);
+    }
+
+    public boolean isReal() {
+        return real;
+    }
+
+    public ArrayList<String> getPorts() {
+        return ports;
     }
 
     private ArrayList<String> parsePortsString(String portsString) {
@@ -24,7 +44,8 @@ public class Computer {
     @Override
     public String toString() {
         return "Computer{" +
-                "openPorts=" + openPorts +
+                "real=" + real +
+                ", ports=" + ports +
                 '}';
     }
 }
