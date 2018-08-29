@@ -37,6 +37,26 @@ public class Network {
         return probability;
     }
 
+    public boolean containsComputerAtIndex(int i) {
+        return i < (realComputers.size() + honeyComputers.size());
+    }
+
+    public boolean computerAtIndexIsReal(int i) {
+        return i < realComputers.size();
+    }
+
+    public boolean computerAtIndexIsHoney(int i) {
+        return i >= realComputers.size() && i < (realComputers.size() + honeyComputers.size());
+    }
+
+    public Computer getComputerAtIndex(int i) {
+        return (i < realComputers.size() ? realComputers.get(i) : honeyComputers.get(i - realComputers.size()));
+    }
+
+    public boolean portAtIndexInComputerExists(int computerI, int portI) {
+        return containsComputerAtIndex(computerI) && getComputerAtIndex(computerI).containsPortAtIndex(portI);
+    }
+
     public void setProbability(double probability) {
         this.probability = probability;
     }
@@ -64,10 +84,24 @@ public class Network {
         return computersList;
     }
 
+    private String createStringRepresentation() {
+        StringBuilder sb = new StringBuilder("N{");
+        for (int computerI = 0; computerI < realComputers.size(); ++computerI) {
+            sb.append(realComputers.get(computerI).getStringRepresentation()).append(computerI < realComputers.size() - 1 ? "," : "");
+        }
+        for (int computerI = 0; computerI < honeyComputers.size(); ++computerI) {
+            sb.append(",").append(honeyComputers.get(computerI).getStringRepresentation());
+        }
+        return sb.append("}").toString();
+    }
+
+    public String getStringRepresentation() {
+        return createStringRepresentation();
+    }
+
     @Override
     public String toString() {
         return "Network{" +
-                "probability=" + probability +
                 ", realComputers=" + realComputers +
                 ", honeyComputers=" + honeyComputers +
                 '}';

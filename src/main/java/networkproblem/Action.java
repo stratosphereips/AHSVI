@@ -1,34 +1,55 @@
 package networkproblem;
 
 public class Action {
-    private final String name;
-    private final String targetComputer;
-    private final String targetPort;
 
-    public Action(String name, String targetComputer, String targetPort) {
-        this.name = name;
-        this.targetComputer = targetComputer;
-        this.targetPort = targetPort;
+    private final ActionType actionType;
+    private final String name;
+    private final int targetComputerI;
+    private final int targetPortI;
+
+    public Action(ActionType actionType, int targetComputerI, int targetPortI) {
+        this.targetComputerI = targetComputerI;
+        this.targetPortI = targetPortI;
+        this.actionType = actionType;
+        this.name = actionType + "(" + targetComputerI + "," + targetPortI + ")";
+    }
+
+    public ActionType getActionType() {
+        return actionType;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getTargetComputer() {
-        return targetComputer;
+    public int getTargetComputerI() {
+        return targetComputerI;
     }
 
-    public String getTargetPort() {
-        return targetPort;
+    public int getTargetPortI() {
+        return targetPortI;
     }
 
     @Override
     public String toString() {
         return "Action{" +
-                "name='" + name + '\'' +
-                ", targetComputer='" + targetComputer + '\'' +
-                ", targetPort='" + targetPort + '\'' +
+                "name='" + name +
                 '}';
+    }
+
+    public enum ActionType {
+        PROBE("probe"),
+        ATTACK("attack");
+
+        private final String text;
+
+        ActionType(String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
     }
 }

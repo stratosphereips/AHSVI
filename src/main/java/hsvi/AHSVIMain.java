@@ -25,7 +25,7 @@ public class AHSVIMain {
         int honeypotsCount = 2;
         int maxNumberOfDetectedAttacksAllowed = 0;
         double successfulAttackReward = 1.0;
-        double probeSuccessProbability = 0.5;
+        double probeSuccessProbability = 0.75;
         double probeCost = 0.5;
         double epsilon = 1e-10;
 
