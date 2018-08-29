@@ -102,7 +102,7 @@ public class Network {
     @Override
     public String toString() {
         return "Network{" +
-                ", realComputers=" + realComputers +
+                "realComputers=" + realComputers +
                 ", honeyComputers=" + honeyComputers +
                 '}';
     }

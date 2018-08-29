@@ -82,7 +82,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         try {
             BufferedReader bf = new BufferedReader(new FileReader(pathToNetworkFile));
             readFile(bf);
-
+            System.out.println("Read network: " + networks);
         } catch (FileNotFoundException e) {
             System.err.println("File " + pathToNetworkFile + " does not exist");
             System.exit(20);
@@ -104,19 +104,26 @@ public class NetworkDistrubitionToPOMDPConverter {
         for (Network net : networks) {
             net.setProbability(net.getProbability() / totalNetworksSum);
         }
-        System.out.println(networks);
     }
 
     private void createPomdpProblem() {
         System.out.println("Creating POMDP problem");
         ArrayList<State> states = createStates();
-        HashMap<String, Integer> statesToIndexes = createStateToIndexMap(states);
+        ArrayList<String> statesNames = createStatesNames(states);
+        HashMap<String, Integer> statesToIndexes = createStateToIndexMap(statesNames);
         ArrayList<Action> actions = createActions(states);
-        HashMap<String, Integer> actionsToIndexes = createActionToIndexMap(actions);
+        ArrayList<String> actionsNames = creatActionsNames(actions);
+        HashMap<String, Integer> actionsToIndexes = createActionToIndexMap(actionsNames);
         double[][][] transitionFunction = createTransitionFunction(states, actions);
         ArrayList<String> observations = createObservations();
         HashMap<String, Integer> observationsToIndexes = createObservationToIndexMap(observations);
         double[][][] observationProbabilities = createObservationProbabilities(states, actions, observationsToIndexes);
+        double[][][][] rewards = createRewardFunction(states, actions, observationsToIndexes);
+        pomdpProblem = new POMDPProblem(statesNames, statesToIndexes,
+                actionsNames, actionsToIndexes, transitionFunction,
+                observations, observationsToIndexes, observationProbabilities,
+                rewards,
+                discount);
     }
 
     private ArrayList<State> createStates() {
@@ -141,8 +148,11 @@ public class NetworkDistrubitionToPOMDPConverter {
         }
         long virtualNetworksWith1ComputerCount = HelperFunctions.factorial(productionPortsCount) /
                 (HelperFunctions.factorial(honeypotsCount) * HelperFunctions.factorial(productionPortsCount - honeypotsCount));
-        long virtualNetworksWith2ComputersCount = HelperFunctions.factorial(productionPortsCount - 1 + honeypotsCount) /
-                (HelperFunctions.factorial(honeypotsCount) * HelperFunctions.factorial(productionPortsCount - 1));
+        long virtualNetworksWith2ComputersCount = 0;
+        if (honeypotsCount > 1) {
+            virtualNetworksWith2ComputersCount = HelperFunctions.factorial(productionPortsCount - 1 + honeypotsCount) /
+                    (HelperFunctions.factorial(honeypotsCount) * HelperFunctions.factorial(productionPortsCount - 1));
+        }
         int virtualNetworksCount = (int) (virtualNetworksWith1ComputerCount + virtualNetworksWith2ComputersCount);
         int statesCount = networks.size() * virtualNetworksCount + 1;
 
@@ -155,32 +165,44 @@ public class NetworkDistrubitionToPOMDPConverter {
 
         Network network;
         String[] portsComb;
-        // #virtual_computers = 1
-        portsComb = new String[honeypotsCount];
-        for (Network inputNetwork : networks) {
-            for (int port1 = 0; port1 < productionPortsCount; ++port1) {
-                for (int port2 = port1 + 1; port2 < productionPortsCount; ++port2) {
-                    portsComb[0] = productionPorts.get(port1);
-                    portsComb[1] = productionPorts.get(port2);
+        if (honeypotsCount == 1) {
+            portsComb = new String[1];
+            for (Network inputNetwork : networks) {
+                for (int port = 0; port < productionPortsCount; ++port) {
+                    portsComb[0] = productionPorts.get(port);
                     network = new Network(inputNetwork);
                     network.addHoneyComputer(new Computer(false, portsComb));
                     states.add(new State(network));
                 }
             }
-        }
-
-        // #virtual_computers = 2
-        portsComb = new String[1];
-        if (honeypotsCount >= 2) {
+        } else if (honeypotsCount == 2) {
+            // #virtual_computers = 1
+            portsComb = new String[2];
             for (Network inputNetwork : networks) {
                 for (int port1 = 0; port1 < productionPortsCount; ++port1) {
-                    for (int port2 = port1; port2 < productionPortsCount; ++port2) {
-                        network = new Network(inputNetwork);
+                    for (int port2 = port1 + 1; port2 < productionPortsCount; ++port2) {
                         portsComb[0] = productionPorts.get(port1);
-                        network.addHoneyComputer(new Computer(false, portsComb));
-                        portsComb[0] = productionPorts.get(port2);
+                        portsComb[1] = productionPorts.get(port2);
+                        network = new Network(inputNetwork);
                         network.addHoneyComputer(new Computer(false, portsComb));
                         states.add(new State(network));
+                    }
+                }
+            }
+
+            // #virtual_computers = 2
+            portsComb = new String[1];
+            if (honeypotsCount >= 2) {
+                for (Network inputNetwork : networks) {
+                    for (int port1 = 0; port1 < productionPortsCount; ++port1) {
+                        for (int port2 = port1; port2 < productionPortsCount; ++port2) {
+                            network = new Network(inputNetwork);
+                            portsComb[0] = productionPorts.get(port1);
+                            network.addHoneyComputer(new Computer(false, portsComb));
+                            portsComb[0] = productionPorts.get(port2);
+                            network.addHoneyComputer(new Computer(false, portsComb));
+                            states.add(new State(network));
+                        }
                     }
                 }
             }
@@ -191,10 +213,20 @@ public class NetworkDistrubitionToPOMDPConverter {
         return states;
     }
 
-    private HashMap<String, Integer> createStateToIndexMap(ArrayList<State> states) {
-        HashMap<String, Integer> stateNamesToIndex = new HashMap<>(states.size() * 2);
-        for (int s = 0; s < states.size(); ++s) {
-            stateNamesToIndex.put(states.get(s).getName(), s);
+    private ArrayList<String> createStatesNames(ArrayList<State> states) {
+        ArrayList<String> statesNames = new ArrayList<>(states.size());
+        for (State state : states) {
+            statesNames.add(state.getName());
+        }
+        return statesNames;
+    }
+
+    private HashMap<String, Integer> createStateToIndexMap(ArrayList<String> statesNames) {
+        System.out.println("\tCreating states names");
+        HashMap<String, Integer> stateNamesToIndex = new HashMap<>(statesNames.size() * 2);
+        for (int s = 0; s < statesNames.size(); ++s) {
+            System.out.println("\t\t" + s + ": " + statesNames.get(s));
+            stateNamesToIndex.put(statesNames.get(s), s);
         }
         return stateNamesToIndex;
     }
@@ -232,10 +264,18 @@ public class NetworkDistrubitionToPOMDPConverter {
         return actions;
     }
 
-    private HashMap<String, Integer> createActionToIndexMap(ArrayList<Action> actions) {
+    private ArrayList<String> creatActionsNames(ArrayList<Action> actions) {
+        ArrayList<String> actionsNames = new ArrayList<>(actions.size());
+        for (Action action : actions) {
+            actionsNames.add(action.getName());
+        }
+        return actionsNames;
+    }
+
+    private HashMap<String, Integer> createActionToIndexMap(ArrayList<String> actions) {
         HashMap<String, Integer> actionNamesToIndex = new HashMap<>(actions.size() * 2);
         for (int a = 0; a < actions.size(); ++a) {
-            actionNamesToIndex.put(actions.get(a).getName(), a);
+            actionNamesToIndex.put(actions.get(a), a);
         }
         return actionNamesToIndex;
     }
@@ -286,7 +326,7 @@ public class NetworkDistrubitionToPOMDPConverter {
             }
         }
 
-
+        /*
         for (int a = 0; a < actions.size(); ++a) {
             System.out.println("\t\t" + actions.get(a));
             for (int s = 0; s < states.size(); ++s) {
@@ -297,21 +337,21 @@ public class NetworkDistrubitionToPOMDPConverter {
                 System.out.println();
             }
         }
+        */
 
         return transitionFunction;
     }
 
-    ArrayList<String> createObservations() {
+    private ArrayList<String> createObservations() {
         System.out.println("\tCreating observations");
-        ArrayList<String> observations = new ArrayList<>(Arrays.asList(new String[]{
-                Observation.ObservationType.NOTHING.toString(),
+        ArrayList<String> observations = new ArrayList<>(Arrays.asList(Observation.ObservationType.NOTHING.toString(),
                 Observation.ObservationType.REAL.toString(),
-                Observation.ObservationType.HONEYPOT.toString()}));
+                Observation.ObservationType.HONEYPOT.toString()));
         System.out.println("\t\tObservations: " + observations);
         return observations;
     }
 
-    HashMap<String, Integer> createObservationToIndexMap(ArrayList<String> observations) {
+    private HashMap<String, Integer> createObservationToIndexMap(ArrayList<String> observations) {
         HashMap<String, Integer> observationToIndex = new HashMap<>(observations.size() * 2);
         for (int o = 0; o < observations.size(); ++o) {
             observationToIndex.put(observations.get(o), o);
@@ -319,11 +359,11 @@ public class NetworkDistrubitionToPOMDPConverter {
         return observationToIndex;
     }
 
-    double[][][] createObservationProbabilities(ArrayList<State> states,
-                                                ArrayList<Action> actions,
-                                                HashMap<String, Integer> observationToIndex) {
+    private double[][][] createObservationProbabilities(ArrayList<State> states,
+                                                        ArrayList<Action> actions,
+                                                        HashMap<String, Integer> observationToIndex) {
         System.out.println("\tCreating observation probabilities");
-        double[][][] observationProbabilities = new double[states.size()][actions.size()][observationToIndex.size()];
+        double[][][] observationProbabilities = new double[actions.size()][states.size()][observationToIndex.size()];
         int nothingObsI = observationToIndex.get(Observation.ObservationType.NOTHING.toString());
         int realObsI = observationToIndex.get(Observation.ObservationType.REAL.toString());
         int honeypotObsI = observationToIndex.get(Observation.ObservationType.HONEYPOT.toString());
@@ -332,25 +372,24 @@ public class NetworkDistrubitionToPOMDPConverter {
         Action action;
         State state;
         Network network;
-        for (int s_ = 0; s_ < finalS; ++s_) {
-            state = states.get(s_);
-            network = state.getNetwork();
-            for (int a = 0; a < actions.size(); ++a) {
-                action = actions.get(a);
+        for (int a = 0; a < actions.size(); ++a) {
+            action = actions.get(a);
+            for (int s_ = 0; s_ < finalS; ++s_) {
+                state = states.get(s_);
+                network = state.getNetwork();
                 switch (action.getActionType()) {
                     case PROBE:
                         if (network.containsComputerAtIndex(action.getTargetComputerI()) &&
                                 network.getComputerAtIndex(action.getTargetComputerI()).containsPortAtIndex(action.getTargetPortI())) {
                             if (network.getComputerAtIndex(action.getTargetComputerI()).isReal()) {
                                 // TODO probe success probability for real computers, too?
-                                observationProbabilities[s_][a][realObsI] = probeSuccessProbability;
-                                observationProbabilities[s_][a][honeypotObsI] = 1.0 - probeSuccessProbability;
+                                observationProbabilities[a][s_][realObsI] = 1.0;
                             } else {
-                                observationProbabilities[s_][a][honeypotObsI] = probeSuccessProbability;
-                                observationProbabilities[s_][a][realObsI] = 1.0 - probeSuccessProbability;
+                                observationProbabilities[a][s_][honeypotObsI] = probeSuccessProbability;
+                                observationProbabilities[a][s_][realObsI] = 1.0 - probeSuccessProbability;
                             }
                         } else {
-                            observationProbabilities[s_][a][nothingObsI] = 1.0;
+                            observationProbabilities[a][s_][nothingObsI] = 1.0;
                         }
                         break;
                     case ATTACK:
@@ -359,17 +398,17 @@ public class NetworkDistrubitionToPOMDPConverter {
                                 network.getComputerAtIndex(action.getTargetComputerI()).containsPortAtIndex(action.getTargetPortI())) {
                             if (network.computerAtIndexIsReal(action.getTargetComputerI())) {
                                 // TODO attack real computer - what you should see
-                                observationProbabilities[s_][a][realObsI] = 1.0;
+                                observationProbabilities[a][s_][realObsI] = 1.0;
                             } else { // attack on a honeypot
                                 if (state.getNumberOfAttackOnHoneypot() + 1 <= maxNumberOfDetectedAttacksAllowed) {
                                     // TODO attacked honeypot but you are not busted yet - what you should see
                                     System.exit(12345);
                                 } else { // you attacked honeypot for the last time...
-                                    observationProbabilities[s_][a][nothingObsI] = 1.0;
+                                    observationProbabilities[a][s_][nothingObsI] = 1.0;
                                 }
                             }
                         } else {
-                            observationProbabilities[s_][a][nothingObsI] = 1.0;
+                            observationProbabilities[a][s_][nothingObsI] = 1.0;
                         }
                         break;
                     default:
@@ -381,21 +420,57 @@ public class NetworkDistrubitionToPOMDPConverter {
 
         // cannot see anything from final state
         for (int a = 0; a < actions.size(); ++a) {
-            observationProbabilities[finalS][a][nothingObsI] = 1.0;
+            observationProbabilities[a][finalS][nothingObsI] = 1.0;
         }
 
-
+        /*
         for (int s_ = 0; s_ < states.size(); ++s_) {
             System.out.println("\t\t" + states.get(s_));
             for (int a = 0; a < actions.size(); ++a) {
                 System.out.print("\t\t");
                 for (int o = 0; o < observationToIndex.size(); ++o) {
-                    System.out.print(observationProbabilities[s_][a][o] + " ");
+                    System.out.print(observationProbabilities[a][s_][o] + " ");
                 }
                 System.out.println();
             }
         }
+        */
 
         return observationProbabilities;
+    }
+
+    private double[][][][] createRewardFunction(ArrayList<State> states,
+                                                ArrayList<Action> actions,
+                                                HashMap<String, Integer> observationToIndex) {
+        System.out.println("\tCreating reward function");
+        double[][][][] rewards = new double[actions.size()][states.size()][states.size()][observationToIndex.size()];
+
+        int realObsI = observationToIndex.get(Observation.ObservationType.REAL.toString());
+
+        int finalS = states.size() - 1;
+        Action action;
+        for (int a = 0; a < actions.size(); ++a) {
+            action = actions.get(a);
+            for (int s = 0; s < finalS; ++s) {
+                switch (action.getActionType()) {
+                    case PROBE:
+                        for (int o = 0; o < observationToIndex.size(); ++o) {
+                            rewards[a][s][s][o] = probeCost;
+                        }
+                        break;
+                    case ATTACK:
+                        // does the computer and the port we attack even exist at this index in this network?
+                        // TODO reward for succesful attack on real computer/port, but what about loss?
+                        // TODO ^^ do we need observation detected?
+                        rewards[a][s][s][realObsI] = successfulAttackReward;
+                        break;
+                    default:
+                        System.out.println("No such action");
+                        System.exit(21313);
+                }
+            }
+        }
+
+        return rewards;
     }
 }

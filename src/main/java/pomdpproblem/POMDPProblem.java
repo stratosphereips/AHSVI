@@ -68,6 +68,24 @@ public class POMDPProblem {
                 false);
     }
 
+    public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
+                        List<String> actionNames, HashMap<String, Integer> actionNameToIndex,
+                        double[][][] transitionProbabilities,
+                        List<String> observationNames, HashMap<String, Integer> observationNameToIndex,
+                        double[][][] observationProbabilities,
+                        double[][][][] rewards,
+                        double discount) {
+        this(stateNames, stateNameToIndex,
+                actionNames, actionNameToIndex,
+                transitionProbabilities,
+                observationNames, observationNameToIndex,
+                observationProbabilities,
+                rewards,
+                discount,
+                null,
+                false);
+    }
+
     public int getNumberOfStates() {
         return stateNames.size();
     }

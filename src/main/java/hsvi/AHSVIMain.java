@@ -20,13 +20,15 @@ public class AHSVIMain {
 
         String networksFileName = DATA1;
 
-
         double discount = 0.9;
-        int honeypotsCount = 2;
+
+        int honeypotsCount = 1;
+
         int maxNumberOfDetectedAttacksAllowed = 0;
         double successfulAttackReward = 1.0;
-        double probeSuccessProbability = 0.75;
-        double probeCost = 0.5;
+        double probeSuccessProbability = 0.2;
+        double probeCost = -0.5;
+
         double epsilon = 1e-10;
 
         // =======================================
@@ -47,8 +49,8 @@ public class AHSVIMain {
         // =======================================
         // =               A H S V I             =
 
-        //AHSVIAlgorithm ahsviAlgorithm = new AHSVIAlgorithm(pomdpProblem, epsilon);
-        //ahsviAlgorithm.solve();
+        AHSVIAlgorithm ahsviAlgorithm = new AHSVIAlgorithm(pomdpProblem, epsilon);
+        ahsviAlgorithm.solve();
 
     }
 }
