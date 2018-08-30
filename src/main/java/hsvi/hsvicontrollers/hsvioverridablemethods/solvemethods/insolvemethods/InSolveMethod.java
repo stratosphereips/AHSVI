@@ -9,6 +9,6 @@ public class InSolveMethod extends OverridableMethod {
 
     @Override
     public void callMethod() {
-
+        hsvi.incrementSolveIteration();
     }
 }

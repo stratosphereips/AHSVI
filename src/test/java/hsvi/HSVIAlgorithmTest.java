@@ -1,13 +1,18 @@
-package ahsvi;
+package hsvi;
 
-import hsvi.Config;
-import hsvi.HSVIAlgorithm;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.InSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.PostSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods.PreSolveMethod;
+import hsvi.hsvicontrollers.terminators.exploreterminators.ExploreTerminator;
+import hsvi.hsvicontrollers.terminators.exploreterminators.HSVIExploreTerminatorClassic;
+import hsvi.hsvicontrollers.terminators.solveterminators.HSVISolveTerminatorClassic;
+import hsvi.hsvicontrollers.terminators.solveterminators.SolveTerminator;
 import pomdpproblem.pomdpdummyproblems.POMDPDummyProblems;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class AHSVITest {
+public class HSVIAlgorithmTest {
     // generic tests
     public void testUBGteUB(double ub, double lb) {
         assertTrue("UB must be greater than or equal LB",
@@ -25,7 +30,21 @@ public class AHSVITest {
 
     public HSVIAlgorithm testDummyPOMDP(String pomdpProblemName, double epsilon, Double expectedValueInInitBelief) {
         System.out.printf("* TESTING \"%s\" DUMMY POMDP PROBLEM\n", pomdpProblemName);
-        HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm(new POMDPDummyProblems(pomdpProblemName).load(), epsilon);
+
+        PreSolveMethod preSolveMethod = new PreSolveMethod();
+        InSolveMethod inSolveMethod = new InSolveMethod();
+        PostSolveMethod postSolveMethod = new PostSolveMethod();
+        SolveTerminator solveTerminator = new HSVISolveTerminatorClassic();
+        ExploreTerminator exploreTerminator = new HSVIExploreTerminatorClassic();
+        HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm.HSVIAlgorithmBuilder()
+                .setEpsilon(epsilon)
+                .setPomdpProblem(new POMDPDummyProblems(pomdpProblemName).load())
+                .setPreSolveMethod(preSolveMethod)
+                .setInSolveMethod(inSolveMethod)
+                .setPostSolveMethod(postSolveMethod)
+                .setSolveTerminator(solveTerminator)
+                .setExploreTerminator(exploreTerminator)
+                .build();
         hsviAlgorithm.solve();
         testUBGteUB(hsviAlgorithm.getUBValueInInitBelief(), hsviAlgorithm.getLBValueInInitBelief());
         testUBCloseToLB(hsviAlgorithm.getUBValueInInitBelief(), hsviAlgorithm.getLBValueInInitBelief(), epsilon);

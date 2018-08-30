@@ -11,5 +11,6 @@ public class PreSolveMethod extends OverridableMethod {
     @Override
     public void callMethod() {
         hsvi.initValueFunctions();
+        hsvi.initSolveIteration();
     }
 }

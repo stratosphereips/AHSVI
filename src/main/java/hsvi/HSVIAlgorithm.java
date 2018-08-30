@@ -6,6 +6,12 @@ import java.util.logging.*;
 import hsvi.CustomLogger.CustomLogger;
 import helpers.HelperFunctions;
 import hsvi.bounds.*;
+import hsvi.hsvicontrollers.HSVIController;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.InSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.PostSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods.PreSolveMethod;
+import hsvi.hsvicontrollers.terminators.exploreterminators.ExploreTerminator;
+import hsvi.hsvicontrollers.terminators.solveterminators.SolveTerminator;
 import pomdpproblem.POMDPProblem;
 
 /**
@@ -15,16 +21,20 @@ public class HSVIAlgorithm {
 
     private static final Logger LOGGER = CustomLogger.getLogger(HSVIAlgorithm.class.getName());
 
-    protected final POMDPProblem pomdpProblem;
-    protected final double epsilon;
+    private  final POMDPProblem pomdpProblem;
+    private  final double epsilon;
+    private  final HSVIController hsviController;
 
-    protected LowerBound lbFunction;
-    protected UpperBound ubFunction;
+    private  LowerBound lbFunction;
+    private  UpperBound ubFunction;
 
-    public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon) {
+    private  int solveIteration;
+
+    public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon, HSVIController hsviController) {
         this.pomdpProblem = pomdpProblem;
         this.epsilon = epsilon;
-        this.initValueFunctions();
+        this.hsviController = hsviController;
+        this.hsviController.init(this);
     }
 
     public POMDPProblem getPomdpProblem() {
@@ -33,6 +43,18 @@ public class HSVIAlgorithm {
 
     public double getEpsilon() {
         return epsilon;
+    }
+
+    public int getSolveIteration() {
+        return solveIteration;
+    }
+
+    public void initSolveIteration() {
+        this.solveIteration = 0;
+    }
+
+    public void incrementSolveIteration() {
+        ++this.solveIteration;
     }
 
     public double getLBValueInBelief(double[] belief) {
@@ -116,15 +138,14 @@ public class HSVIAlgorithm {
         return ubFunction.getValue(belief) - lbFunction.getValue(belief);
     }
 
-    private boolean widthLargerThanEps(double[] belief) {
-        return width(belief) > epsilon;
-    }
-
     public void solve() {
+        hsviController.callPreSolveMethod();
+
         long timeStarted = System.currentTimeMillis();
         int iter = 0;
         double lbVal, ubVal, lastLbVal, lastUbVal;
 
+        initValueFunctions();
         LOGGER.fine("###########################################################################");
         LOGGER.fine("###########################################################################");
         ++iter;
@@ -135,8 +156,10 @@ public class HSVIAlgorithm {
         LOGGER.fine("UB in init belief: " + ubVal);
         lastLbVal = lbVal;
         lastUbVal = ubVal;
-        while (widthLargerThanEps(pomdpProblem.initBelief)) {
-            explore(pomdpProblem.initBelief, 0, iter);
+
+        while (!hsviController.shouldSolveTerminate(pomdpProblem.initBelief)) {
+            explore(pomdpProblem.initBelief, 0);
+            hsviController.callInSolveMethod();
 
             LOGGER.fine("###########################################################################");
             LOGGER.fine("###########################################################################");
@@ -164,19 +187,16 @@ public class HSVIAlgorithm {
             lastLbVal = lbVal;
             lastUbVal = ubVal;
         }
+        hsviController.callPostSolveMethod();
     }
 
-    protected boolean exploreEndingCondition(double[] belief, int t, int iteration) {
-        return width(belief) <= epsilon * Math.pow(pomdpProblem.discount, -t);
-    }
-
-    protected void explore(double[] belief, int t, int iteration) {
-        if (exploreEndingCondition(belief, t, iteration)) {// TODO float instability
+    private void explore(double[] belief, int t) {
+        if (hsviController.shouldExploreTerminate(belief, t)) {// TODO float instability
             return;
         }
         double[] nextBelief = select(belief, t);
         if (nextBelief != null) {
-            explore(nextBelief, t + 1, iteration);
+            explore(nextBelief, t + 1);
         }
 
         updateLb(belief);
@@ -310,8 +330,57 @@ public class HSVIAlgorithm {
         }
     }
 
-    public static class HSVIAlgorithmBuilder {
+    static class HSVIAlgorithmBuilder {
         private double epsilon;
         private POMDPProblem pomdpProblem;
+        private PreSolveMethod preSolveMethod;
+        private InSolveMethod inSolveMethod;
+        private PostSolveMethod postSolveMethod;
+        private SolveTerminator solveTerminator;
+        private ExploreTerminator exploreTerminator;
+
+        HSVIAlgorithmBuilder() {
+        }
+
+        HSVIAlgorithmBuilder setEpsilon(double epsilon) {
+            this.epsilon = epsilon;
+            return this;
+        }
+
+        HSVIAlgorithmBuilder setPomdpProblem(POMDPProblem pomdpProblem) {
+            this.pomdpProblem = pomdpProblem;
+            return this;
+        }
+
+        HSVIAlgorithmBuilder setPreSolveMethod(PreSolveMethod preSolveMethod) {
+            this.preSolveMethod = preSolveMethod;
+            return this;
+        }
+
+        HSVIAlgorithmBuilder setInSolveMethod(InSolveMethod inSolveMethod) {
+            this.inSolveMethod = inSolveMethod;
+            return this;
+        }
+
+        HSVIAlgorithmBuilder setPostSolveMethod(PostSolveMethod postSolveMethod) {
+            this.postSolveMethod = postSolveMethod;
+            return this;
+        }
+
+        HSVIAlgorithmBuilder setSolveTerminator(SolveTerminator solveTerminator) {
+            this.solveTerminator = solveTerminator;
+            return this;
+        }
+
+        HSVIAlgorithmBuilder setExploreTerminator(ExploreTerminator exploreTerminator) {
+            this.exploreTerminator = exploreTerminator;
+            return this;
+        }
+
+        HSVIAlgorithm build() {
+            return new HSVIAlgorithm(pomdpProblem,
+                    epsilon,
+                    new HSVIController(preSolveMethod, inSolveMethod, postSolveMethod, solveTerminator, exploreTerminator));
+        }
     }
 }
