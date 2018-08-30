@@ -18,8 +18,6 @@ public abstract class Bound {
 
     public abstract double getValue(double[] belief);
 
-    public abstract double[] getBeliefInMinimum();
-
     public abstract void removeDominated();
 
     public double growthRatioSinceLastPruning() {

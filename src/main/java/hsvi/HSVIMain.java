@@ -68,6 +68,5 @@ public class HSVIMain {
 
         System.out.println("Final utility LB: " + hsviAlgorithm.getLBValueInInitBelief());
         System.out.println("Final utility UB: " + hsviAlgorithm.getUBValueInInitBelief());
-
     }
 }

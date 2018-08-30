@@ -30,33 +30,6 @@ public class LowerBound extends Bound {
         return alphaVectors.size();
     }
 
-    @Override
-    public double[] getBeliefInMinimum() {
-        // TODO make this smarter
-        try {
-            IloCplex model = new IloCplex();
-            model.setOut(null);
-            model.setWarning(null);
-
-            IloNumExpr obj = model.numVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-            IloNumVar[] beliefVars = model.numVarArray(dimension, 0.0, 1.0);
-            model.addEq(model.sum(beliefVars), 1.0);
-
-            for (LBAlphaVector alphaVector : alphaVectors) {
-                model.addGe(obj, model.scalProd(alphaVector.vector, beliefVars));
-            }
-            //model.exportModel("min_belief.lp");
-            model.addMinimize(obj);
-            model.solve();
-            return model.getValues(beliefVars);
-
-        } catch (IloException e) {
-            LOGGER.severe(e.toString());
-        }
-
-        return null;
-    }
-
     public boolean contains(double[] vector) {
         for (LBAlphaVector alpha : alphaVectors) {
             if (Arrays.equals(alpha.vector, vector)) {
@@ -80,7 +53,7 @@ public class LowerBound extends Bound {
         return state;
     }
 
-    public void removePairwiseDominated() {
+    private void removePairwiseDominated() {
         LOGGER.finer("Removing pairwise dominated - LB");
         TreeSet<Integer> alphasToRemoveIndexes = new TreeSet<>();
         ArrayList<LBAlphaVector> alphas = new ArrayList<>(alphaVectors);
@@ -124,7 +97,7 @@ public class LowerBound extends Bound {
     public void removeAlphasWithNoValuesAboveOthers() {
         LOGGER.finer("Removing alphas with no values above others - LB");
         LOGGER.finer("LB size before removing: " + alphaVectors.size());
-        IloCplex model = null;
+        IloCplex model;
         ListIterator<LBAlphaVector> listIt = alphaVectors.listIterator();
         try {
             model = new IloCplex();
@@ -157,20 +130,10 @@ public class LowerBound extends Bound {
         LOGGER.finer("LB size after removing: " + alphaVectors.size());
     }
 
-    int pruningCounts = 0;
-
     @Override
     public void removeDominated() {
         LOGGER.finer("Removing dominated - LB");
-        /*
-        if (pruningCounts % 20 == 0) {
-            removeAlphasWithNoValuesAboveOthers();
-        } else {
-            removePairwiseDominated();
-        }
-        */
         removePairwiseDominated();
-        ++pruningCounts;
     }
 
     public void addAlphaVector(LBAlphaVector alphaVector) {

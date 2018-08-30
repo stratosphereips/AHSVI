@@ -26,7 +26,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     private double probeCost;
 
     private POMDPProblem pomdpProblem;
-    private int[] statesGroupsIds;
+    private ArrayList<LinkedList<Integer>> groups;
     private double[] groupsProbabilities;
 
     public NetworkDistrubitionToPOMDPConverter(String fileName) {
@@ -46,7 +46,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         probeCost = DEFAULT_PROBE_COST;
 
         pomdpProblem = null;
-        statesGroupsIds = null;
+        groups = null;
         groupsProbabilities = null;
     }
 
@@ -57,8 +57,8 @@ public class NetworkDistrubitionToPOMDPConverter {
         return pomdpProblem;
     }
 
-    public int[] getStatesGroupsIds() {
-        return statesGroupsIds;
+    public ArrayList<LinkedList<Integer>> getStatesGroupsIds() {
+        return groups;
     }
 
     public double[] getGroupsProbabilities() {
@@ -118,10 +118,12 @@ public class NetworkDistrubitionToPOMDPConverter {
             totalNetworksSum += network.getProbability();
         }
         bf.close();
+        groups = new ArrayList<>(networks.size());
         groupsProbabilities = new double[networks.size()];
         for (int networkI = 0; networkI < networks.size(); ++networkI) {
             networks.get(networkI).setProbability(networks.get(networkI).getProbability() / totalNetworksSum);
             groupsProbabilities[networkI] = networks.get(networkI).getProbability();
+            groups.add(new LinkedList<>());
         }
     }
 
@@ -181,7 +183,6 @@ public class NetworkDistrubitionToPOMDPConverter {
         System.out.println("\t\tTotal number of POMDP states: " + statesCount);
 
         ArrayList<State> states = new ArrayList<>(statesCount);
-        statesGroupsIds = new int[statesCount];
 
         Network network;
         String[] portsComb;
@@ -192,7 +193,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                     portsComb[0] = productionPorts.get(port);
                     network = new Network(networks.get(inputNetworkI));
                     network.addHoneyComputer(new Computer(false, portsComb));
-                    statesGroupsIds[states.size()] = inputNetworkI;
+                    groups.get(inputNetworkI).add(states.size());
                     states.add(new State(network));
                 }
             }
@@ -206,7 +207,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                         portsComb[1] = productionPorts.get(port2);
                         network = new Network(networks.get(inputNetworkI));
                         network.addHoneyComputer(new Computer(false, portsComb));
-                        statesGroupsIds[states.size()] = inputNetworkI;
+                        groups.get(inputNetworkI).add(states.size());
                         states.add(new State(network));
                     }
                 }
@@ -223,7 +224,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                             network.addHoneyComputer(new Computer(false, portsComb));
                             portsComb[0] = productionPorts.get(port2);
                             network.addHoneyComputer(new Computer(false, portsComb));
-                            statesGroupsIds[states.size()] = inputNetworkI;
+                            groups.get(inputNetworkI).add(states.size());
                             states.add(new State(network));
                         }
                     }
@@ -232,7 +233,6 @@ public class NetworkDistrubitionToPOMDPConverter {
         }
 
         // add final state
-        statesGroupsIds[states.size()] = -1;
         states.add(new State());
         return states;
     }

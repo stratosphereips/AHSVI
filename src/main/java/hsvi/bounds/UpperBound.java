@@ -34,20 +34,6 @@ public abstract class UpperBound extends Bound {
         return points.size();
     }
 
-    @Override
-    public double[] getBeliefInMinimum() {
-        // TODO just find min among UB points?
-        double[] beliefInMin = null;
-        double minValue = Double.POSITIVE_INFINITY;
-        for (UBPoint point : points) {
-            if (point.getValue() < minValue) {
-                minValue = point.getValue();
-                beliefInMin = point.getBelief();
-            }
-        }
-        return beliefInMin;
-    }
-
     public abstract void addPoint(double[] belief, double value, int a);
 
     public abstract void addPoint(UBPoint point, int a);

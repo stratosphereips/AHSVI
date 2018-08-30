@@ -1,13 +1,18 @@
 package hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods;
 
-public class AHSVIPreSolveMethod extends PreSolveMethod {
-    public AHSVIPreSolveMethod() {
-        super();
-    }
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.AHSVIMinValueFinder;
 
+public class AHSVIPreSolveMethod extends PreSolveMethod {
+    private final AHSVIMinValueFinder minValueFinder;
+
+    public AHSVIPreSolveMethod(AHSVIMinValueFinder minValueFinder) {
+        super();
+        this.minValueFinder = minValueFinder;
+    }
     @Override
     public void callMethod() {
         super.callMethod();
-        hsvi.getPomdpProblem().setInitBelief(hsvi.getLbFunction().getBeliefInMinimum());
+        minValueFinder.setHsvi(hsvi);
+        hsvi.getPomdpProblem().setInitBelief(minValueFinder.findBeliefInLbMin());
     }
 }

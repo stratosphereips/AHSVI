@@ -4,9 +4,7 @@ import hsvi.Config;
 import helpers.HelperFunctions;
 import hsvi.CustomLogger.CustomLogger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class SawtoothUpperBound extends UpperBound {
@@ -14,10 +12,12 @@ public class SawtoothUpperBound extends UpperBound {
     private static final Logger LOGGER = CustomLogger.getLogger(SawtoothUpperBound.class.getName());
 
     private final double[] extremePointsValues;
+    private final ArrayList<UBPoint> extremePoints;
 
     public SawtoothUpperBound(int dimension) {
         super(dimension);
         extremePointsValues = new double[dimension];
+        extremePoints = new ArrayList<>(dimension);
     }
 
     public SawtoothUpperBound(int dimension, double[] initialUBExtremePointsValues) {
@@ -28,6 +28,12 @@ public class SawtoothUpperBound extends UpperBound {
     @Override
     protected void initUBPoints(double[] initialUBExtremePointsValues) {
         HelperFunctions.copyArray(initialUBExtremePointsValues, extremePointsValues);
+        double[] belief;
+        for (int s = 0; s < dimension; ++s) {
+            belief = new double[dimension];
+            belief[s] = 1.0;
+            extremePoints.add(new UBPoint(belief, extremePointsValues[s]));
+        }
     }
 
     @Override
@@ -36,10 +42,18 @@ public class SawtoothUpperBound extends UpperBound {
     }
 
     @Override
+    public List<UBPoint> getPoints() {
+        LinkedList<UBPoint> allPoints = new LinkedList<>(super.getPoints());
+        allPoints.addAll(extremePoints);
+        return allPoints;
+    }
+
+    @Override
     public void addPoint(UBPoint point, int a) {
         int extremePointId = extremePointId(point.belief);
         if (extremePointId > -1) {
             extremePointsValues[extremePointId] = point.value;
+            extremePoints.get(extremePointId).setValue(point.value);
             return;
         }
         points.add(point);
@@ -49,27 +63,6 @@ public class SawtoothUpperBound extends UpperBound {
     @Override
     public void addPoint(double[] belief, double value, int a) {
         addPoint(new UBPoint(belief, value, a));
-    }
-
-    @Override
-    public double[] getBeliefInMinimum() {
-        double[] beliefInMin = null;
-        double minValue = Double.POSITIVE_INFINITY;
-        for (UBPoint point : points) {
-            if (point.getValue() < minValue) {
-                minValue = point.getValue();
-                beliefInMin = point.getBelief();
-            }
-        }
-        for (int s = 1; s < dimension; ++s) {
-            if (extremePointsValues[s] < minValue) {
-                minValue = extremePointsValues[s];
-                beliefInMin = new double[dimension];
-                beliefInMin[s] = 1;
-            }
-        }
-
-        return beliefInMin;
     }
 
     private double getValueInducedByInnerPoint(UBPoint innerPoint, double[] belief,
