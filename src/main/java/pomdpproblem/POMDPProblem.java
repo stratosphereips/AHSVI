@@ -98,6 +98,10 @@ public class POMDPProblem {
         return observationNames.size();
     }
 
+    public void setInitBelief(double[] initBelief) {
+        this.initBelief = initBelief;
+    }
+
     public boolean areTransitionProbabilitiesCorrect() {
         double probSum;
         for (int s = 0; s < getNumberOfStates(); ++s) {

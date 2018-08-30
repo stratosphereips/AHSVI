@@ -2,6 +2,10 @@ package helpers;
 
 import hsvi.bounds.LBAlphaVector;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -139,5 +143,13 @@ public class HelperFunctions {
             result *= factor;
         }
         return result;
+    }
+
+    public static int countLinesInFile(String fileName) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        int linesCount = 0;
+        while (reader.readLine() != null) linesCount++;
+        reader.close();
+        return linesCount;
     }
 }

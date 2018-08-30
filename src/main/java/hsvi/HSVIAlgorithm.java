@@ -25,7 +25,14 @@ public class HSVIAlgorithm {
         this.pomdpProblem = pomdpProblem;
         this.epsilon = epsilon;
         this.initValueFunctions();
+    }
 
+    public POMDPProblem getPomdpProblem() {
+        return pomdpProblem;
+    }
+
+    public double getEpsilon() {
+        return epsilon;
     }
 
     public double getLBValueInBelief(double[] belief) {
@@ -52,7 +59,7 @@ public class HSVIAlgorithm {
         return getUBValueInBelief(pomdpProblem.initBelief);
     }
 
-    private void initValueFunctions() {
+    public void initValueFunctions() {
         lbFunction = initLowerBound();
         ubFunction = initUpperBound();
     }
@@ -105,7 +112,7 @@ public class HSVIAlgorithm {
         return lbFunction.getDotProdArgMax(belief);
     }
 
-    private double width(double[] belief) {
+    public double width(double[] belief) {
         return ubFunction.getValue(belief) - lbFunction.getValue(belief);
     }
 
