@@ -19,4 +19,8 @@ public abstract class SolveTerminator extends Terminator {
     }
 
     protected abstract boolean shouldTerminate(SolveTerminatorParameters exploreTerminatorParameters);
+
+    public SolveTerminatorParameters createParametersContainer() {
+        return new SolveTerminatorParameters();
+    }
 }

@@ -1,4 +1,4 @@
-package hsvi.hsvicontrollers.terminators.exploreterminators;
+package hsvi.hsvicontrollers.terminators.solveterminators;
 
 import hsvi.hsvicontrollers.terminators.solveterminators.SolveTerminator;
 import hsvi.hsvicontrollers.terminators.solveterminators.SolveTerminatorParameters;
@@ -10,6 +10,6 @@ public class HSVISolveTerminatorClassic extends SolveTerminator {
 
     @Override
     protected boolean shouldTerminate(SolveTerminatorParameters exploreTerminatorParameters) {
-        return hsvi.width(exploreTerminatorParameters.getBelief()) <= epsilon;
+        return hsvi.width(exploreTerminatorParameters.getBelief()) <= hsvi.getEpsilon();
     }
 }

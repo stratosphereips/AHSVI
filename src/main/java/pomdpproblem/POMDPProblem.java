@@ -98,6 +98,10 @@ public class POMDPProblem {
         return observationNames.size();
     }
 
+    public double getDiscount() {
+        return discount;
+    }
+
     public void setInitBelief(double[] initBelief) {
         this.initBelief = initBelief;
     }

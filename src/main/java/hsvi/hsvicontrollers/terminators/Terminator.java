@@ -1,19 +1,12 @@
 package hsvi.hsvicontrollers.terminators;
 
 import hsvi.HSVIAlgorithm;
+import hsvi.hsvicontrollers.InitializableWithHSVI;
 
-public abstract class Terminator {
-    protected HSVIAlgorithm hsvi;
-    protected double epsilon;
+public abstract class Terminator extends InitializableWithHSVI {
 
     public Terminator() {
-        hsvi = null;
-        this.epsilon = -1;
-    }
-
-    public void init(HSVIAlgorithm hsvi, double epsilon) {
-        this.hsvi = hsvi;
-        this.epsilon = epsilon;
+        super();
     }
 
     public abstract boolean shouldTerminate(TerminatorParameters terminatorParameters);

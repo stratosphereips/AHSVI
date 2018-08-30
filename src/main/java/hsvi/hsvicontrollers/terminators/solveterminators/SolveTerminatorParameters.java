@@ -13,7 +13,7 @@ public class SolveTerminatorParameters implements TerminatorParameters {
         return belief;
     }
 
-    public TerminatorParameters setBelief(double[] belief) {
+    public TerminatorParameters setParamaters(double[] belief) {
         this.belief = belief;
         return this;
     }
