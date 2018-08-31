@@ -1,9 +1,8 @@
 package hsvi.hsvicontrollers.terminators;
 
-import hsvi.HSVIAlgorithm;
-import hsvi.hsvicontrollers.InitializableWithHSVI;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.InitializableWithHSVIAndSolveMethods;
 
-public abstract class Terminator extends InitializableWithHSVI {
+public abstract class Terminator extends InitializableWithHSVIAndSolveMethods {
 
     public Terminator() {
         super();

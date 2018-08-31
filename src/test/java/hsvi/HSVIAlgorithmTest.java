@@ -1,7 +1,10 @@
 package hsvi;
 
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.HSVIInSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.InSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.HSVIPostSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.PostSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods.HSVIPreSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods.PreSolveMethod;
 import hsvi.hsvicontrollers.terminators.exploreterminators.ExploreTerminator;
 import hsvi.hsvicontrollers.terminators.exploreterminators.HSVIExploreTerminatorClassic;
@@ -31,9 +34,9 @@ public class HSVIAlgorithmTest {
     public HSVIAlgorithm testDummyPOMDP(String pomdpProblemName, double epsilon, Double expectedValueInInitBelief) {
         System.out.printf("* TESTING \"%s\" DUMMY POMDP PROBLEM\n", pomdpProblemName);
 
-        PreSolveMethod preSolveMethod = new PreSolveMethod();
-        InSolveMethod inSolveMethod = new InSolveMethod();
-        PostSolveMethod postSolveMethod = new PostSolveMethod();
+        PreSolveMethod preSolveMethod = new HSVIPreSolveMethod();
+        InSolveMethod inSolveMethod = new HSVIInSolveMethod();
+        PostSolveMethod postSolveMethod = new HSVIPostSolveMethod();
         SolveTerminator solveTerminator = new HSVISolveTerminatorClassic();
         ExploreTerminator exploreTerminator = new HSVIExploreTerminatorClassic();
         HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm.HSVIAlgorithmBuilder()

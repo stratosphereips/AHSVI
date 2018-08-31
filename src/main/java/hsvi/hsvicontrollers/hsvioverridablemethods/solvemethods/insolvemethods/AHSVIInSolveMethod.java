@@ -1,10 +1,14 @@
 package hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods;
 
+import hsvi.CustomLogger.CustomLogger;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.AHSVIMinValueFinder;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class AHSVIInSolveMethod extends InSolveMethod {
+
+    private static final Logger LOGGER = CustomLogger.getLogger();
 
     private final AHSVIMinValueFinder minValueFinder;
 
@@ -18,6 +22,6 @@ public class AHSVIInSolveMethod extends InSolveMethod {
         super.callMethod();
         hsvi.getPomdpProblem().setInitBelief(minValueFinder.findBeliefInLbMin());
 
-        System.out.println(Arrays.toString(hsvi.getPomdpProblem().initBelief));
+
     }
 }

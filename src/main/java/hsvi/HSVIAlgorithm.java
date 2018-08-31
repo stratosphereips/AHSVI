@@ -7,6 +7,7 @@ import hsvi.CustomLogger.CustomLogger;
 import helpers.HelperFunctions;
 import hsvi.bounds.*;
 import hsvi.hsvicontrollers.HSVIController;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.SolveMethods;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.InSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.PostSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods.PreSolveMethod;
@@ -21,14 +22,12 @@ public class HSVIAlgorithm {
 
     private static final Logger LOGGER = CustomLogger.getLogger();
 
-    private  final POMDPProblem pomdpProblem;
-    private  final double epsilon;
-    private  final HSVIController hsviController;
+    private final POMDPProblem pomdpProblem;
+    private final double epsilon;
+    private final HSVIController hsviController;
 
-    private  LowerBound lbFunction;
-    private  UpperBound ubFunction;
-
-    private  int solveIteration;
+    private LowerBound lbFunction;
+    private UpperBound ubFunction;
 
     public HSVIAlgorithm(POMDPProblem pomdpProblem, double epsilon, HSVIController hsviController) {
         this.pomdpProblem = pomdpProblem;
@@ -43,18 +42,6 @@ public class HSVIAlgorithm {
 
     public double getEpsilon() {
         return epsilon;
-    }
-
-    public int getSolveIteration() {
-        return solveIteration;
-    }
-
-    public void initSolveIteration() {
-        this.solveIteration = 0;
-    }
-
-    public void incrementSolveIteration() {
-        ++this.solveIteration;
     }
 
     public double getLBValueInBelief(double[] belief) {
@@ -140,52 +127,9 @@ public class HSVIAlgorithm {
 
     public void solve() {
         hsviController.callPreSolveMethod();
-
-        long timeStarted = System.currentTimeMillis();
-        int iter = 0;
-        double lbVal, ubVal, lastLbVal, lastUbVal;
-
-        initValueFunctions();
-        LOGGER.fine("###########################################################################");
-        LOGGER.fine("###########################################################################");
-        ++iter;
-        lbVal = lbFunction.getValue(pomdpProblem.initBelief);
-        ubVal = ubFunction.getValue(pomdpProblem.initBelief);
-        LOGGER.fine("Solve iteration: " + iter);
-        LOGGER.fine("LB in init belief: " + lbVal);
-        LOGGER.fine("UB in init belief: " + ubVal);
-        lastLbVal = lbVal;
-        lastUbVal = ubVal;
-
         while (!hsviController.shouldSolveTerminate(pomdpProblem.initBelief)) {
             explore(pomdpProblem.initBelief, 0);
             hsviController.callInSolveMethod();
-
-            LOGGER.fine("###########################################################################");
-            LOGGER.fine("###########################################################################");
-            ++iter;
-            /*
-            if (iter % 1000 == 0) {
-                LOGGER.finer("Removing lines that are not above any other line");
-                lbFunction.removeAlphasWithNoValuesAboveOthers();
-            }
-            */
-            lbVal = lbFunction.getValue(pomdpProblem.initBelief);
-            ubVal = ubFunction.getValue(pomdpProblem.initBelief);
-            LOGGER.fine("Solve iteration: " + iter);
-            LOGGER.fine("LB in init belief: " + lbVal);
-            LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n", (lbVal - lastLbVal)));
-            LOGGER.finer("LB size: " + lbFunction.getAlphaVectors().size());
-            LOGGER.fine("UB in init belief: " + ubVal);
-            LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n", (ubVal - lastUbVal)));
-            LOGGER.finer("UB size: " + ubFunction.getPoints().size());
-            LOGGER.finer("Running time so far [s]: " + ((System.currentTimeMillis() - timeStarted) / 1000));
-            assert ubVal <= lastUbVal;
-            assert lbVal >= lastLbVal;
-            LOGGER.fine("===========================================================================");
-
-            lastLbVal = lbVal;
-            lastUbVal = ubVal;
         }
         hsviController.callPostSolveMethod();
     }
@@ -380,7 +324,8 @@ public class HSVIAlgorithm {
         HSVIAlgorithm build() {
             return new HSVIAlgorithm(pomdpProblem,
                     epsilon,
-                    new HSVIController(preSolveMethod, inSolveMethod, postSolveMethod, solveTerminator, exploreTerminator));
+                    new HSVIController(new SolveMethods(preSolveMethod, inSolveMethod, postSolveMethod),
+                            solveTerminator, exploreTerminator));
         }
     }
 }

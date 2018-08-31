@@ -1,32 +1,23 @@
 package hsvi.hsvicontrollers;
 
 import hsvi.HSVIAlgorithm;
-import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.InSolveMethod;
-import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.PostSolveMethod;
-import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods.PreSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.SolveMethods;
 import hsvi.hsvicontrollers.terminators.exploreterminators.ExploreTerminator;
 import hsvi.hsvicontrollers.terminators.exploreterminators.ExploreTerminatorParameters;
 import hsvi.hsvicontrollers.terminators.solveterminators.SolveTerminator;
 import hsvi.hsvicontrollers.terminators.solveterminators.SolveTerminatorParameters;
 
 public class HSVIController {
-
-    private final PreSolveMethod preSolveMethod;
-    private final InSolveMethod inSolveMethod;
-    private final PostSolveMethod postSolveMethod;
+    private final SolveMethods solveMethods;
     private final SolveTerminator solveTerminator;
     private final SolveTerminatorParameters solveTerminatorParameters;
     private final ExploreTerminator exploreTerminator;
     private final ExploreTerminatorParameters exploreTerminatorParameters;
 
-    public HSVIController(PreSolveMethod preSolveMethod,
-                          InSolveMethod inSolveMethod,
-                          PostSolveMethod postSolveMethod,
+    public HSVIController(SolveMethods solveMethods,
                           SolveTerminator solveTerminator,
                           ExploreTerminator exploreTerminator) {
-        this.preSolveMethod = preSolveMethod;
-        this.inSolveMethod = inSolveMethod;
-        this.postSolveMethod = postSolveMethod;
+        this.solveMethods = solveMethods;
         this.solveTerminator = solveTerminator;
         this.solveTerminatorParameters = solveTerminator.createParametersContainer();
         this.exploreTerminator = exploreTerminator;
@@ -34,23 +25,21 @@ public class HSVIController {
     }
 
     public void init(HSVIAlgorithm hsvi) {
-        preSolveMethod.init(hsvi);
-        inSolveMethod.init(hsvi);
-        postSolveMethod.init(hsvi);
-        solveTerminator.init(hsvi);
-        exploreTerminator.init(hsvi);
+        solveMethods.init(hsvi);
+        solveTerminator.init(hsvi, solveMethods);
+        exploreTerminator.init(hsvi, solveMethods);
     }
 
     public void callPreSolveMethod() {
-        preSolveMethod.callMethod();
+        solveMethods.callPreSolveMethod();
     }
 
     public void callInSolveMethod() {
-        inSolveMethod.callMethod();
+        solveMethods.callInSolveMethod();
     }
 
     public void callPostSolveMethod() {
-        postSolveMethod.callMethod();
+        solveMethods.callPostSolveMethod();
     }
 
     public boolean shouldSolveTerminate(double[] belief) {

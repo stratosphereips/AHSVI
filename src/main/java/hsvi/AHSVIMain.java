@@ -3,6 +3,8 @@ package hsvi;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.AHSVIMinValueFinder;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.AHSVIInSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.InSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.AHSVIPostSolveMethod;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.HSVIPostSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethods.PostSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods.AHSVIPreSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods.PreSolveMethod;
@@ -63,7 +65,7 @@ public class AHSVIMain {
 
         PreSolveMethod preSolveMethod = new AHSVIPreSolveMethod(minValueFinder);
         InSolveMethod inSolveMethod = new AHSVIInSolveMethod(minValueFinder);
-        PostSolveMethod postSolveMethod = new PostSolveMethod();
+        PostSolveMethod postSolveMethod = new AHSVIPostSolveMethod();
         SolveTerminator solveTerminator = new AHSVISolveTerminatorAbsoluteDiff(minValueFinder);
         ExploreTerminator exploreTerminator = new AHSVIExploreTerminatorClassic();
 
