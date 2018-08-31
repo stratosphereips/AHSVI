@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
  */
 public class CplexLPUpperBound extends UpperBound {
 
-    private static final Logger LOGGER = CustomLogger.getLogger(CplexLPUpperBound.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger();
 
     private IloCplex cplex;
     public static double RANDOMIZE = Double.NaN;

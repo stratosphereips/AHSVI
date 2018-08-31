@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class LBInitializer {
 
-    private static final Logger LOGGER = CustomLogger.getLogger(LBInitializer.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger();
 
     private POMDPProblem pomdpProblem;
     LBAlphaVector alphaVector;

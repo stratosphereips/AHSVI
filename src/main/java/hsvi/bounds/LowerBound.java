@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 public class LowerBound extends Bound {
 
-    private static final Logger LOGGER = CustomLogger.getLogger(LowerBound.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger();
 
     private List<LBAlphaVector> alphaVectors;
 

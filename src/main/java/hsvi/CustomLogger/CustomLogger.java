@@ -8,16 +8,18 @@ import java.util.logging.Logger;
 
 public class CustomLogger {
 
-    public static Logger getLogger(String className) {
-        Logger LOGGER = Logger.getLogger(className);
+    private static Logger LOGGER = null;
 
-        LOGGER.setLevel(Config.LOGGING_LEVEL);
-        LOGGER.setUseParentHandlers(false);
-        Handler hndl = new ConsoleHandler();
-        hndl.setFormatter(new CustomRecordFormatter());
-        hndl.setLevel(Config.LOGGING_LEVEL);
-        LOGGER.addHandler(hndl);
-
+    public static Logger getLogger() {
+        if (LOGGER == null) {
+            LOGGER = Logger.getLogger("LOGGER");
+            LOGGER.setLevel(Config.LOGGING_LEVEL);
+            LOGGER.setUseParentHandlers(false);
+            Handler hndl = new ConsoleHandler();
+            hndl.setFormatter(new CustomRecordFormatter());
+            hndl.setLevel(Config.LOGGING_LEVEL);
+            LOGGER.addHandler(hndl);
+        }
         return LOGGER;
     }
 }

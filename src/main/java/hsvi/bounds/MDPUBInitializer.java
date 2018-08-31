@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class MDPUBInitializer {
 
-    private static final Logger LOGGER = CustomLogger.getLogger(MDPUBInitializer.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger();
 
     private static final double EPS = 0.001;
     private static final int MAX_ITER_N = 10000; // TODO constant?

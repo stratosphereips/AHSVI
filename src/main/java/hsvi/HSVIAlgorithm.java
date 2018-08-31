@@ -19,7 +19,7 @@ import pomdpproblem.POMDPProblem;
  */
 public class HSVIAlgorithm {
 
-    private static final Logger LOGGER = CustomLogger.getLogger(HSVIAlgorithm.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger();
 
     private  final POMDPProblem pomdpProblem;
     private  final double epsilon;

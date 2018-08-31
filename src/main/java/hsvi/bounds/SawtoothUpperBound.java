@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 public class SawtoothUpperBound extends UpperBound {
 
-    private static final Logger LOGGER = CustomLogger.getLogger(SawtoothUpperBound.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger();
 
     private final double[] extremePointsValues;
     private final ArrayList<UBPoint> extremePoints;
