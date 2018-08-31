@@ -18,10 +18,21 @@ public class AHSVIInSolveMethod extends InSolveMethod {
     }
 
     @Override
-    public void callMethod() {
-        super.callMethod();
+    public void overridableMethod() {
         hsvi.getPomdpProblem().setInitBelief(minValueFinder.findBeliefInLbMin());
 
-
+        double[] minLbValueBelief = minValueFinder.findBeliefInLbMin();
+        hsvi.getPomdpProblem().setInitBelief(minLbValueBelief);
+        solveMethodsContainer.setNewLbVal(hsvi.getLBValueInBelief(minLbValueBelief));
+        double[] minUbValueBelief = minValueFinder.findBeliefInUbMin();
+        solveMethodsContainer.setNewLbVal(hsvi.getUBValueInBelief(minUbValueBelief));
+        LOGGER.finer("LB min belief: " + Arrays.toString(minLbValueBelief));
+        LOGGER.fine("LB min value: " + solveMethodsContainer.getLbVal());
+        LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n",
+                (solveMethodsContainer.getLbVal() - solveMethodsContainer.getLastLbVal())));
+        LOGGER.finer("UB min belief: " + Arrays.toString(minUbValueBelief));
+        LOGGER.fine("UB min value: " + solveMethodsContainer.getUbVal());
+        LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n",
+                (solveMethodsContainer.getUbVal() - solveMethodsContainer.getLastUbVal())));
     }
 }

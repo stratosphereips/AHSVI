@@ -48,7 +48,7 @@ public class MDPUBInitializer {
         // https://github.com/trey0/zmdp/blob/master/src/pomdpBounds/FullObsUBInitializer.cc
         double[] alpha = valueIteration();
         HelperFunctions.copyArray(alpha, ubExtremePointsValues);
-        LOGGER.finer("Initial UB points values: " + Arrays.toString(alpha));
+        LOGGER.finest("Initial UB points values: " + Arrays.toString(alpha));
     }
 
     public double[] getInitialUbExtremePointsValues() {

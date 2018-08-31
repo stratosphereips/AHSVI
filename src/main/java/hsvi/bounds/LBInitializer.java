@@ -41,7 +41,7 @@ public class LBInitializer {
         double R_ = maxRa / (1 - pomdpProblem.discount);
         double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
         HelperFunctions.fillArray(initAlpha, R_);
-        LOGGER.finer("Initial LB alpha vector: " + Arrays.toString(initAlpha));
+        LOGGER.finest("Initial LB alpha vector: " + Arrays.toString(initAlpha));
 
        alphaVector = new LBAlphaVector(initAlpha, bestA);
     }

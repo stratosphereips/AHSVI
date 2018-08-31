@@ -13,8 +13,7 @@ public class HSVIPreSolveMethod extends PreSolveMethod{
     }
 
     @Override
-    public void callMethod() {
-        super.callMethod();
+    public void overridableMethod() {
         solveMethodsContainer.setLbVal(hsvi.getLBValueInInitBelief());
         solveMethodsContainer.setUbVal(hsvi.getUBValueInInitBelief());
         LOGGER.fine("LB in init belief: " + solveMethodsContainer.getLbVal());

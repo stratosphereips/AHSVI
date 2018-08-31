@@ -13,7 +13,7 @@ public class HSVIPostSolveMethod extends PostSolveMethod {
     }
 
     @Override
-    public void callMethod() {
-        super.callMethod();
+    public void overridableMethod() {
+
     }
 }

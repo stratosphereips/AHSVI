@@ -66,7 +66,7 @@ public class AHSVIMain {
         PreSolveMethod preSolveMethod = new AHSVIPreSolveMethod(minValueFinder);
         InSolveMethod inSolveMethod = new AHSVIInSolveMethod(minValueFinder);
         PostSolveMethod postSolveMethod = new AHSVIPostSolveMethod();
-        SolveTerminator solveTerminator = new AHSVISolveTerminatorAbsoluteDiff(minValueFinder);
+        SolveTerminator solveTerminator = new AHSVISolveTerminatorAbsoluteDiff();
         ExploreTerminator exploreTerminator = new AHSVIExploreTerminatorClassic();
 
         // =======================================

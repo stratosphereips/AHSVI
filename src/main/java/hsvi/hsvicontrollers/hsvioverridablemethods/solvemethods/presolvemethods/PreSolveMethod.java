@@ -1,12 +1,11 @@
 package hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.presolvemethods;
 
 import hsvi.CustomLogger.CustomLogger;
-import hsvi.hsvicontrollers.hsvioverridablemethods.OverridableMethod;
-import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.InitializableWithHSVIAndSolveMethods;
+import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.SolveMethod;
 
 import java.util.logging.Logger;
 
-public abstract class PreSolveMethod extends InitializableWithHSVIAndSolveMethods implements OverridableMethod {
+public abstract class PreSolveMethod extends SolveMethod {
 
     private static final Logger LOGGER = CustomLogger.getLogger();
 
@@ -15,7 +14,7 @@ public abstract class PreSolveMethod extends InitializableWithHSVIAndSolveMethod
     }
 
     @Override
-    public void callMethod() {
+    public void solveStageSpecificMethod() {
         hsvi.initValueFunctions();
 
         LOGGER.fine("###########################################################################");

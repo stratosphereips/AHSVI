@@ -54,7 +54,7 @@ public class LowerBound extends Bound {
     }
 
     private void removePairwiseDominated() {
-        LOGGER.finer("Removing pairwise dominated - LB");
+        LOGGER.finest("Removing pairwise dominated - LB");
         TreeSet<Integer> alphasToRemoveIndexes = new TreeSet<>();
         ArrayList<LBAlphaVector> alphas = new ArrayList<>(alphaVectors);
         int dominationState;
@@ -82,8 +82,8 @@ public class LowerBound extends Bound {
                 alphaVectors.add(alphas.get(i));
             }
         }
-        LOGGER.finer("LB size before removing: " + alphas.size());
-        LOGGER.finer("LB size after removing: " + alphaVectors.size());
+        LOGGER.finest("LB size before removing: " + alphas.size());
+        LOGGER.finest("LB size after removing: " + alphaVectors.size());
     }
 
     private Map<LBAlphaVector, IloNumExpr> initExprs(IloCplex model, IloNumVar[] beliefVars) throws IloException {
@@ -95,8 +95,8 @@ public class LowerBound extends Bound {
     }
 
     public void removeAlphasWithNoValuesAboveOthers() {
-        LOGGER.finer("Removing alphas with no values above others - LB");
-        LOGGER.finer("LB size before removing: " + alphaVectors.size());
+        LOGGER.finest("Removing alphas with no values above others - LB");
+        LOGGER.finest("LB size before removing: " + alphaVectors.size());
         IloCplex model;
         ListIterator<LBAlphaVector> listIt = alphaVectors.listIterator();
         try {
@@ -116,9 +116,9 @@ public class LowerBound extends Bound {
                 }
                 model.addEq(model.sum(beliefVars), 1.0);
                 model.solve();
-                //LOGGER.finer("Model status: " + model.getStatus());
+                //LOGGER.finest("Model status: " + model.getStatus());
                 if (model.getStatus() == IloCplex.Status.Infeasible) {
-                    //LOGGER.finer("REMOVIIIIING");
+                    //LOGGER.finest("REMOVIIIIING");
                     listIt.remove();
                 }
                 model.clearModel();
@@ -127,12 +127,12 @@ public class LowerBound extends Bound {
             e.printStackTrace();
             System.exit(10);
         }
-        LOGGER.finer("LB size after removing: " + alphaVectors.size());
+        LOGGER.finest("LB size after removing: " + alphaVectors.size());
     }
 
     @Override
     public void removeDominated() {
-        LOGGER.finer("Removing dominated - LB");
+        LOGGER.finest("Removing dominated - LB");
         removePairwiseDominated();
     }
 
@@ -147,7 +147,7 @@ public class LowerBound extends Bound {
 
     public void printVectors() {
         for (LBAlphaVector vector : alphaVectors) {
-            LOGGER.finer(vector.toString());
+            LOGGER.finest(vector.toString());
         }
     }
 

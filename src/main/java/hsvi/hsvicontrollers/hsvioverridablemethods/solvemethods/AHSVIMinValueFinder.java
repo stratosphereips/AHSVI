@@ -3,6 +3,7 @@ package hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods;
 import hsvi.HSVIAlgorithm;
 import hsvi.bounds.LBAlphaVector;
 import hsvi.bounds.UBPoint;
+import hsvi.hsvicontrollers.InitializableWithHSVI;
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
@@ -11,8 +12,7 @@ import ilog.cplex.IloCplex;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class AHSVIMinValueFinder {
-    private HSVIAlgorithm hsvi;
+public class AHSVIMinValueFinder extends InitializableWithHSVI {
     private final ArrayList<LinkedList<Integer>> statesGroups;
     private final double[] groupsProbabilities;
 
@@ -78,6 +78,7 @@ public class AHSVIMinValueFinder {
 
             model.addEq(model.sum(coefVars), 1.0);
             model.addEq(model.sum(beliefVars), 1.0);
+            model.addEq(beliefVars[beliefVars.length - 1], 0.0);
 
             UBPoint point;
             IloNumExpr valueSum = model.constant(0);
