@@ -17,6 +17,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     private final String pathToNetworkFile;
 
     private ArrayList<Network> networks;
+    private HashMap<Integer, Integer> portsValues;
 
     private double discount;
     private int honeypotsCount;
@@ -149,11 +150,11 @@ public class NetworkDistrubitionToPOMDPConverter {
 
     private ArrayList<State> createStates() {
         System.out.println("\tCreating states");
-        HashSet<String> productionPortsSet = new HashSet<>();
+        HashSet<Integer> productionPortsSet = new HashSet<>();
         for (Network net : networks) {
             productionPortsSet.addAll(net.getOpenPortsInNetwork());
         }
-        ArrayList<String> productionPorts = new ArrayList<>(productionPortsSet);
+        ArrayList<Integer> productionPorts = new ArrayList<>(productionPortsSet);
         int productionPortsCount = productionPorts.size();
         System.out.println("\t\tProduction ports: " + productionPorts);
 
@@ -185,9 +186,9 @@ public class NetworkDistrubitionToPOMDPConverter {
         ArrayList<State> states = new ArrayList<>(statesCount);
 
         Network network;
-        String[] portsComb;
+        int[] portsComb;
         if (honeypotsCount == 1) {
-            portsComb = new String[1];
+            portsComb = new int[1];
             for (int inputNetworkI = 0; inputNetworkI < networks.size(); ++inputNetworkI) {
                 for (int port = 0; port < productionPortsCount; ++port) {
                     portsComb[0] = productionPorts.get(port);
@@ -199,7 +200,7 @@ public class NetworkDistrubitionToPOMDPConverter {
             }
         } else if (honeypotsCount == 2) {
             // #virtual_computers = 1
-            portsComb = new String[2];
+            portsComb = new int[2];
             for (int inputNetworkI = 0; inputNetworkI < networks.size(); ++inputNetworkI) {
                 for (int port1 = 0; port1 < productionPortsCount; ++port1) {
                     for (int port2 = port1 + 1; port2 < productionPortsCount; ++port2) {
@@ -214,7 +215,7 @@ public class NetworkDistrubitionToPOMDPConverter {
             }
 
             // #virtual_computers = 2
-            portsComb = new String[1];
+            portsComb = new int[1];
             if (honeypotsCount >= 2) {
                 for (int inputNetworkI = 0; inputNetworkI < networks.size(); ++inputNetworkI) {
                     for (int port1 = 0; port1 < productionPortsCount; ++port1) {

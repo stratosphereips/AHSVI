@@ -65,8 +65,8 @@ public class Network {
         honeyComputers.add(computer);
     }
 
-    public HashSet<String> getOpenPortsInNetwork() {
-        HashSet<String> openPortsInNetwork = new HashSet<>();
+    public HashSet<Integer> getOpenPortsInNetwork() {
+        HashSet<Integer> openPortsInNetwork = new HashSet<>();
         for (Computer computer : realComputers) {
             if (computer.isReal()) {
                 openPortsInNetwork.addAll(computer.getPorts());

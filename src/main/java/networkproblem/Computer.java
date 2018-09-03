@@ -8,8 +8,8 @@ public class Computer {
     private static final String PORTS_DELIM = ";";
 
     private final boolean real;
-    private final ArrayList<String> ports;
-    private final HashMap<String, Integer> portNamesToIndex;
+    private final ArrayList<Integer> ports;
+    private final HashMap<Integer, Integer> portNamesToIndex;
 
     public Computer(String portsString) {
         real = true;
@@ -17,14 +17,17 @@ public class Computer {
         portNamesToIndex = createPortNamesToIndexMap();
     }
 
-    public Computer(boolean real, String[] ports) {
+    public Computer(boolean real, int[] ports) {
         this.real = real;
-        this.ports = new ArrayList<>(Arrays.asList(ports));
+        this.ports = new ArrayList<>(ports.length);
+        for (int portI = 0; portI < ports.length; ++portI) {
+            this.ports.add(ports[portI]);
+        }
         portNamesToIndex = createPortNamesToIndexMap();
     }
 
-    private HashMap<String, Integer> createPortNamesToIndexMap() {
-        HashMap<String, Integer> portNamesToIndex = new HashMap<>();
+    private HashMap<Integer, Integer> createPortNamesToIndexMap() {
+        HashMap<Integer, Integer> portNamesToIndex = new HashMap<>();
         for (int portI = 0; portI < ports.size(); ++portI) {
             portNamesToIndex.put(ports.get(portI), portI);
         }
@@ -35,7 +38,7 @@ public class Computer {
         return real;
     }
 
-    public ArrayList<String> getPorts() {
+    public ArrayList<Integer> getPorts() {
         return ports;
     }
 
@@ -55,9 +58,13 @@ public class Computer {
         return i < ports.size();
     }
 
-    private ArrayList<String> parsePortsString(String portsString) {
-        String[] ports = portsString.split(PORTS_DELIM);
-        return new ArrayList<>(Arrays.asList(ports));
+    private ArrayList<Integer> parsePortsString(String portsString) {
+        String[] portsStringSplits = portsString.split(PORTS_DELIM);
+        ArrayList<Integer> portsList = new ArrayList<>(portsStringSplits.length);
+        for (int portI = 0; portI < portsStringSplits.length; ++portI) {
+            portsList.add(Integer.valueOf(portsStringSplits[portI]));
+        }
+        return portsList;
     }
 
     @Override
