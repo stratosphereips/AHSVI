@@ -9,28 +9,21 @@ public class Network {
     private static final String COMPUTERS_DELIM = "\\|";
 
     private double probability;
-    private final ArrayList<Computer> realComputers;
-    private final ArrayList<Computer> honeyComputers;
+    private final ArrayList<Computer> computers;
 
     public Network(String line) {
         String[] lineSplits = line.split(VALUES_DELIM, 2);
         probability = Double.parseDouble(lineSplits[0]);
-        realComputers = parseNetworkString(lineSplits[1]);
-        honeyComputers = null;
+        computers = parseNetworkString(lineSplits[1]);
     }
 
     public Network(Network oldNetwork) {
         probability = oldNetwork.probability;
-        realComputers = new ArrayList<>(oldNetwork.realComputers);
-        honeyComputers = (oldNetwork.honeyComputers == null ? new ArrayList<>() : new ArrayList<>(oldNetwork.honeyComputers));
+        computers = new ArrayList<>(oldNetwork.computers);
     }
 
-    public ArrayList<Computer> getRealComputers() {
-        return realComputers;
-    }
-
-    public ArrayList<Computer> getHoneyComputers() {
-        return honeyComputers;
+    public ArrayList<Computer> getComputers() {
+        return computers;
     }
 
     public double getProbability() {
@@ -38,36 +31,32 @@ public class Network {
     }
 
     public boolean containsComputerAtIndex(int i) {
-        return i < (realComputers.size() + honeyComputers.size());
+        return i < computers.size();
     }
 
     public boolean computerAtIndexIsReal(int i) {
-        return i < realComputers.size();
-    }
-
-    public boolean computerAtIndexIsHoney(int i) {
-        return i >= realComputers.size() && i < (realComputers.size() + honeyComputers.size());
+        return computers.get(i).isReal();
     }
 
     public Computer getComputerAtIndex(int i) {
-        return (i < realComputers.size() ? realComputers.get(i) : honeyComputers.get(i - realComputers.size()));
+        return computers.get(i);
     }
 
-    public boolean portAtIndexInComputerExists(int computerI, int portI) {
-        return containsComputerAtIndex(computerI) && getComputerAtIndex(computerI).containsPortAtIndex(portI);
+    public boolean portInComputerExists(int computerI, int port) {
+        return containsComputerAtIndex(computerI) && getComputerAtIndex(computerI).containsPort(port);
     }
 
     public void setProbability(double probability) {
         this.probability = probability;
     }
 
-    public void addHoneyComputer(Computer computer) {
-        honeyComputers.add(computer);
+    public void addComputer(Computer computer) {
+        computers.add(computer);
     }
 
     public HashSet<Integer> getOpenPortsInNetwork() {
         HashSet<Integer> openPortsInNetwork = new HashSet<>();
-        for (Computer computer : realComputers) {
+        for (Computer computer : computers) {
             if (computer.isReal()) {
                 openPortsInNetwork.addAll(computer.getPorts());
             }
@@ -85,12 +74,9 @@ public class Network {
     }
 
     private String createStringRepresentation() {
-        StringBuilder sb = new StringBuilder("N{");
-        for (int computerI = 0; computerI < realComputers.size(); ++computerI) {
-            sb.append(realComputers.get(computerI).getStringRepresentation()).append(computerI < realComputers.size() - 1 ? "," : "");
-        }
-        for (int computerI = 0; computerI < honeyComputers.size(); ++computerI) {
-            sb.append(",").append(honeyComputers.get(computerI).getStringRepresentation());
+        StringBuilder sb = new StringBuilder("{");
+        for (int computerI = 0; computerI < computers.size(); ++computerI) {
+            sb.append(computers.get(computerI).getStringRepresentation()).append(computerI < computers.size() - 1 ? "," : "");
         }
         return sb.append("}").toString();
     }
@@ -102,8 +88,7 @@ public class Network {
     @Override
     public String toString() {
         return "Network{" +
-                "realComputers=" + realComputers +
-                ", honeyComputers=" + honeyComputers +
+                "computers=" + computers +
                 '}';
     }
 }

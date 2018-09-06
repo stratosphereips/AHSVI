@@ -5,13 +5,13 @@ public class Action {
     private final ActionType actionType;
     private final String name;
     private final int targetComputerI;
-    private final int targetPortI;
+    private final int targetPort;
 
-    public Action(ActionType actionType, int targetComputerI, int targetPortI) {
+    public Action(ActionType actionType, int targetComputerI, int targetPort) {
         this.targetComputerI = targetComputerI;
-        this.targetPortI = targetPortI;
+        this.targetPort = targetPort;
         this.actionType = actionType;
-        this.name = actionType + "(" + targetComputerI + "," + targetPortI + ")";
+        this.name = actionType + "(" + targetComputerI + "," + targetPort + ")";
     }
 
     public ActionType getActionType() {
@@ -26,8 +26,8 @@ public class Action {
         return targetComputerI;
     }
 
-    public int getTargetPortI() {
-        return targetPortI;
+    public int getTargetPort() {
+        return targetPort;
     }
 
     @Override

@@ -2,7 +2,9 @@ package hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.postsolvemethod
 
 import hsvi.CustomLogger.CustomLogger;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class AHSVIPostSolveMethod extends PostSolveMethod {
 
@@ -14,6 +16,6 @@ public class AHSVIPostSolveMethod extends PostSolveMethod {
 
     @Override
     public void overridableMethod() {
-
+        //LOGGER.fine(hsvi.getPomdpProblem().stateNames.stream().collect(Collectors.joining("\n")));
     }
 }

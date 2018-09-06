@@ -1,5 +1,7 @@
 package networkproblem;
 
+import java.util.Collections;
+
 public class State {
 
     private final Network network;
@@ -9,6 +11,7 @@ public class State {
 
     public State(Network network, int numberOfAttackOnHoneypot) {
         this.network = network;
+        Collections.sort(this.network.getComputers());
         this.numberOfAttackOnHoneypot = numberOfAttackOnHoneypot;
         finalState = false;
         name = createName();

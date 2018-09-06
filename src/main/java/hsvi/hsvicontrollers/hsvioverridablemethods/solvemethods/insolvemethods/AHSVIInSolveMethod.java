@@ -5,6 +5,7 @@ import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.AHSVIMinValueFin
 
 import java.util.Arrays;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class AHSVIInSolveMethod extends InSolveMethod {
 
@@ -25,7 +26,7 @@ public class AHSVIInSolveMethod extends InSolveMethod {
         hsvi.getPomdpProblem().setInitBelief(minLbValueBelief);
         solveMethodsContainer.setNewLbVal(hsvi.getLBValueInBelief(minLbValueBelief));
         double[] minUbValueBelief = minValueFinder.findBeliefInUbMin();
-        solveMethodsContainer.setNewLbVal(hsvi.getUBValueInBelief(minUbValueBelief));
+        solveMethodsContainer.setNewUbVal(hsvi.getUBValueInBelief(minUbValueBelief));
         LOGGER.finer("LB min belief: " + Arrays.toString(minLbValueBelief));
         LOGGER.fine("LB min value: " + solveMethodsContainer.getLbVal());
         LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n",
@@ -34,5 +35,7 @@ public class AHSVIInSolveMethod extends InSolveMethod {
         LOGGER.fine("UB min value: " + solveMethodsContainer.getUbVal());
         LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n",
                 (solveMethodsContainer.getUbVal() - solveMethodsContainer.getLastUbVal())));
+
+        //LOGGER.fine(hsvi.getLbFunction().getAlphaVectors().stream().map(a -> Arrays.toString(a.vector)).collect(Collectors.joining("\n")));
     }
 }

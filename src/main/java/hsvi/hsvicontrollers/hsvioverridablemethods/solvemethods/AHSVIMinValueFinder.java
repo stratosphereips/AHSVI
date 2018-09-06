@@ -50,8 +50,8 @@ public class AHSVIMinValueFinder extends InitializableWithHSVI {
             for (LBAlphaVector alphaVector : hsvi.getLbFunction().getAlphaVectors()) {
                 model.addGe(obj, model.scalProd(alphaVector.vector, beliefVars));
             }
-            model.exportModel("min_belief.lp");
             model.addMinimize(obj);
+            model.exportModel("min_lb_belief.lp");
             model.solve();
             return model.getValues(beliefVars);
 
@@ -70,14 +70,32 @@ public class AHSVIMinValueFinder extends InitializableWithHSVI {
             model.setOut(null);
             model.setWarning(null);
 
-            IloNumExpr valueVar = model.numVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+            IloNumExpr valueVar = model.numVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, "valueVar");
             int numberOfStates = hsvi.getPomdpProblem().getNumberOfStates();
-            IloNumVar[] beliefVars = model.numVarArray(numberOfStates, 0.0, 1.0);
+            String[] beliefNames = new String[numberOfStates];
+            for (int s = 0; s < numberOfStates; ++s) {
+                beliefNames[s] = "belief" + s;
+            }
+            IloNumVar[] beliefVars = model.numVarArray(numberOfStates, 0.0, 1.0, beliefNames);
             ArrayList<UBPoint> ubPoints = new ArrayList<>(hsvi.getUbFunction().getPoints());
-            IloNumVar[] coefVars = model.numVarArray(ubPoints.size(), 0.0, 1.0);
+            String[] coefNames = new String[ubPoints.size()];
+            for (int c = 0; c < ubPoints.size(); ++c) {
+                coefNames[c] = "c" + c;
+            }
+            IloNumVar[] coefVars = model.numVarArray(ubPoints.size(), 0.0, 1.0, coefNames);
 
             model.addEq(model.sum(coefVars), 1.0);
             model.addEq(model.sum(beliefVars), 1.0);
+            IloNumExpr statesProbabilitiesSum;
+            LinkedList<Integer> group;
+            for (int groupI = 0; groupI < statesGroups.size(); ++groupI) {
+                group = statesGroups.get(groupI);
+                statesProbabilitiesSum = model.constant(0);
+                for (Integer s : group) {
+                    statesProbabilitiesSum = model.sum(statesProbabilitiesSum, beliefVars[s]);
+                }
+                model.addEq(statesProbabilitiesSum, groupsProbabilities[groupI]);
+            }
             model.addEq(beliefVars[beliefVars.length - 1], 0.0);
 
             UBPoint point;
@@ -103,6 +121,7 @@ public class AHSVIMinValueFinder extends InitializableWithHSVI {
             model.addEq(valueSum, valueVar);
 
             model.addMinimize(valueVar);
+            model.exportModel("min_ub_belief.lp");
             model.solve();
             return model.getValues(beliefVars);
 

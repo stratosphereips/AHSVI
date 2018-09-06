@@ -3,7 +3,9 @@ package hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods;
 import hsvi.CustomLogger.CustomLogger;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.SolveMethod;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public abstract class InSolveMethod extends SolveMethod {
 

@@ -165,7 +165,7 @@ public class HSVIAlgorithm {
         // compute best observation
         double[] bestNextBelief = null;
         double[] nextBelief;
-        double valueOfBestO = 0; // TODO Double.NEGATIVE_INFINITY; why 0?
+        double valueOfBestO = Double.NEGATIVE_INFINITY; // TODO Double.NEGATIVE_INFINITY    VS     0?
         double prb, excess;
         for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
             nextBelief = nextBelief(belief, bestA, o);
