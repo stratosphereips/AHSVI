@@ -44,17 +44,13 @@ public class Computer implements Comparable<Computer> {
         return ports;
     }
 
-    private String createStringRepresentation() {
-        StringBuilder sb = new StringBuilder(real ? "P" : "H").append("{");
+    public String getStringRepresentation(boolean infoSet) {
+        StringBuilder sb = new StringBuilder().append(infoSet ? "" : (real ? "P" : "H")).append(infoSet ? "" : ":");
         for (Integer port : ports) {
-            sb.append(port).append(",");
+            sb.append(port).append(";");
         }
         sb.setLength(sb.length() - 1);
-        return sb.append("}").toString();
-    }
-
-    public String getStringRepresentation() {
-        return createStringRepresentation();
+        return sb.toString();
     }
 
     public boolean containsPort(int i) {

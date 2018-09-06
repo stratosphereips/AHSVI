@@ -31,14 +31,14 @@ public class LBInitializer {
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
             minRsa = Double.POSITIVE_INFINITY;
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                minRsa = Math.min(minRsa, pomdpProblem.rewards[s][a]);
+                minRsa = Math.min(minRsa, pomdpProblem.getRewards(s, a));
             }
             if (minRsa > maxRa) {
                 maxRa = minRsa;
                 bestA = a;
             }
         }
-        double R_ = maxRa / (1 - pomdpProblem.discount);
+        double R_ = maxRa / (1 - pomdpProblem.getDiscount());
         double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
         HelperFunctions.fillArray(initAlpha, R_);
         LOGGER.finest("Initial LB alpha vector: " + Arrays.toString(initAlpha));

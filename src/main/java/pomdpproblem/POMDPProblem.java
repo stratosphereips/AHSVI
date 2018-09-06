@@ -5,19 +5,19 @@ import hsvi.Config;
 import java.util.*;
 
 public class POMDPProblem {
-    public final ArrayList<String> stateNames;
-    public final HashMap<String, Integer> stateNameToIndex;
-    public final ArrayList<String> actionNames;
-    public final HashMap<String, Integer> actionNameToIndex;
-    public final double[][][] transitionProbabilities; // probability p of getting from start-state s_ to end-state s_ playing
+    private final ArrayList<String> stateNames;
+    private final HashMap<String, Integer> stateNameToIndex;
+    private final ArrayList<String> actionNames;
+    private final HashMap<String, Integer> actionNameToIndex;
+    private final double[][][] transitionProbabilities; // probability p of getting from start-state s_ to end-state s_ playing
     //                                         action a ... p = transitionProbabilities[s][a][s_]
-    public final ArrayList<String> observationNames;
-    public final HashMap<String, Integer> observationNameToIndex;
-    public final double[][][] observationProbabilities; // probability p of seeing an observation o playing action a getting to
+    private final ArrayList<String> observationNames;
+    private final HashMap<String, Integer> observationNameToIndex;
+    private final double[][][] observationProbabilities; // probability p of seeing an observation o playing action a getting to
     //                                              end-state s_ ... p = observationProbabilities[s_][a][o]
-    public final double[][] rewards; // reward r for playing action a in state s ... r = rewards[s][a]
-    public final double discount;
-    public double[] initBelief;
+    private final double[][] rewards; // reward r for playing action a in state s ... r = rewards[s][a]
+    private final double discount;
+    private double[] initBelief;
     public final boolean minimize;
 
     public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
@@ -100,6 +100,50 @@ public class POMDPProblem {
 
     public double getDiscount() {
         return discount;
+    }
+
+    public String getStateName(int s) {
+        return stateNames.get(s);
+    }
+
+    public int getStateNameToIndex(String stateName) {
+        return stateNameToIndex.get(stateName);
+    }
+
+    public String getActionName(int a) {
+        return actionNames.get(a);
+    }
+
+    public int getActionNameToIndex(String actionName) {
+        return actionNameToIndex.get(actionName);
+    }
+
+    public double getTransitionProbability(int s, int a, int s_) {
+        return transitionProbabilities[s][a][s_];
+    }
+
+    public String getObservationName(int o) {
+        return observationNames.get(o);
+    }
+
+    public int getObservationNameToIndex(String observationName) {
+        return observationNameToIndex.get(observationName);
+    }
+
+    public double getObservationProbabilities(int s_, int a, int o) {
+        return observationProbabilities[s_][a][o];
+    }
+
+    public double getRewards(int s, int a) {
+        return rewards[s][a];
+    }
+
+    public double getInitBelief(int s) {
+        return initBelief[s];
+    }
+
+    public double[] getInitBelief() {
+        return initBelief;
     }
 
     public void setInitBelief(double[] initBelief) {
@@ -186,8 +230,12 @@ public class POMDPProblem {
             for (int s = 0; s < statesCount; ++s) {
                 for (int s_ = 0; s_ < statesCount; ++s_) {
                     for (int o = 0; o < observationsCount; ++o) {
+                        System.out.println("T([" + s + "][" + a + "][" + s_ + "]=" + transitionProbabilities[s][a][s_]);
+                        System.out.println("O([" + s_ + "][" + a + "][" + o + "]=" + observationProbabilities[s_][a][o]);
+                        System.out.println("R([" + a + "][" + s + "][" + s_ + "][" + o + "]=" + rewards[a][s][s_][o]);
                         rewardsTransformed[s][a] += transitionProbabilities[s][a][s_] * observationProbabilities[s_][a][o] *
                                 rewards[a][s][s_][o];
+                        System.out.println("Rt[" + s + "][" + a + "]");
                     }
                 }
             }

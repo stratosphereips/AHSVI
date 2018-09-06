@@ -16,6 +16,7 @@ import networkproblem.NetworkDistrubitionToPOMDPConverter;
 import pomdpproblem.POMDPProblem;
 
 import java.io.File;
+import java.util.TreeSet;
 
 public class AHSVIMain {
     public static void main(String[] args) {
@@ -38,14 +39,14 @@ public class AHSVIMain {
         // =======================================
         // =          S E T T I N G S            =
 
-        String networksFileName = DATA1;
+        String networksFileName = DATA2;
 
         String portsValuesFileName = PORTS_VALUES_SMALL;
         String portsSuccessfulAttacksProbsFileName = PORTS_SUCCESSFUL_ATTACK_PROBS_SMALL;
 
         double discount = 0.9;
 
-        int honeypotsCount = 1;
+        int honeypotsCount = 2;
 
         int maxNumberOfDetectedAttacksAllowed = 0;
         double probeSuccessProbability = 0.2;
@@ -76,7 +77,7 @@ public class AHSVIMain {
 
         PreSolveMethod preSolveMethod = new AHSVIPreSolveMethod(minValueFinder);
         InSolveMethod inSolveMethod = new AHSVIInSolveMethod(minValueFinder);
-        PostSolveMethod postSolveMethod = new AHSVIPostSolveMethod();
+        PostSolveMethod postSolveMethod = new AHSVIPostSolveMethod(minValueFinder, networkFileReader.getInfoSets());
         SolveTerminator solveTerminator = new AHSVISolveTerminatorAbsoluteDiff();
         ExploreTerminator exploreTerminator = new AHSVIExploreTerminatorClassic();
 

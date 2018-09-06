@@ -73,16 +73,12 @@ public class Network {
         return computersList;
     }
 
-    private String createStringRepresentation() {
-        StringBuilder sb = new StringBuilder("{");
+    public String getStringRepresentation(boolean infoSet) {
+        StringBuilder sb = new StringBuilder(infoSet ? "" : "{");
         for (int computerI = 0; computerI < computers.size(); ++computerI) {
-            sb.append(computers.get(computerI).getStringRepresentation()).append(computerI < computers.size() - 1 ? "," : "");
+            sb.append(computers.get(computerI).getStringRepresentation(infoSet)).append(computerI < computers.size() - 1 ? "|" : "");
         }
-        return sb.append("}").toString();
-    }
-
-    public String getStringRepresentation() {
-        return createStringRepresentation();
+        return sb.append(infoSet ? "" : "}").toString();
     }
 
     @Override

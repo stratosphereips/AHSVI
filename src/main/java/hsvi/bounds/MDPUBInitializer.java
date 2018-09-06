@@ -59,11 +59,11 @@ public class MDPUBInitializer {
         double maxR = Double.NEGATIVE_INFINITY;
         for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
             for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
-                maxR = Math.max(maxR, pomdpProblem.rewards[s][a]);
+                maxR = Math.max(maxR, pomdpProblem.getRewards(s, a));
             }
         }
         double[] initAlpha = new double[pomdpProblem.getNumberOfStates()];
-        HelperFunctions.fillArray(initAlpha, maxR / (1 - pomdpProblem.discount));
+        HelperFunctions.fillArray(initAlpha, maxR / (1 - pomdpProblem.getDiscount()));
         return initAlpha;
     }
 
@@ -75,7 +75,7 @@ public class MDPUBInitializer {
         for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
             for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
                 for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                    transitionProbabilitiesTransformed[a][s_][s] = pomdpProblem.transitionProbabilities[s][a][s_];
+                    transitionProbabilitiesTransformed[a][s_][s] = pomdpProblem.getTransitionProbability(s, a, s_);
                 }
             }
         }
@@ -86,22 +86,15 @@ public class MDPUBInitializer {
         double[][] rewardsTransformed = new double[pomdpProblem.getNumberOfActions()][pomdpProblem.getNumberOfStates()];
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                rewardsTransformed[a][s] = pomdpProblem.rewards[s][a];
+                rewardsTransformed[a][s] = pomdpProblem.getRewards(s, a);
             }
         }
         return rewardsTransformed;
     }
 
     private void nextAlphaAction(double[] result, int a) {
-        // TODO
-        // pomdp.Ttr[a][s][s_] is matrix of probabilities of ending in s_ from s
-        // mult return matrix product in the first arg
-        //        mult( result, alpha, pomdp->Ttr[a] );
-        //        result *= pomdp->discount;
-        //        copy_from_column( R_xa, pomdp->R, a );
-        //        result += R_xa;
         HelperFunctions.matrixProd(alpha, transitionProbabilities[a], result);
-        HelperFunctions.arrScalarProd(result, pomdpProblem.discount);
+        HelperFunctions.arrScalarProd(result, pomdpProblem.getDiscount());
         HelperFunctions.arrAdd(result, rewards[a]);
     }
 

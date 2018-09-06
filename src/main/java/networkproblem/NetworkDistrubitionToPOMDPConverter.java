@@ -2,6 +2,7 @@ package networkproblem;
 
 import helpers.HelperFunctions;
 import pomdpproblem.POMDPProblem;
+import sun.reflect.generics.tree.Tree;
 
 import java.io.*;
 import java.util.*;
@@ -33,6 +34,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     private POMDPProblem pomdpProblem;
     private ArrayList<LinkedList<Integer>> groups;
     private double[] groupsProbabilities;
+    private HashMap<String, TreeSet<Integer>> infoSets;
 
     public NetworkDistrubitionToPOMDPConverter(String fileName) {
         pathToNetworkFile = fileName;
@@ -58,6 +60,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         pomdpProblem = null;
         groups = null;
         groupsProbabilities = null;
+        infoSets = null;
 
         loadNetwork();
     }
@@ -107,6 +110,10 @@ public class NetworkDistrubitionToPOMDPConverter {
 
     public double[] getGroupsProbabilities() {
         return groupsProbabilities;
+    }
+
+    public HashMap<String, TreeSet<Integer>> getInfoSets() {
+        return infoSets;
     }
 
     public NetworkDistrubitionToPOMDPConverter setDiscount(double discount) {
@@ -284,15 +291,24 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private ArrayList<String> createStatesNames(ArrayList<State> states) {
+        System.out.println("\tCreating states names");
         ArrayList<String> statesNames = new ArrayList<>(states.size());
-        for (State state : states) {
-            statesNames.add(state.getName());
+        infoSets = new HashMap<>(2 * states.size());
+        String infoSetName;
+        TreeSet<Integer> statesInInfoSet;
+        for (int s = 0; s < states.size() - 1; ++s) {
+            statesNames.add(states.get(s).getName());
+            infoSetName = states.get(s).getInfoSetName();
+            statesInInfoSet = infoSets.getOrDefault(infoSetName, new TreeSet<>());
+            statesInInfoSet.add(s);
+            infoSets.put(infoSetName, statesInInfoSet);
         }
+        statesNames.add(states.get(states.size() - 1).getName());
         return statesNames;
     }
 
     private HashMap<String, Integer> createStateToIndexMap(ArrayList<String> statesNames) {
-        System.out.println("\tCreating states names");
+        System.out.println("\tCreating states names to indexes map");
         HashMap<String, Integer> stateNamesToIndex = new HashMap<>(statesNames.size() * 2);
         for (int s = 0; s < statesNames.size(); ++s) {
             System.out.println("\t\t" + s + ": " + statesNames.get(s));
@@ -329,6 +345,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private ArrayList<String> creatActionsNames(ArrayList<Action> actions) {
+        System.out.println("\tCreating actions names");
         ArrayList<String> actionsNames = new ArrayList<>(actions.size());
         for (Action action : actions) {
             actionsNames.add(action.getName());
@@ -337,7 +354,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private HashMap<String, Integer> createActionToIndexMap(ArrayList<String> actionsNames) {
-        System.out.println("\tCreating actions names");
+        System.out.println("\tCreating actions names to indexes map");
         HashMap<String, Integer> actionNamesToIndex = new HashMap<>(actionsNames.size() * 2);
         for (int a = 0; a < actionsNames.size(); ++a) {
             System.out.println("\t\t" + a + ": " + actionsNames.get(a));
@@ -418,6 +435,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private HashMap<String, Integer> createObservationToIndexMap(ArrayList<String> observations) {
+        System.out.println("\tCreating observations to indexes map");
         HashMap<String, Integer> observationToIndex = new HashMap<>(observations.size() * 2);
         for (int o = 0; o < observations.size(); ++o) {
             observationToIndex.put(observations.get(o), o);

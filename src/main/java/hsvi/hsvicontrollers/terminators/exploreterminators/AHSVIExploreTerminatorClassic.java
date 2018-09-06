@@ -7,6 +7,6 @@ public class AHSVIExploreTerminatorClassic extends ExploreTerminator {
 
     @Override
     protected boolean shouldTerminate(ExploreTerminatorParameters exploreTerminatorParameters) {
-        return exploreTerminatorParameters.getT() >= solveMethodsContainer.getIteration();
+        return exploreTerminatorParameters.getT() >= Math.sqrt(solveMethodsContainer.getIteration());
     }
 }

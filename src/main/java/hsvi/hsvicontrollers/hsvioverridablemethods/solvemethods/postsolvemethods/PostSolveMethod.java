@@ -18,6 +18,8 @@ public abstract class PostSolveMethod extends SolveMethod {
         LOGGER.fine("###########################################################################");
         LOGGER.fine("###########################################################################");
         LOGGER.fine("Finish in solve iteration: " + solveMethodsContainer.getIteration());
-        LOGGER.fine(hsvi.getPomdpProblem().actionNames.get(hsvi.getLbFunction().getDotProdArgMax(hsvi.getPomdpProblem().initBelief).a));
+        LOGGER.fine("Best action in init belief: " +
+                hsvi.getPomdpProblem().getActionName(
+                        hsvi.getLbFunction().getDotProdArgMax(hsvi.getPomdpProblem().getInitBelief()).a));
     }
 }

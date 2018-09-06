@@ -57,7 +57,7 @@ public class HSVIAlgorithm {
     }
 
     public double getLBValueInInitBelief() {
-        return getLBValueInBelief(pomdpProblem.initBelief);
+        return getLBValueInBelief(pomdpProblem.getInitBelief());
     }
 
     public double getUBValueInBelief(double[] belief) {
@@ -65,7 +65,7 @@ public class HSVIAlgorithm {
     }
 
     public double getUBValueInInitBelief() {
-        return getUBValueInBelief(pomdpProblem.initBelief);
+        return getUBValueInBelief(pomdpProblem.getInitBelief());
     }
 
     public void initValueFunctions() {
@@ -99,13 +99,13 @@ public class HSVIAlgorithm {
         double[] beliefNew = new double[belief.length];
         double normConstant = 0;
         for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-            if (pomdpProblem.observationProbabilities[s_][a][o] < Config.ZERO) {
+            if (pomdpProblem.getObservationProbabilities(s_, a, o) < Config.ZERO) {
                 continue;
             }
             for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                beliefNew[s_] += pomdpProblem.transitionProbabilities[s][a][s_] * belief[s];
+                beliefNew[s_] += pomdpProblem.getTransitionProbability(s, a, s_) * belief[s];
             }
-            beliefNew[s_] *= pomdpProblem.observationProbabilities[s_][a][o];
+            beliefNew[s_] *= pomdpProblem.getObservationProbabilities(s_, a, o);
             normConstant += beliefNew[s_];
         }
         if (normConstant < Config.ZERO) {
@@ -127,8 +127,8 @@ public class HSVIAlgorithm {
 
     public void solve() {
         hsviController.callPreSolveMethod();
-        while (!hsviController.shouldSolveTerminate(pomdpProblem.initBelief)) {
-            explore(pomdpProblem.initBelief, 0);
+        while (!hsviController.shouldSolveTerminate(pomdpProblem.getInitBelief())) {
+            explore(pomdpProblem.getInitBelief(), 0);
             hsviController.callInSolveMethod();
         }
         hsviController.callPostSolveMethod();
@@ -165,13 +165,13 @@ public class HSVIAlgorithm {
         // compute best observation
         double[] bestNextBelief = null;
         double[] nextBelief;
-        double valueOfBestO = Double.NEGATIVE_INFINITY; // TODO Double.NEGATIVE_INFINITY    VS     0?
+        double valueOfBestO = Double.NEGATIVE_INFINITY;
         double prb, excess;
         for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
             nextBelief = nextBelief(belief, bestA, o);
             if (nextBelief != null) {
                 prb = pomdpProblem.getProbabilityOfObservationPlayingAction(o, belief, bestA);
-                excess = width(nextBelief) - epsilon * Math.pow(pomdpProblem.discount, -(t + 1));
+                excess = width(nextBelief) - epsilon * Math.pow(pomdpProblem.getDiscount(), -(t + 1));
                 value = prb * excess;
                 if (value > valueOfBestO) {
                     valueOfBestO = value;
@@ -192,17 +192,17 @@ public class HSVIAlgorithm {
             if (belief[s] < Config.ZERO) {
                 continue;
             }
-            rewardsSum += pomdpProblem.rewards[s][a] * belief[s];
+            rewardsSum += pomdpProblem.getRewards(s, a) * belief[s];
             observationsValuesSubSum = 0;
             for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                if (pomdpProblem.transitionProbabilities[s][a][s_] < Config.ZERO) {
+                if (pomdpProblem.getTransitionProbability(s, a, s_) < Config.ZERO) {
                     continue;
                 }
                 for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
                     nextBel = nextBelief(belief, a, o);
                     if (nextBel != null &&
-                            pomdpProblem.observationProbabilities[s_][a][o] > Config.ZERO) {
-                        observationsValuesSubSum += pomdpProblem.transitionProbabilities[s][a][s_] * pomdpProblem.observationProbabilities[s_][a][o] *
+                            pomdpProblem.getObservationProbabilities(s_, a, o) > Config.ZERO) {
+                        observationsValuesSubSum += pomdpProblem.getTransitionProbability(s, a, s_) * pomdpProblem.getObservationProbabilities(s_, a, o) *
                                 ubFunction.getValue(nextBel);
 
                     }
@@ -210,7 +210,7 @@ public class HSVIAlgorithm {
             }
             observationsValuesSum += belief[s] * observationsValuesSubSum;
         }
-        observationsValuesSum *= pomdpProblem.discount;
+        observationsValuesSum *= pomdpProblem.getDiscount();
         return rewardsSum + observationsValuesSum;
     }
 
@@ -252,11 +252,11 @@ public class HSVIAlgorithm {
                     }
                     for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
                         sumOs_ += beta.vector[s_] *
-                                pomdpProblem.observationProbabilities[s_][a][o] *
-                                pomdpProblem.transitionProbabilities[s][a][s_];
+                                pomdpProblem.getObservationProbabilities(s_, a, o) *
+                                pomdpProblem.getTransitionProbability(s, a, s_);
                     }
                 }
-                betaVec[s] = pomdpProblem.rewards[s][a] + pomdpProblem.discount * sumOs_;
+                betaVec[s] = pomdpProblem.getRewards(s, a) + pomdpProblem.getDiscount() * sumOs_;
             }
             betasAo.clear();
             if (lbFunction.contains(betaVec)) {

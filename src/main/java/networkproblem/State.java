@@ -8,6 +8,7 @@ public class State {
     private final int numberOfAttackOnHoneypot;
     private final boolean finalState;
     private final String name;
+    private final String infoSetName;
 
     public State(Network network, int numberOfAttackOnHoneypot) {
         this.network = network;
@@ -15,6 +16,7 @@ public class State {
         this.numberOfAttackOnHoneypot = numberOfAttackOnHoneypot;
         finalState = false;
         name = createName();
+        infoSetName = createInfoSetName();
     }
 
     public State(Network network) {
@@ -26,11 +28,16 @@ public class State {
         numberOfAttackOnHoneypot = -1;
         finalState = true;
         name = "F";
+        infoSetName = "F";
     }
 
     private String createName() {
-        return new StringBuilder("S(").append(network.getStringRepresentation()).
+        return new StringBuilder("S(").append(network.getStringRepresentation(false)).
                 append(",#ha=").append(numberOfAttackOnHoneypot).append(")").toString();
+    }
+
+    private String createInfoSetName() {
+        return network.getStringRepresentation(true);
     }
 
     public Network getNetwork() {
@@ -43,6 +50,10 @@ public class State {
 
     public String getName() {
         return name;
+    }
+
+    public String getInfoSetName() {
+        return infoSetName;
     }
 
     public boolean isFinalState() {

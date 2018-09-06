@@ -20,8 +20,6 @@ public class AHSVIInSolveMethod extends InSolveMethod {
 
     @Override
     public void overridableMethod() {
-        hsvi.getPomdpProblem().setInitBelief(minValueFinder.findBeliefInLbMin());
-
         double[] minLbValueBelief = minValueFinder.findBeliefInLbMin();
         hsvi.getPomdpProblem().setInitBelief(minLbValueBelief);
         solveMethodsContainer.setNewLbVal(hsvi.getLBValueInBelief(minLbValueBelief));
