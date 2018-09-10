@@ -202,13 +202,13 @@ public class NetworkDistrubitionToPOMDPConverter {
 
     private ArrayList<State> createStates() {
         System.out.println("\tCreating states");
-        HashSet<Integer> productionPortsSet = new HashSet<>();
-        for (Network net : networks) {
-            productionPortsSet.addAll(net.getOpenPortsInNetwork());
-        }
-        ArrayList<Integer> productionPorts = new ArrayList<>(productionPortsSet);
-        int productionPortsCount = productionPorts.size();
-        System.out.println("\t\tProduction ports: " + productionPorts);
+        ArrayList<Integer> openPortsList = new ArrayList<>(openPorts);
+        int productionPortsCount = openPortsList.size();
+        System.out.println("\t\tProduction ports: " + openPortsList);
+
+        ArrayList<State> states = new ArrayList<>();
+        new StatesMaker(networks, openPortsList, honeypotsCount).createStates();
+        System.exit(1234567);
 
         // TODO now we can do only honeypotsCount == 1 || honeypotsCount == 2
         if (honeypotsCount > 2 || honeypotsCount < 0) {
@@ -220,6 +220,8 @@ public class NetworkDistrubitionToPOMDPConverter {
             System.err.println("\t\tNope, can't do that, maxNumberOfDetectedAttacksAllowed must be 0");
             System.exit(13223);
         }
+
+        /*
         long virtualNetworksWith1ComputerCount = HelperFunctions.factorial(productionPortsCount) /
                 (HelperFunctions.factorial(honeypotsCount) * HelperFunctions.factorial(productionPortsCount - honeypotsCount));
         long virtualNetworksWith2ComputersCount = 0;
@@ -235,6 +237,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         System.out.println("\t\tNumber of virtual networks combinations: " + virtualNetworksCount);
         System.out.println("\t\tTotal number of POMDP states: " + statesCount);
 
+
         ArrayList<State> states = new ArrayList<>(statesCount);
 
         Network network;
@@ -243,7 +246,7 @@ public class NetworkDistrubitionToPOMDPConverter {
             portsComb = new int[1];
             for (int inputNetworkI = 0; inputNetworkI < networks.size(); ++inputNetworkI) {
                 for (int port = 0; port < productionPortsCount; ++port) {
-                    portsComb[0] = productionPorts.get(port);
+                    portsComb[0] = openPortsList.get(port);
                     network = new Network(networks.get(inputNetworkI));
                     network.addComputer(new Computer(false, portsComb));
                     groups.get(inputNetworkI).add(states.size());
@@ -256,8 +259,8 @@ public class NetworkDistrubitionToPOMDPConverter {
             for (int inputNetworkI = 0; inputNetworkI < networks.size(); ++inputNetworkI) {
                 for (int port1 = 0; port1 < productionPortsCount; ++port1) {
                     for (int port2 = port1 + 1; port2 < productionPortsCount; ++port2) {
-                        portsComb[0] = productionPorts.get(port1);
-                        portsComb[1] = productionPorts.get(port2);
+                        portsComb[0] = openPortsList.get(port1);
+                        portsComb[1] = openPortsList.get(port2);
                         network = new Network(networks.get(inputNetworkI));
                         network.addComputer(new Computer(false, portsComb));
                         groups.get(inputNetworkI).add(states.size());
@@ -273,9 +276,9 @@ public class NetworkDistrubitionToPOMDPConverter {
                     for (int port1 = 0; port1 < productionPortsCount; ++port1) {
                         for (int port2 = port1; port2 < productionPortsCount; ++port2) {
                             network = new Network(networks.get(inputNetworkI));
-                            portsComb[0] = productionPorts.get(port1);
+                            portsComb[0] = openPortsList.get(port1);
                             network.addComputer(new Computer(false, portsComb));
-                            portsComb[0] = productionPorts.get(port2);
+                            portsComb[0] = openPortsList.get(port2);
                             network.addComputer(new Computer(false, portsComb));
                             groups.get(inputNetworkI).add(states.size());
                             states.add(new State(network));
@@ -284,6 +287,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                 }
             }
         }
+        */
 
         // add final state
         states.add(new State());

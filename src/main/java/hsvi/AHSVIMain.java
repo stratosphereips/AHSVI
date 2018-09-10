@@ -32,6 +32,7 @@ public class AHSVIMain {
         String DATA1 = "data1";
         String DATA2 = "data2";
         String DATA3 = "data3";
+        String DATA4 = "data4";
 
         String PORTS_VALUES_SMALL = "ports_values_small";
         String PORTS_SUCCESSFUL_ATTACK_PROBS_SMALL = "ports_successful_attack_probs_small";
@@ -46,7 +47,7 @@ public class AHSVIMain {
 
         double discount = 0.9;
 
-        int honeypotsCount = 2;
+        int honeypotsCount = 4;
 
         int maxNumberOfDetectedAttacksAllowed = 0;
         double probeSuccessProbability = 0.2;

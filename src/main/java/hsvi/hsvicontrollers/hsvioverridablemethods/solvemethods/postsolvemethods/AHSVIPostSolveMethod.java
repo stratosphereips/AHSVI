@@ -28,9 +28,9 @@ public class AHSVIPostSolveMethod extends PostSolveMethod {
         hsvi.getPomdpProblem().setInitBelief(minValueFinder.findBeliefInUbMin());
 
         for (String infoSetName : infoSets.keySet()) {
-            System.out.println(infoSetName);
+            LOGGER.severe(infoSetName);
             for (Integer s : infoSets.get(infoSetName)) {
-                System.out.println("\t" + hsvi.getPomdpProblem().getInitBelief(s) + "   " + hsvi.getPomdpProblem().getStateName(s));
+                LOGGER.severe("\t" + hsvi.getPomdpProblem().getInitBelief(s) + "   " + hsvi.getPomdpProblem().getStateName(s));
             }
         }
     }
