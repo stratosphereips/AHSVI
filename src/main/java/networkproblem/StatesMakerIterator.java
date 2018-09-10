@@ -1,29 +1,63 @@
 package networkproblem;
 
+import helpers.HelperFunctions;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
-public class StatesMaker {
+public class StatesMakerIterator implements Iterator<State> {
 
     private final ArrayList<Network> inputNetworks;
     private final ArrayList<Integer> openPorts;
     private final int honeypotsCount;
 
     private final LinkedList<ArrayList<Integer>> honeycomputersSizesCombinations;
-    private final LinkedList<ArrayList<int[]>> honeypotCombinations;
+    private final ArrayList<ArrayList<int[]>> honeypotCombinations;
 
-    public StatesMaker(ArrayList<Network> inputNetworks, ArrayList<Integer> openPorts, int honeypotsCount) {
+    private int currentInputNetworkI;
+    private int currentCombinationI;
+
+    public StatesMakerIterator(ArrayList<Network> inputNetworks, ArrayList<Integer> openPorts, int honeypotsCount) {
         this.inputNetworks = inputNetworks;
         this.openPorts = openPorts;
         this.honeypotsCount = honeypotsCount;
 
         honeycomputersSizesCombinations = new LinkedList<>();
-        honeypotCombinations = new LinkedList<>();
+        honeypotCombinations = new ArrayList<>(2 * (int)(HelperFunctions.factorial(openPorts.size()) / HelperFunctions.factorial(honeypotsCount)));
+
+        createHoneypotCombinations();
+
+        currentInputNetworkI = 0;
+        currentCombinationI = 0;
     }
 
-    public void createStates() {
+    @Override
+    public boolean hasNext() {
+        return currentInputNetworkI < inputNetworks.size();
+    }
+
+    @Override
+    public State next() {
+        Network network = new Network(inputNetworks.get(currentInputNetworkI));
+        for (int[] honeycomputer : honeypotCombinations.get(currentCombinationI)) {
+            network.addComputer(new Computer(false, honeycomputer));
+        }
+        ++currentCombinationI;
+        if (currentCombinationI >= honeypotCombinations.size()) {
+            ++currentInputNetworkI;
+            currentCombinationI = 0;
+        }
+        return new State(network);
+    }
+
+    public int getTotalNumberOfStates() {
+        return honeypotCombinations.size() * inputNetworks.size();
+    }
+
+    private void createHoneypotCombinations() {
         createPossibleHoneycomputersSizeCombinations(new ArrayList<>(honeypotsCount), 0, 1);
         System.out.println("Possible honeycomputers sizes combinations count: " + honeycomputersSizesCombinations.size());
 

@@ -230,12 +230,12 @@ public class POMDPProblem {
             for (int s = 0; s < statesCount; ++s) {
                 for (int s_ = 0; s_ < statesCount; ++s_) {
                     for (int o = 0; o < observationsCount; ++o) {
-                        System.out.println("T([" + s + "][" + a + "][" + s_ + "]=" + transitionProbabilities[s][a][s_]);
-                        System.out.println("O([" + s_ + "][" + a + "][" + o + "]=" + observationProbabilities[s_][a][o]);
-                        System.out.println("R([" + a + "][" + s + "][" + s_ + "][" + o + "]=" + rewards[a][s][s_][o]);
+                        System.out.println("T[" + s + "][" + a + "][" + s_ + "]=" + transitionProbabilities[s][a][s_]);
+                        System.out.println("O[" + s_ + "][" + a + "][" + o + "]=" + observationProbabilities[s_][a][o]);
+                        System.out.println("R[" + a + "][" + s + "][" + s_ + "][" + o + "]=" + rewards[a][s][s_][o]);
                         rewardsTransformed[s][a] += transitionProbabilities[s][a][s_] * observationProbabilities[s_][a][o] *
                                 rewards[a][s][s_][o];
-                        System.out.println("Rt[" + s + "][" + a + "]");
+                        System.out.println("Rt[" + s + "][" + a + "]=" + rewardsTransformed[s][a]);
                     }
                 }
             }

@@ -2,7 +2,6 @@ package networkproblem;
 
 import helpers.HelperFunctions;
 import pomdpproblem.POMDPProblem;
-import sun.reflect.generics.tree.Tree;
 
 import java.io.*;
 import java.util.*;
@@ -206,20 +205,20 @@ public class NetworkDistrubitionToPOMDPConverter {
         int productionPortsCount = openPortsList.size();
         System.out.println("\t\tProduction ports: " + openPortsList);
 
-        ArrayList<State> states = new ArrayList<>();
-        new StatesMaker(networks, openPortsList, honeypotsCount).createStates();
-        System.exit(1234567);
-
-        // TODO now we can do only honeypotsCount == 1 || honeypotsCount == 2
-        if (honeypotsCount > 2 || honeypotsCount < 0) {
-            System.err.println("\t\tCan't do that boss, only honepots <= 2");
-            System.exit(100);
+        // TODO make it work
+        Iterator<State> stateIterator = new StatesMakerIterator(networks, openPortsList, honeypotsCount);
+        ArrayList<State> states = new ArrayList<>(((StatesMakerIterator) stateIterator).getTotalNumberOfStates());
+        while (stateIterator.hasNext()) {
+            states.add(stateIterator.next());
         }
+
+
         // TODO now we can do only maxNumberOfDetectedAttacksAllowed == 0
         if (maxNumberOfDetectedAttacksAllowed > 0) {
             System.err.println("\t\tNope, can't do that, maxNumberOfDetectedAttacksAllowed must be 0");
             System.exit(13223);
         }
+
 
         /*
         long virtualNetworksWith1ComputerCount = HelperFunctions.factorial(productionPortsCount) /
