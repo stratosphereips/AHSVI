@@ -32,9 +32,10 @@ public class AHSVIPreSolveMethod extends PreSolveMethod {
         solveMethodsContainer.setLbVal(hsvi.getLBValueInBelief(minLbValueBelief));
         double[] minUbValueBelief = minValueFinder.findBeliefInUbMin();
         solveMethodsContainer.setUbVal(hsvi.getUBValueInBelief(minUbValueBelief));
-        LOGGER.finer("LB min belief: " + Arrays.toString(minLbValueBelief));
-        LOGGER.fine("LB min value: " + solveMethodsContainer.getLbVal());
-        LOGGER.finer("UB min belief: " + Arrays.toString(minUbValueBelief));
-        LOGGER.fine("UB min value: " + solveMethodsContainer.getUbVal());
+        LOGGER.fine("LB_MIN_BELIEF: " + Arrays.toString(minLbValueBelief));
+        LOGGER.fine("LB_MIN_VALUE: " + solveMethodsContainer.getLbVal());
+        LOGGER.fine("LB_MIN_BELIEF_UB_VALUE: " + hsvi.getUbFunction().getValue(minLbValueBelief));
+        LOGGER.fine("UB_MIN_BELIEF: " + Arrays.toString(minUbValueBelief));
+        LOGGER.fine("UB_MIN_VALUE: " + solveMethodsContainer.getUbVal());
     }
 }

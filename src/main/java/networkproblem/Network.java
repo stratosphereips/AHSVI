@@ -8,6 +8,9 @@ public class Network {
     private static final String VALUES_DELIM = ",";
     private static final String COMPUTERS_DELIM = "\\|";
 
+    private static int networkId = 0;
+
+    private int groupId;
     private double probability;
     private final ArrayList<Computer> computers;
 
@@ -15,11 +18,18 @@ public class Network {
         String[] lineSplits = line.split(VALUES_DELIM, 2);
         probability = Double.parseDouble(lineSplits[0]);
         computers = parseNetworkString(lineSplits[1]);
+        groupId = networkId;
+        ++networkId;
     }
 
     public Network(Network oldNetwork) {
+        groupId = oldNetwork.groupId;
         probability = oldNetwork.probability;
         computers = new ArrayList<>(oldNetwork.computers);
+    }
+
+    public int getGroupId() {
+        return groupId;
     }
 
     public ArrayList<Computer> getComputers() {
@@ -74,7 +84,7 @@ public class Network {
     }
 
     public String getStringRepresentation(boolean infoSet) {
-        StringBuilder sb = new StringBuilder(infoSet ? "" : "{");
+        StringBuilder sb = new StringBuilder(infoSet ? "" : "id:" + groupId + "{");
         for (int computerI = 0; computerI < computers.size(); ++computerI) {
             sb.append(computers.get(computerI).getStringRepresentation(infoSet)).append(computerI < computers.size() - 1 ? "|" : "");
         }
@@ -84,7 +94,8 @@ public class Network {
     @Override
     public String toString() {
         return "Network{" +
-                "computers=" + computers +
+                "groupId=" + groupId +
+                ",computers=" + computers +
                 '}';
     }
 }

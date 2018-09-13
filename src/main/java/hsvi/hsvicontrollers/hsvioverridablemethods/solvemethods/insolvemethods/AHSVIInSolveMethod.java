@@ -24,15 +24,24 @@ public class AHSVIInSolveMethod extends InSolveMethod {
         hsvi.getPomdpProblem().setInitBelief(minLbValueBelief);
         solveMethodsContainer.setNewLbVal(hsvi.getLBValueInBelief(minLbValueBelief));
         double[] minUbValueBelief = minValueFinder.findBeliefInUbMin();
+
         solveMethodsContainer.setNewUbVal(hsvi.getUBValueInBelief(minUbValueBelief));
-        LOGGER.finer("LB min belief: " + Arrays.toString(minLbValueBelief));
-        LOGGER.fine("LB min value: " + solveMethodsContainer.getLbVal());
-        LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n",
+        LOGGER.fine("LB_MIN_BELIEF: " + Arrays.toString(minLbValueBelief));
+        LOGGER.fine("LB_MIN_VALUE: " + solveMethodsContainer.getLbVal());
+        LOGGER.fine("LB_MIN_BELIEF_UB_VALUE: " + hsvi.getUbFunction().getValue(minLbValueBelief));
+        LOGGER.finer(String.format(" ----- LB_MIN_VALUE_DIFF: %.20f",
                 (solveMethodsContainer.getLbVal() - solveMethodsContainer.getLastLbVal())));
-        LOGGER.finer("UB min belief: " + Arrays.toString(minUbValueBelief));
-        LOGGER.fine("UB min value: " + solveMethodsContainer.getUbVal());
-        LOGGER.fine(String.format(" ----- Diff to last iteration: %.20f\n",
+        LOGGER.fine("LB_MIN_BELIEF_ACTION: " +
+                hsvi.getPomdpProblem().getActionName(
+                        hsvi.getLbFunction().getDotProdArgMax(minLbValueBelief).a));
+        LOGGER.fine("UB_MIN_BELIEF: " + Arrays.toString(minUbValueBelief));
+        LOGGER.fine("UB_MIN_VALUE: " + solveMethodsContainer.getUbVal());
+        LOGGER.finer(String.format(" ----- UB_MIN_VALUE_DIFF: %.20f",
                 (solveMethodsContainer.getUbVal() - solveMethodsContainer.getLastUbVal())));
+        LOGGER.fine("UB_MIN_BELIEF_ACTION: " +
+                hsvi.getPomdpProblem().getActionName(
+                        hsvi.getLbFunction().getDotProdArgMax(minUbValueBelief).a));
+        LOGGER.fine("BOUNDS_GAP: " + (solveMethodsContainer.getLastUbVal() - solveMethodsContainer.getLastLbVal()));
 
         //LOGGER.fine(hsvi.getLbFunction().getAlphaVectors().stream().map(a -> Arrays.toString(a.vector)).collect(Collectors.joining("\n")));
     }

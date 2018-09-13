@@ -2,10 +2,7 @@ package networkproblem;
 
 import helpers.HelperFunctions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StatesMakerIterator implements Iterator<State> {
@@ -15,10 +12,10 @@ public class StatesMakerIterator implements Iterator<State> {
     private final int honeypotsCount;
 
     private final LinkedList<ArrayList<Integer>> honeycomputersSizesCombinations;
-    private final ArrayList<ArrayList<int[]>> honeypotCombinations;
+    private final LinkedList<ArrayList<int[]>> honeycomputersCombinations;
 
+    private ListIterator<ArrayList<int[]>> combinationsIter;
     private int currentInputNetworkI;
-    private int currentCombinationI;
 
     public StatesMakerIterator(ArrayList<Network> inputNetworks, ArrayList<Integer> openPorts, int honeypotsCount) {
         this.inputNetworks = inputNetworks;
@@ -26,12 +23,12 @@ public class StatesMakerIterator implements Iterator<State> {
         this.honeypotsCount = honeypotsCount;
 
         honeycomputersSizesCombinations = new LinkedList<>();
-        honeypotCombinations = new ArrayList<>(2 * (int)(HelperFunctions.factorial(openPorts.size()) / HelperFunctions.factorial(honeypotsCount)));
+        honeycomputersCombinations = new LinkedList<>();
 
         createHoneypotCombinations();
 
+        combinationsIter = honeycomputersCombinations.listIterator();
         currentInputNetworkI = 0;
-        currentCombinationI = 0;
     }
 
     @Override
@@ -42,19 +39,19 @@ public class StatesMakerIterator implements Iterator<State> {
     @Override
     public State next() {
         Network network = new Network(inputNetworks.get(currentInputNetworkI));
-        for (int[] honeycomputer : honeypotCombinations.get(currentCombinationI)) {
+        ArrayList<int[]> honeycomputersCombination = combinationsIter.next();
+        for (int[] honeycomputer : honeycomputersCombination) {
             network.addComputer(new Computer(false, honeycomputer));
         }
-        ++currentCombinationI;
-        if (currentCombinationI >= honeypotCombinations.size()) {
+        if (!combinationsIter.hasNext()) {
             ++currentInputNetworkI;
-            currentCombinationI = 0;
+            combinationsIter = honeycomputersCombinations.listIterator();
         }
         return new State(network);
     }
 
     public int getTotalNumberOfStates() {
-        return honeypotCombinations.size() * inputNetworks.size();
+        return honeycomputersCombinations.size() * inputNetworks.size();
     }
 
     private void createHoneypotCombinations() {
@@ -62,12 +59,27 @@ public class StatesMakerIterator implements Iterator<State> {
         System.out.println("Possible honeycomputers sizes combinations count: " + honeycomputersSizesCombinations.size());
 
         createHoneypotsCombinationsOfPossibleSizes();
-        System.out.println("Honeypot combinations size: " + honeypotCombinations.size());
+        System.out.println("Honeypot combinations size: " + honeycomputersCombinations.size());
+
+    }
+
+    private ArrayList<int[]> transformPortIndexesCombinationsToPortsCombinations(ArrayList<int[]> portIndexesCombination) {
+        ArrayList<int[]> combination = new ArrayList<>(portIndexesCombination.size());
+        int[] honeycomputer;
+        for (int[] honeycomputerPortIndexes : portIndexesCombination) {
+            honeycomputer = new int[honeycomputerPortIndexes.length];
+            for (int portI = 0; portI < honeycomputerPortIndexes.length; ++portI) {
+                honeycomputer[portI] = openPorts.get(honeycomputerPortIndexes[portI]);
+            }
+            combination.add(honeycomputer);
+        }
+        //System.out.println("\t\t+" + combination.stream().map(x->Arrays.toString(x)).collect(Collectors.joining(" | ")));
+        return combination;
     }
 
     private void createHoneypotsCombinationsOfPossibleSizes() {
         for (ArrayList<Integer> honeycomputerSizesCombination : honeycomputersSizesCombinations) {
-            System.out.println(honeycomputerSizesCombination);
+            //System.out.println(honeycomputerSizesCombination);
             createHoneypotsCombinationsOfSizes(new ArrayList<>(honeycomputerSizesCombination.size()),
                     honeycomputerSizesCombination, 0);
         }
@@ -75,8 +87,8 @@ public class StatesMakerIterator implements Iterator<State> {
 
     private void createHoneypotsCombinationsOfSizes(ArrayList<int[]> acum, ArrayList<Integer> honeycomputerSizes, int currentComputerI) {
         if (currentComputerI >= honeycomputerSizes.size()) {
-            System.out.println("\t\t\t+" + acum.stream().map(x -> Arrays.toString(x)).collect(Collectors.joining(" | ")));
-            honeypotCombinations.add(new ArrayList<>(acum));
+            //System.out.println("\t\t\t+" + acum.stream().map(x -> Arrays.toString(x)).collect(Collectors.joining(" | ")));
+            honeycomputersCombinations.add(transformPortIndexesCombinationsToPortsCombinations(acum));
             return;
         }
         int[] lastHoneyComputerNew = (currentComputerI == 0 ? null : acum.get(acum.size() - 1));
@@ -112,30 +124,22 @@ public class StatesMakerIterator implements Iterator<State> {
     }
 
     private boolean incrementPortInHoneycomputer(int[] honeycomputer) {
-        System.out.println("\tIncrementing " + Arrays.toString(honeycomputer));
+        //System.out.println("\tIncrementing " + Arrays.toString(honeycomputer));
         for (int portI = honeycomputer.length - 1; portI >= 0; --portI) {
             if (honeycomputer[portI] + 1 < openPorts.size()) {
-                System.out.println("\t\tCan increment at index: " + portI);
-                int toSumBase = honeycomputer[portI]+ 1;
+                //System.out.println("\t\tCan increment at index: " + portI);
+                int toSumBase = honeycomputer[portI] + 1;
                 if (toSumBase + (honeycomputer.length - portI - 1) >= openPorts.size()) {
                     continue;
                 }
                 for (int off = 0; portI + off < honeycomputer.length; ++off) {
                     honeycomputer[portI + off] = toSumBase + off;
-                    System.out.println("\t\tAfter increment: " + Arrays.toString(honeycomputer));
+                    //System.out.println("\t\tAfter increment: " + Arrays.toString(honeycomputer));
                 }
                 return true;
             }
         }
         return false;
-    }
-
-    private void createHoneyComputer(int honeycomputerSize, int[] lastHoneycomputer) {
-
-    }
-
-    private void createHoneyports(int honeycomputerSize, int honeyportI, int minPortI) {
-
     }
 
     private void createPossibleHoneycomputersSizeCombinations(ArrayList<Integer> acum, int currSum, int minSize) {

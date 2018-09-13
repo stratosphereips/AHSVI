@@ -63,7 +63,8 @@ public class State {
     @Override
     public String toString() {
         return "State{" +
-                "network=" + network +
+                "groupId=" + network.getGroupId() +
+                ",network=" + network +
                 ", numberOfAttackOnHoneypot=" + numberOfAttackOnHoneypot +
                 '}';
     }
