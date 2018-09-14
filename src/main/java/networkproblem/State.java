@@ -12,7 +12,6 @@ public class State {
 
     public State(Network network, int numberOfAttackOnHoneypot) {
         this.network = network;
-        Collections.sort(this.network.getComputers());
         this.numberOfAttackOnHoneypot = numberOfAttackOnHoneypot;
         finalState = false;
         name = createName();

@@ -22,6 +22,12 @@ public class Network {
         ++networkId;
     }
 
+    public Network(int groupId, double probability, ArrayList<Computer> computers) {
+        this.groupId = groupId;
+        this.probability = probability;
+        this.computers = computers;
+    }
+
     public Network(Network oldNetwork) {
         groupId = oldNetwork.groupId;
         probability = oldNetwork.probability;

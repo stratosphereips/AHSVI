@@ -1,9 +1,10 @@
-package networkproblem;
+package networkproblem.statesmaker;
 
-import helpers.HelperFunctions;
+import networkproblem.Computer;
+import networkproblem.Network;
+import networkproblem.State;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class StatesMakerIterator implements Iterator<State> {
 
@@ -12,9 +13,11 @@ public class StatesMakerIterator implements Iterator<State> {
     private final int honeypotsCount;
 
     private final LinkedList<ArrayList<Integer>> honeycomputersSizesCombinations;
-    private final LinkedList<ArrayList<int[]>> honeycomputersCombinations;
+    private final LinkedList<ArrayList<Computer>> honeycomputersCombinations;
 
-    private ListIterator<ArrayList<int[]>> combinationsIter;
+
+    private CombinationsPermutationsMaker permutationsMaker;
+    private ListIterator<ArrayList<Computer>> combinationsIter;
     private int currentInputNetworkI;
 
     public StatesMakerIterator(ArrayList<Network> inputNetworks, ArrayList<Integer> openPorts, int honeypotsCount) {
@@ -27,6 +30,7 @@ public class StatesMakerIterator implements Iterator<State> {
 
         createHoneypotCombinations();
 
+        permutationsMaker = null;
         combinationsIter = honeycomputersCombinations.listIterator();
         currentInputNetworkI = 0;
     }
@@ -38,16 +42,19 @@ public class StatesMakerIterator implements Iterator<State> {
 
     @Override
     public State next() {
-        Network network = new Network(inputNetworks.get(currentInputNetworkI));
-        ArrayList<int[]> honeycomputersCombination = combinationsIter.next();
-        for (int[] honeycomputer : honeycomputersCombination) {
-            network.addComputer(new Computer(false, honeycomputer));
+        Network originalNetwork = inputNetworks.get(currentInputNetworkI);
+        if (permutationsMaker == null || !permutationsMaker.hasNext()) {
+            ArrayList<Computer> network = new ArrayList<>(originalNetwork.getComputers());
+            ArrayList<Computer> honeycomputersCombination = combinationsIter.next();
+            network.addAll(honeycomputersCombination);
+            permutationsMaker = new AllPermutationsMaker(network);
+            if (!combinationsIter.hasNext()) {
+                ++currentInputNetworkI;
+                combinationsIter = honeycomputersCombinations.listIterator();
+            }
         }
-        if (!combinationsIter.hasNext()) {
-            ++currentInputNetworkI;
-            combinationsIter = honeycomputersCombinations.listIterator();
-        }
-        return new State(network);
+        ArrayList<Computer> networkPermutation = permutationsMaker.next();
+        return new State(new Network(originalNetwork.getGroupId(), originalNetwork.getProbability(), networkPermutation));
     }
 
     public int getTotalNumberOfStates() {
@@ -63,15 +70,15 @@ public class StatesMakerIterator implements Iterator<State> {
 
     }
 
-    private ArrayList<int[]> transformPortIndexesCombinationsToPortsCombinations(ArrayList<int[]> portIndexesCombination) {
-        ArrayList<int[]> combination = new ArrayList<>(portIndexesCombination.size());
-        int[] honeycomputer;
+    private ArrayList<Computer> transformPortIndexesCombinationsToHoneycomputer(ArrayList<int[]> portIndexesCombination) {
+        ArrayList<Computer> combination = new ArrayList<>(portIndexesCombination.size());
+        int[] ports;
         for (int[] honeycomputerPortIndexes : portIndexesCombination) {
-            honeycomputer = new int[honeycomputerPortIndexes.length];
+            ports = new int[honeycomputerPortIndexes.length];
             for (int portI = 0; portI < honeycomputerPortIndexes.length; ++portI) {
-                honeycomputer[portI] = openPorts.get(honeycomputerPortIndexes[portI]);
+                ports[portI] = openPorts.get(honeycomputerPortIndexes[portI]);
             }
-            combination.add(honeycomputer);
+            combination.add(new Computer(false, ports));
         }
         //System.out.println("\t\t+" + combination.stream().map(x->Arrays.toString(x)).collect(Collectors.joining(" | ")));
         return combination;
@@ -88,7 +95,7 @@ public class StatesMakerIterator implements Iterator<State> {
     private void createHoneypotsCombinationsOfSizes(ArrayList<int[]> acum, ArrayList<Integer> honeycomputerSizes, int currentComputerI) {
         if (currentComputerI >= honeycomputerSizes.size()) {
             //System.out.println("\t\t\t+" + acum.stream().map(x -> Arrays.toString(x)).collect(Collectors.joining(" | ")));
-            honeycomputersCombinations.add(transformPortIndexesCombinationsToPortsCombinations(acum));
+            honeycomputersCombinations.add(transformPortIndexesCombinationsToHoneycomputer(acum));
             return;
         }
         int[] lastHoneyComputerNew = (currentComputerI == 0 ? null : acum.get(acum.size() - 1));

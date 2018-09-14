@@ -1,6 +1,7 @@
 package networkproblem;
 
 import helpers.HelperFunctions;
+import networkproblem.statesmaker.StatesMakerIterator;
 import pomdpproblem.POMDPProblem;
 
 import java.io.*;

@@ -1,5 +1,6 @@
 package networkproblem;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -42,6 +43,16 @@ public class Computer implements Comparable<Computer> {
 
     public TreeSet<Integer> getPorts() {
         return ports;
+    }
+
+    public int[] getPortsAsArray() {
+        int[] portsArr = new int[ports.size()];
+        int i = 0;
+        for (Integer port : ports) {
+            portsArr[i] = port;
+            ++i;
+        }
+        return portsArr;
     }
 
     public String getStringRepresentation(boolean infoSet) {
