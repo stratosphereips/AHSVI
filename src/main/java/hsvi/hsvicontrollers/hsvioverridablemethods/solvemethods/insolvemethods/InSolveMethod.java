@@ -20,7 +20,7 @@ public abstract class InSolveMethod extends SolveMethod {
         LOGGER.fine("###########################################################################");
         LOGGER.fine("###########################################################################");
         LOGGER.fine("Solve iteration: " + solveMethodsContainer.getIteration());
-        LOGGER.finer("Running time so far [s]: " + solveMethodsContainer.getTimeSinceStarted());
+        LOGGER.fine("TIME: " + solveMethodsContainer.getTimeSinceStarted());
         LOGGER.finest("LB size: " + hsvi.getLbFunction().getAlphaVectors().size());
         LOGGER.finest("UB size: " + hsvi.getUbFunction().getPoints().size());
     }
