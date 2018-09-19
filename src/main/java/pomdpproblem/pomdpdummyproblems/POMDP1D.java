@@ -129,7 +129,7 @@ public class POMDP1D implements POMDPDummyProblemI {
         initBelief[1] = 0.333333;
         initBelief[2] = 0.333333;
 
-        return new POMDPProblem(stateNames, stateNameToIndex,
+        return POMDPProblem.createPOMDPProblemFromPOMDPFormatSpecs(stateNames, stateNameToIndex,
                 actionNames, actionNameToIndex, transitionProbabilities,
                 observationNames, observationNameToIndex, observationProbabilities,
                 rewards, discount, initBelief);

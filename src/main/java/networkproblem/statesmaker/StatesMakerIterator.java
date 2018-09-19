@@ -37,21 +37,33 @@ public class StatesMakerIterator implements Iterator<State> {
 
     @Override
     public boolean hasNext() {
-        return currentInputNetworkI < inputNetworks.size();
+        return (currentInputNetworkI + 1 < inputNetworks.size())
+                || (
+                (currentInputNetworkI < inputNetworks.size())
+                        && (
+                        combinationsIter.hasNext()
+                                || permutationsMaker == null
+                                || permutationsMaker.hasNext()
+                )
+        );
     }
 
     @Override
     public State next() {
+        if (!combinationsIter.hasNext() && !permutationsMaker.hasNext()) {
+            ++currentInputNetworkI;
+            combinationsIter = honeycomputersCombinations.listIterator();
+        }
         Network originalNetwork = inputNetworks.get(currentInputNetworkI);
         if (permutationsMaker == null || !permutationsMaker.hasNext()) {
             ArrayList<Computer> network = new ArrayList<>(originalNetwork.getComputers());
             ArrayList<Computer> honeycomputersCombination = combinationsIter.next();
             network.addAll(honeycomputersCombination);
             permutationsMaker = new AllPermutationsMaker(network);
-            if (!combinationsIter.hasNext()) {
-                ++currentInputNetworkI;
+            if (!combinationsIter.hasNext() && !permutationsMaker.hasNext()) {
                 combinationsIter = honeycomputersCombinations.listIterator();
             }
+
         }
         ArrayList<Computer> networkPermutation = permutationsMaker.next();
         return new State(new Network(originalNetwork.getGroupId(), originalNetwork.getProbability(), networkPermutation));

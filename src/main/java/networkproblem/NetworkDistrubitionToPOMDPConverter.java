@@ -3,6 +3,8 @@ package networkproblem;
 import helpers.HelperFunctions;
 import networkproblem.statesmaker.StatesMakerIterator;
 import pomdpproblem.POMDPProblem;
+import pomdpproblem.SparseTransitionFunction;
+import pomdpproblem.TransitionFunction;
 
 import java.io.*;
 import java.util.*;
@@ -35,7 +37,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     private POMDPProblem pomdpProblem;
     private ArrayList<LinkedList<Integer>> groups;
     private double[] groupsProbabilities;
-    private HashMap<String, TreeSet<Integer>> infoSets;
+    private Map<String, Map<String, Set<Integer>>> infoSets;
 
     public NetworkDistrubitionToPOMDPConverter(String fileName) {
         pathToNetworkFile = fileName;
@@ -114,7 +116,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         return groupsProbabilities;
     }
 
-    public HashMap<String, TreeSet<Integer>> getInfoSets() {
+    public Map<String, Map<String, Set<Integer>>> getInfoSets() {
         return infoSets;
     }
 
@@ -198,13 +200,13 @@ public class NetworkDistrubitionToPOMDPConverter {
         ArrayList<Action> actions = createActions(states);
         ArrayList<String> actionsNames = creatActionsNames(actions);
         HashMap<String, Integer> actionsToIndexes = createActionToIndexMap(actionsNames);
-        double[][][] transitionProbabilities = POMDPProblem.transformTransitionProbabilitiesToHSVI(createTransitionFunction(states, actions));
+        TransitionFunction transitionFunction = createTransitionFunction(states, actions);
         ArrayList<String> observations = createObservations();
         HashMap<String, Integer> observationsToIndexes = createObservationToIndexMap(observations);
         double[][][] observationProbabilities = POMDPProblem.transformObservationProbabilitiesToHSVI(createObservationProbabilities(states, actions, observationsToIndexes));
-        double[][] rewards = createRewardFunction(states, actions, observationsToIndexes, transitionProbabilities, observationProbabilities);
+        double[][] rewards = createRewardFunction(states, actions, observationsToIndexes, transitionFunction, observationProbabilities);
         pomdpProblem = new POMDPProblem(statesNames, statesToIndexes,
-                actionsNames, actionsToIndexes, transitionProbabilities,
+                actionsNames, actionsToIndexes, transitionFunction,
                 observations, observationsToIndexes, observationProbabilities,
                 rewards,
                 discount);
@@ -213,15 +215,14 @@ public class NetworkDistrubitionToPOMDPConverter {
     private ArrayList<State> createStates() {
         System.out.println("\tCreating states");
         ArrayList<Integer> openPortsList = new ArrayList<>(openPorts);
-        int productionPortsCount = openPortsList.size();
         System.out.println("\t\tProduction ports: " + openPortsList);
 
-        Iterator<State> stateIterator;
+        StatesMakerIterator stateIterator;
         LinkedList<State> states = new LinkedList<>();
         State state;
         for (int honeypotsCount = honeypotsCountsLb; honeypotsCount <= honeypotsCountsUb; ++honeypotsCount) {
             stateIterator = new StatesMakerIterator(networks, openPortsList, honeypotsCount);
-            System.out.println("\t\tTotal number of states: " + ((StatesMakerIterator) stateIterator).getTotalNumberOfStates());
+            System.out.println("\t\tTotal number of states: " + stateIterator.getTotalNumberOfStates());
             while (stateIterator.hasNext()) {
                 state = stateIterator.next();
                 groups.get(state.getNetwork().getGroupId()).add(states.size());
@@ -243,15 +244,21 @@ public class NetworkDistrubitionToPOMDPConverter {
     private ArrayList<String> createStatesNames(ArrayList<State> states) {
         System.out.println("\tCreating states names");
         ArrayList<String> statesNames = new ArrayList<>(states.size());
-        infoSets = new HashMap<>(2 * states.size());
-        String infoSetName;
-        TreeSet<Integer> statesInInfoSet;
+        infoSets = new TreeMap<>();
+        String infoSetName, combinationGroupName;
+        Map<String, Set<Integer>> combinationGroupsInInfoSet;
+        Set<Integer> statesInCombinationGroup;
+        State state;
         for (int s = 0; s < states.size() - 1; ++s) {
-            statesNames.add(states.get(s).getName());
-            infoSetName = states.get(s).getInfoSetName();
-            statesInInfoSet = infoSets.getOrDefault(infoSetName, new TreeSet<>());
-            statesInInfoSet.add(s);
-            infoSets.put(infoSetName, statesInInfoSet);
+            state = states.get(s);
+            statesNames.add(state.getName());
+            infoSetName = state.getInfoSetName();
+            combinationGroupName = state.getCombinationGroupName();
+            combinationGroupsInInfoSet = infoSets.getOrDefault(infoSetName, new TreeMap<>());
+            statesInCombinationGroup = combinationGroupsInInfoSet.getOrDefault(combinationGroupName, new TreeSet<>());
+            statesInCombinationGroup.add(s);
+            combinationGroupsInInfoSet.put(combinationGroupName, statesInCombinationGroup);
+            infoSets.put(infoSetName, combinationGroupsInInfoSet);
         }
         statesNames.add(states.get(states.size() - 1).getName());
         return statesNames;
@@ -313,43 +320,52 @@ public class NetworkDistrubitionToPOMDPConverter {
         return actionNamesToIndex;
     }
 
-    private double[][][] createTransitionFunction(ArrayList<State> states, ArrayList<Action> actions) {
+    private TransitionFunction createTransitionFunction(ArrayList<State> states, ArrayList<Action> actions) {
         System.out.println("\tCreating transition function");
 
-        double[][][] transitionFunction = new double[actions.size()][states.size()][states.size()]; // T(a,s,s_)
 
         int finalS = states.size() - 1;
+        List<List<Map<Integer, Double>>> transitionFunction = new ArrayList<>(states.size()); // T(s,a,s_)
+        List<Map<Integer, Double>> actionStatesToProbabilityMap;
+        for (int s = 0; s < states.size(); ++s) {
+            actionStatesToProbabilityMap = new ArrayList<>(actions.size());
+            transitionFunction.add(actionStatesToProbabilityMap);
+            for (int a = 0; a < actions.size(); ++a) {
+                actionStatesToProbabilityMap.add(new TreeMap<>());
+            }
+        }
         Action action;
         State state;
         Network network;
         for (int a = 0; a < actions.size(); ++a) {
             // cannnot go anywhere from final state
-            transitionFunction[a][finalS][finalS] = 1.0;
+            transitionFunction.get(finalS).get(a).put(finalS, 1.0);
             action = actions.get(a);
             for (int s = 0; s < finalS; ++s) {
                 state = states.get(s);
                 network = state.getNetwork();
                 switch (action.getActionType()) {
                     case PROBE:
-                        transitionFunction[a][s][s] = 1.0;
+                        transitionFunction.get(s).get(a).put(s, 1.0);
                         break;
                     case ATTACK:
                         // does the computer and the port we attack even exist at this index in this network?
                         if (network.containsComputerAtIndex(action.getTargetComputerI()) &&
                                 network.getComputerAtIndex(action.getTargetComputerI()).containsPort(action.getTargetPort())) {
                             if (network.computerAtIndexIsReal(action.getTargetComputerI())) {
-                                transitionFunction[a][s][s] = 1.0;
+                                transitionFunction.get(s).get(a).put(s, 1.0); // TODO after computer attack on honeypot, it can attack again
                             } else {
                                 // attack on a honeypot
                                 if (state.getNumberOfAttackOnHoneypot() + 1 <= maxNumberOfDetectedAttacksAllowed) {
                                     // TODO add transition to the state with honeypot attacks higher by one
                                     System.exit(12345);
                                 } else {
-                                    transitionFunction[a][s][finalS] = 1.0;
+                                    // detected
+                                    transitionFunction.get(s).get(a).put(finalS, 1.0);
                                 }
                             }
                         } else {
-                            transitionFunction[a][s][s] = 1.0;
+                            transitionFunction.get(s).get(a).put(s, 1.0);
                         }
                         break;
                     default:
@@ -372,7 +388,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         }
         */
 
-        return transitionFunction;
+        return new SparseTransitionFunction(transitionFunction);
     }
 
     private ArrayList<String> createObservations() {
@@ -476,7 +492,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     private double[][] createRewardFunction(ArrayList<State> states,
                                             ArrayList<Action> actions,
                                             HashMap<String, Integer> observationToIndex,
-                                            double[][][] transitionProbabilities,
+                                            TransitionFunction transitionFunction,
                                             double[][][] observationProbabilities) {
         System.out.println("\tCreating reward function");
         double[][] rewards = new double[states.size()][actions.size()];
@@ -498,7 +514,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                 switch (action.getActionType()) {
                     case PROBE:
                         for (int o = 0; o < observationToIndex.size(); ++o) {
-                            rewards[s][a] += transitionProbabilities[s][a][s] * observationProbabilities[s][a][o] *
+                            rewards[s][a] += transitionFunction.getProbability(s, a, s) * observationProbabilities[s][a][o] *
                                     probeCost;
                         }
                         break;
@@ -513,7 +529,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                             rewardForSuccefulAttack = portsValues.getOrDefault(port, defaultSuccessfulAttackReward);
                             successfulAttackProb = portsSuccessfulAttackProbs.getOrDefault(port, getDefaultSuccessfulAttackProbability);
                             rewardForAttack = successfulAttackProb * rewardForSuccefulAttack;
-                            rewards[s][a] += transitionProbabilities[s][a][s] * observationProbabilities[s][a][realObsI] *
+                            rewards[s][a] += transitionFunction.getProbability(s, a, s) * observationProbabilities[s][a][realObsI] *
                                     rewardForAttack;
                             System.out.println("\t\t\tr[" + s + "]["  + a + "] = " + rewards[s][a]);
                         }

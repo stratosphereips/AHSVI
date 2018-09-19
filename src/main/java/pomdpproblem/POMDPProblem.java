@@ -9,7 +9,7 @@ public class POMDPProblem {
     private final HashMap<String, Integer> stateNameToIndex;
     private final ArrayList<String> actionNames;
     private final HashMap<String, Integer> actionNameToIndex;
-    private final double[][][] transitionProbabilities; // probability p of getting from start-state s_ to end-state s_ playing
+    private final TransitionFunction transitionFunction; // probability p of getting from start-state s_ to end-state s_ playing
     //                                         action a ... p = transitionProbabilities[s][a][s_]
     private final ArrayList<String> observationNames;
     private final HashMap<String, Integer> observationNameToIndex;
@@ -21,7 +21,7 @@ public class POMDPProblem {
 
     public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
                         List<String> actionNames, HashMap<String, Integer> actionNameToIndex,
-                        double[][][] transitionProbabilities,
+                        TransitionFunction transitionFunction,
                         List<String> observationNames, HashMap<String, Integer> observationNameToIndex,
                         double[][][] observationProbabilities,
                         double[][] rewards,
@@ -33,17 +33,29 @@ public class POMDPProblem {
 
         this.stateNameToIndex = stateNameToIndex;
         this.actionNameToIndex = actionNameToIndex;
-        this.transitionProbabilities = transitionProbabilities;
+        this.transitionFunction = transitionFunction;
         this.observationNameToIndex = observationNameToIndex;
         this.observationProbabilities = observationProbabilities;
         this.rewards = rewards;
         this.discount = discount;
         this.initBelief = initBelief;
 
-        assert areTransitionProbabilitiesCorrect(): "Transition probabilities are probably incorrect";
-        assert areObservationProbabilitiesCorrect(): "Observation probabilities are probably incorrect";
-        assert 0 <= discount && discount <= 1: "Discount must be between 0 and 1";
+        assert areTransitionProbabilitiesCorrect() : "Transition probabilities are probably incorrect";
+        assert areObservationProbabilitiesCorrect() : "Observation probabilities are probably incorrect";
+        assert 0 <= discount && discount <= 1 : "Discount must be between 0 and 1";
 
+    }
+
+    public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
+                        List<String> actionNames, HashMap<String, Integer> actionNameToIndex,
+                        TransitionFunction transitionFunction,
+                        List<String> observationNames, HashMap<String, Integer> observationNameToIndex,
+                        double[][][] observationProbabilities,
+                        double[][] rewards,
+                        double discount) {
+        this(stateNames, stateNameToIndex,
+                actionNames, actionNameToIndex, transitionFunction,
+                observationNames, observationNameToIndex, observationProbabilities, rewards, discount, null);
     }
 
     public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
@@ -55,7 +67,7 @@ public class POMDPProblem {
                         double discount) {
         this(stateNames, stateNameToIndex,
                 actionNames, actionNameToIndex,
-                transitionProbabilities,
+                new FullTransitionFunction(transitionProbabilities),
                 observationNames, observationNameToIndex,
                 observationProbabilities,
                 rewards,
@@ -63,7 +75,7 @@ public class POMDPProblem {
                 null);
     }
 
-    public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
+    public static POMDPProblem createPOMDPProblemFromPOMDPFormatSpecs(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
                         List<String> actionNames, HashMap<String, Integer> actionNameToIndex,
                         double[][][] transitionProbabilities, // ap[a][s][s_]
                         List<String> observationNames, HashMap<String, Integer> observationNameToIndex,
@@ -71,21 +83,21 @@ public class POMDPProblem {
                         double[][][][] rewards, //r[a][s][s_][o]
                         double discount,
                         double[] initBelief) {
-        this(stateNames, stateNameToIndex,
-                actionNames, actionNameToIndex, transformTransitionProbabilitiesToHSVI(transitionProbabilities),
+        return new POMDPProblem(stateNames, stateNameToIndex,
+                actionNames, actionNameToIndex, new FullTransitionFunction(transformTransitionProbabilitiesToHSVI(transitionProbabilities)),
                 observationNames, observationNameToIndex, transformObservationProbabilitiesToHSVI(observationProbabilities),
                 transformRewardsToHSVI(rewards, transitionProbabilities, observationProbabilities),
                 discount, initBelief);
     }
 
-    public POMDPProblem(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
+    public static POMDPProblem createPOMDPProblemFromPOMDPFormatSpecs(List<String> stateNames, HashMap<String, Integer> stateNameToIndex,
                         List<String> actionNames, HashMap<String, Integer> actionNameToIndex,
                         double[][][] transitionProbabilities,
                         List<String> observationNames, HashMap<String, Integer> observationNameToIndex,
                         double[][][] observationProbabilities,
                         double[][][][] rewards,
                         double discount) {
-        this(stateNames, stateNameToIndex,
+        return createPOMDPProblemFromPOMDPFormatSpecs(stateNames, stateNameToIndex,
                 actionNames, actionNameToIndex,
                 transitionProbabilities,
                 observationNames, observationNameToIndex,
@@ -128,7 +140,7 @@ public class POMDPProblem {
     }
 
     public double getTransitionProbability(int s, int a, int s_) {
-        return transitionProbabilities[s][a][s_];
+        return transitionFunction.getProbability(s, a, s_);
     }
 
     public String getObservationName(int o) {
@@ -165,7 +177,7 @@ public class POMDPProblem {
             for (int a = 0; a < getNumberOfActions(); ++a) {
                 probSum = 0;
                 for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
-                    probSum += transitionProbabilities[s][a][s_];
+                    probSum += transitionFunction.getProbability(s, a, s_);
                 }
                 if (Math.abs(probSum - 1) > Config.ZERO) {
                     return false;
@@ -197,7 +209,7 @@ public class POMDPProblem {
         for (int s = 0; s < getNumberOfStates(); ++s) {
             probSubSum = 0;
             for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
-                probSubSum += transitionProbabilities[s][a][s_] * observationProbabilities[s_][a][o];
+                probSubSum += transitionFunction.getProbability(s, a, s_) * observationProbabilities[s_][a][o];
             }
             probSum += belief[s] * probSubSum;
         }

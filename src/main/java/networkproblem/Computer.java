@@ -87,6 +87,11 @@ public class Computer implements Comparable<Computer> {
 
     @Override
     public int compareTo(Computer o) {
+        if (isReal() && !o.isReal()) {
+            return -1;
+        } else if (!isReal() && o.isReal()) {
+            return 1;
+        }
         if (ports.size() < o.getPorts().size()) {
             return -1;
         } else if (ports.size() > o.getPorts().size()) {

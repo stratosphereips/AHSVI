@@ -93,8 +93,8 @@ public class AHSVIMain {
         AHSVIMinValueFinder minValueFinder =
                 new AHSVIMinValueFinder(networkFileReader.getStatesGroupsIds(), networkFileReader.getGroupsProbabilities());
 
-        PreSolveMethod preSolveMethod = new AHSVIPreSolveMethod(minValueFinder);
-        InSolveMethod inSolveMethod = new AHSVIInSolveMethod(minValueFinder);
+        PreSolveMethod preSolveMethod = new AHSVIPreSolveMethod(minValueFinder, networkFileReader.getInfoSets());
+        InSolveMethod inSolveMethod = new AHSVIInSolveMethod(minValueFinder, networkFileReader.getInfoSets());
         PostSolveMethod postSolveMethod = new AHSVIPostSolveMethod(minValueFinder, networkFileReader.getInfoSets());
         SolveTerminator solveTerminator = new AHSVISolveTerminatorAbsoluteDiff();
         ExploreTerminator exploreTerminator = new HSVIExploreTerminatorClassic();

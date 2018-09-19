@@ -108,7 +108,7 @@ public class POMDPTiger implements POMDPDummyProblemI {
         initBelief[0] = 0.5;
         initBelief[1] = 0.5;
 
-        return new POMDPProblem(stateNames, stateNameToIndex,
+        return POMDPProblem.createPOMDPProblemFromPOMDPFormatSpecs(stateNames, stateNameToIndex,
                 actionNames, actionNameToIndex, transitionProbabilities,
                 observationNames, observationNameToIndex, observationProbabilities,
                 rewards, discount, initBelief);

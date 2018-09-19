@@ -723,7 +723,7 @@ public class POMDPTigerGrid implements POMDPDummyProblemI {
 					    .mapToDouble(a -> Double.parseDouble(a))
 					    .toArray();
 
-	    return new POMDPProblem(stateNames, stateNameToIndex,
+	    return POMDPProblem.createPOMDPProblemFromPOMDPFormatSpecs(stateNames, stateNameToIndex,
 					    actionNames, actionNameToIndex, transitionProbabilities,
 					    observationNames, observationNameToIndex, observationProbabilities,
 					    rewards, discount, initBelief);

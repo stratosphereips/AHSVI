@@ -89,14 +89,6 @@ public class Network {
         return computersList;
     }
 
-    public String getStringRepresentation(boolean infoSet) {
-        StringBuilder sb = new StringBuilder(infoSet ? "" : "id:" + groupId + "{");
-        for (int computerI = 0; computerI < computers.size(); ++computerI) {
-            sb.append(computers.get(computerI).getStringRepresentation(infoSet)).append(computerI < computers.size() - 1 ? "|" : "");
-        }
-        return sb.append(infoSet ? "" : "}").toString();
-    }
-
     @Override
     public String toString() {
         return "Network{" +
