@@ -68,7 +68,7 @@ public class AHSVIMain {
         int honeypotsCountLb = Integer.parseInt(cmd.getOptionValue("hcl", "1"));
         int honeypotsCountUb = Integer.parseInt(cmd.getOptionValue("hcu", "1"));
         double probeSuccessProbability = Double.parseDouble(cmd.getOptionValue("psp", "0.5"));
-        double probeCost = Double.parseDouble(cmd.getOptionValue("pc", "0.0"));
+        double probeCost = Double.parseDouble(cmd.getOptionValue("pc", "-0.0"));
         double discount = Double.parseDouble(cmd.getOptionValue("d", "0.95"));
 
 

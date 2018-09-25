@@ -1,9 +1,7 @@
 package hsvi;
 
 import java.util.*;
-import java.util.logging.*;
 
-import hsvi.CustomLogger.CustomLogger;
 import helpers.HelperFunctions;
 import hsvi.bounds.*;
 import hsvi.hsvicontrollers.HSVIController;
@@ -95,22 +93,26 @@ public class HSVIAlgorithm {
     private double[] nextBelief(double[] belief, int a, int o) {
         // [paper 2.update b']
         double[] beliefNew = new double[belief.length];
-        double normConstant = 0;
-        for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-            if (pomdpProblem.getObservationProbabilities(s_, a, o) < Config.ZERO) {
-                continue;
+        // TODO switch s_ cycle with s cycle and change s_ for cycle to foreach
+        Iterator<Integer> reachableStatesIt;
+        int s_;
+        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+            reachableStatesIt = pomdpProblem.getTransitionFunction().getIteratorOverReachableStates(s, a);
+            while (reachableStatesIt.hasNext()) {
+            s_ = reachableStatesIt.next();
+                if (pomdpProblem.getObservationProbabilities(s_, a, o) < Config.ZERO) {
+                    continue;
+                }
+                beliefNew[s_] += pomdpProblem.getTransitionProbability(s, a, s_) * belief[s] * pomdpProblem.getObservationProbabilities(s_, a, o);
             }
-            for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-                beliefNew[s_] += pomdpProblem.getTransitionProbability(s, a, s_) * belief[s];
-            }
-            beliefNew[s_] *= pomdpProblem.getObservationProbabilities(s_, a, o);
-            normConstant += beliefNew[s_];
         }
+
+        double normConstant = Arrays.stream(beliefNew).sum();
         if (normConstant < Config.ZERO) {
             return null;
         }
-        for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-            beliefNew[s_] /= normConstant;
+        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+            beliefNew[s] /= normConstant;
         }
         return beliefNew;
     }
@@ -186,13 +188,17 @@ public class HSVIAlgorithm {
         double observationsValuesSum = 0;
         double observationsValuesSubSum;
         double[] nextBel;
+        Iterator<Integer> reachableStatesIt;
+        int s_;
         for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
             if (belief[s] < Config.ZERO) {
                 continue;
             }
             rewardsSum += pomdpProblem.getRewards(s, a) * belief[s];
             observationsValuesSubSum = 0;
-            for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+            reachableStatesIt = pomdpProblem.getTransitionFunction().getIteratorOverReachableStates(s, a);
+            while (reachableStatesIt.hasNext()) {
+                s_ = reachableStatesIt.next();
                 if (pomdpProblem.getTransitionProbability(s, a, s_) < Config.ZERO) {
                     continue;
                 }
@@ -236,6 +242,8 @@ public class HSVIAlgorithm {
         double sumOs_, betaVecValue;
         int bestA = 0;
         LBAlphaVector beta;
+        Iterator<Integer> reachableStatesIt;
+        int s_;
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
             for (int o = 0; o < pomdpProblem.getNumberOfObservations(); ++o) {
                 betasAo.add(getAlphaDotProdArgMax(nextBelief(belief, a, o)));
@@ -248,7 +256,9 @@ public class HSVIAlgorithm {
                     if (beta == null) {
                         continue;
                     }
-                    for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
+                    reachableStatesIt = pomdpProblem.getTransitionFunction().getIteratorOverReachableStates(s, a);
+                    while (reachableStatesIt.hasNext()) {
+                        s_ = reachableStatesIt.next();
                         sumOs_ += beta.vector[s_] *
                                 pomdpProblem.getObservationProbabilities(s_, a, o) *
                                 pomdpProblem.getTransitionProbability(s, a, s_);

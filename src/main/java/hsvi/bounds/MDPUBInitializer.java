@@ -2,8 +2,8 @@ package hsvi.bounds;
 
 import helpers.HelperFunctions;
 import hsvi.CustomLogger.CustomLogger;
-import hsvi.HSVIAlgorithm;
 import pomdpproblem.POMDPProblem;
+import pomdpproblem.TransitionFunction;
 
 import java.util.Arrays;
 import java.util.logging.Logger;
@@ -20,7 +20,7 @@ public class MDPUBInitializer {
     private final double eps;
     private final int maxIterN;
 
-    private final double[][][] transitionProbabilities; // p[a][s][s_]
+    private final TransitionFunction transitionFunction;
     private final double[][] rewards; // r[a][s]
     private final double[] alpha;
 
@@ -40,7 +40,7 @@ public class MDPUBInitializer {
 
         alpha = initAlpha();
 
-        transitionProbabilities = transformTransitionProbabilities();
+        transitionFunction = pomdpProblem.getTransitionFunction();
         rewards = transformRewards();
     }
 
@@ -67,21 +67,6 @@ public class MDPUBInitializer {
         return initAlpha;
     }
 
-    private double[][][] transformTransitionProbabilities() {
-        double[][][] transitionProbabilitiesTransformed =
-                new double[pomdpProblem.getNumberOfActions()]
-                        [pomdpProblem.getNumberOfStates()]
-                        [pomdpProblem.getNumberOfStates()];
-        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
-            for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
-                for (int s_ = 0; s_ < pomdpProblem.getNumberOfStates(); ++s_) {
-                    transitionProbabilitiesTransformed[a][s_][s] = pomdpProblem.getTransitionProbability(s, a, s_);
-                }
-            }
-        }
-        return transitionProbabilitiesTransformed;
-    }
-
     private double[][] transformRewards() {
         double[][] rewardsTransformed = new double[pomdpProblem.getNumberOfActions()][pomdpProblem.getNumberOfStates()];
         for (int a = 0; a < pomdpProblem.getNumberOfActions(); ++a) {
@@ -93,7 +78,7 @@ public class MDPUBInitializer {
     }
 
     private void nextAlphaAction(double[] result, int a) {
-        HelperFunctions.matrixProd(alpha, transitionProbabilities[a], result);
+        HelperFunctions.matrixProd(alpha, transitionFunction, a, result);
         HelperFunctions.arrScalarProd(result, pomdpProblem.getDiscount());
         HelperFunctions.arrAdd(result, rewards[a]);
     }

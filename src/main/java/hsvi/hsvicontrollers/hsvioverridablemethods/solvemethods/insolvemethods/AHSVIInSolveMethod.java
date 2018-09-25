@@ -43,7 +43,7 @@ public class AHSVIInSolveMethod extends InSolveMethod {
         LOGGER.fine("UB_MIN_BELIEF_ACTION: " +
                 hsvi.getPomdpProblem().getActionName(
                         hsvi.getLbFunction().getDotProdArgMax(minUbValueBelief).a));
-        LOGGER.fine("BOUNDS_GAP: " + (solveMethodsContainer.getLastUbVal() - solveMethodsContainer.getLastLbVal()));
+        LOGGER.fine("BOUNDS_GAP: " + (solveMethodsContainer.getUbVal() - solveMethodsContainer.getLbVal()));
 
         //LOGGER.fine(hsvi.getLbFunction().getAlphaVectors().stream().map(a -> Arrays.toString(a.vector)).collect(Collectors.joining("\n")));
 

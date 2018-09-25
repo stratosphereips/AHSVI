@@ -353,7 +353,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                         if (network.containsComputerAtIndex(action.getTargetComputerI()) &&
                                 network.getComputerAtIndex(action.getTargetComputerI()).containsPort(action.getTargetPort())) {
                             if (network.computerAtIndexIsReal(action.getTargetComputerI())) {
-                                transitionFunction.get(s).get(a).put(s, 1.0); // TODO after computer attack on honeypot, it can attack again
+                                transitionFunction.get(s).get(a).put(finalS, 1.0);
                             } else {
                                 // attack on a honeypot
                                 if (state.getNumberOfAttackOnHoneypot() + 1 <= maxNumberOfDetectedAttacksAllowed) {
@@ -374,19 +374,6 @@ public class NetworkDistrubitionToPOMDPConverter {
                 }
             }
         }
-
-        /*
-        for (int a = 0; a < actions.size(); ++a) {
-            System.out.println("\t\t" + actions.get(a));
-            for (int s = 0; s < states.size(); ++s) {
-                System.out.print("\t\t");
-                for (int s_ = 0; s_ < states.size(); ++s_) {
-                    System.out.print(transitionFunction[a][s][s_] + " ");
-                }
-                System.out.println();
-            }
-        }
-        */
 
         return new SparseTransitionFunction(transitionFunction);
     }
@@ -472,20 +459,6 @@ public class NetworkDistrubitionToPOMDPConverter {
         for (int a = 0; a < actions.size(); ++a) {
             observationProbabilities[a][finalS][nothingObsI] = 1.0;
         }
-
-        /*
-        for (int s_ = 0; s_ < states.size(); ++s_) {
-            System.out.println("\t\t" + states.get(s_));
-            for (int a = 0; a < actions.size(); ++a) {
-                System.out.print("\t\t");
-                for (int o = 0; o < observationToIndex.size(); ++o) {
-                    System.out.print(observationProbabilities[a][s_][o] + " ");
-                }
-                System.out.println();
-            }
-        }
-        */
-
         return observationProbabilities;
     }
 
@@ -513,10 +486,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                 network = state.getNetwork();
                 switch (action.getActionType()) {
                     case PROBE:
-                        for (int o = 0; o < observationToIndex.size(); ++o) {
-                            rewards[s][a] += transitionFunction.getProbability(s, a, s) * observationProbabilities[s][a][o] *
-                                    probeCost;
-                        }
+                            rewards[s][a] = probeCost;
                         break;
                     case ATTACK:
                         // does the computer and the port we attack even exist at this index in this network?
@@ -526,12 +496,13 @@ public class NetworkDistrubitionToPOMDPConverter {
                         port = action.getTargetPort();
                         if (network.containsComputerAtIndex(computerI) &&
                                 network.getComputerAtIndex(computerI).containsPort(port)) {
-                            rewardForSuccefulAttack = portsValues.getOrDefault(port, defaultSuccessfulAttackReward);
-                            successfulAttackProb = portsSuccessfulAttackProbs.getOrDefault(port, getDefaultSuccessfulAttackProbability);
-                            rewardForAttack = successfulAttackProb * rewardForSuccefulAttack;
-                            rewards[s][a] += transitionFunction.getProbability(s, a, s) * observationProbabilities[s][a][realObsI] *
-                                    rewardForAttack;
-                            System.out.println("\t\t\tr[" + s + "]["  + a + "] = " + rewards[s][a]);
+                            if (network.computerAtIndexIsReal(computerI)) {
+                                rewardForSuccefulAttack = portsValues.getOrDefault(port, defaultSuccessfulAttackReward);
+                                successfulAttackProb = portsSuccessfulAttackProbs.getOrDefault(port, getDefaultSuccessfulAttackProbability);
+                                rewardForAttack = successfulAttackProb * rewardForSuccefulAttack;
+                                rewards[s][a] += rewardForAttack;
+                                System.out.println("\t\t\tr[" + s + "][" + a + "] = " + rewards[s][a]);
+                            }
                         }
                         break;
                     default:
@@ -543,56 +514,4 @@ public class NetworkDistrubitionToPOMDPConverter {
 
         return rewards;
     }
-    /*
-    private double[][][][] createRewardFunction(ArrayList<State> states,
-                                                ArrayList<Action> actions,
-                                                HashMap<String, Integer> observationToIndex) {
-        System.out.println("\tCreating reward function");
-        double[][][][] rewards = new double[actions.size()][states.size()][states.size()][observationToIndex.size()];
-
-        int realObsI = observationToIndex.get(Observation.ObservationType.REAL.toString());
-
-        int finalS = states.size() - 1;
-        Action action;
-        State state;
-        Network network;
-        int computerI, port;
-        double rewardForAttack, rewardForSuccefulAttack, successfulAttackProb;
-        for (int a = 0; a < actions.size(); ++a) {
-            action = actions.get(a);
-            System.out.println("\t\t" + action);
-            for (int s = 0; s < finalS; ++s) {
-                state = states.get(s);
-                network = state.getNetwork();
-                switch (action.getActionType()) {
-                    case PROBE:
-                        for (int o = 0; o < observationToIndex.size(); ++o) {
-                            rewards[a][s][s][o] = probeCost;
-                        }
-                        break;
-                    case ATTACK:
-                        // does the computer and the port we attack even exist at this index in this network?
-                        // TODO reward for succesful attack on real computer/port, but what about loss?
-                        // TODO ^^ do we need observation detected?
-                        computerI = action.getTargetComputerI();
-                        port = action.getTargetPort();
-                        if (network.containsComputerAtIndex(computerI) &&
-                                network.getComputerAtIndex(computerI).containsPort(port)) {
-                            rewardForSuccefulAttack = portsValues.getOrDefault(port, defaultSuccessfulAttackReward);
-                            successfulAttackProb = portsSuccessfulAttackProbs.getOrDefault(port, getDefaultSuccessfulAttackProbability);
-                            rewardForAttack = successfulAttackProb * rewardForSuccefulAttack;
-                            rewards[a][s][s][realObsI] = rewardForAttack;
-                            System.out.println("\t\t\tr[" + a + "][" + s + "][" + s + "][" + realObsI + "] = " + rewards[a][s][s][realObsI]);
-                        }
-                        break;
-                    default:
-                        System.out.println("No such action");
-                        System.exit(21313);
-                }
-            }
-        }
-
-        return rewards;
-    }
-    */
 }

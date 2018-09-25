@@ -1,13 +1,14 @@
 package helpers;
 
 import hsvi.bounds.LBAlphaVector;
+import pomdpproblem.TransitionFunction;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class HelperFunctions {
 
@@ -80,6 +81,19 @@ public class HelperFunctions {
         for (int j = 0; j < arr.length; ++j) {
             for (int p = 0; p < arr.length; ++p) {
                 res[j] += arr[p] * mat[p][j];
+            }
+        }
+    }
+
+    public static void matrixProd(double[] arr, TransitionFunction transitionFunction, int a, double[] res) {
+        fillArray(res, 0);
+        Iterator<Integer> reachableStatesIt;
+        int s_;
+        for (int s = 0; s < arr.length; ++s) {
+            reachableStatesIt = transitionFunction.getIteratorOverReachableStates(s, a);
+            while (reachableStatesIt.hasNext()) {
+                s_ = reachableStatesIt.next();
+                res[s] += arr[s_] * transitionFunction.getProbability(s, a, s_);
             }
         }
     }

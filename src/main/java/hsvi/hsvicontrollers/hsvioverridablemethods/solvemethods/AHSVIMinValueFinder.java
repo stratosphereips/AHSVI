@@ -51,7 +51,7 @@ public class AHSVIMinValueFinder extends InitializableWithHSVI {
                 model.addGe(obj, model.scalProd(alphaVector.vector, beliefVars));
             }
             model.addMinimize(obj);
-            model.exportModel("min_lb_belief.lp");
+            //model.exportModel("min_lb_belief.lp");
             model.solve();
             return model.getValues(beliefVars);
 
@@ -121,7 +121,7 @@ public class AHSVIMinValueFinder extends InitializableWithHSVI {
             model.addEq(valueSum, valueVar);
 
             model.addMinimize(valueVar);
-            model.exportModel("min_ub_belief.lp");
+            //model.exportModel("min_ub_belief.lp");
             model.solve();
             return model.getValues(beliefVars);
 

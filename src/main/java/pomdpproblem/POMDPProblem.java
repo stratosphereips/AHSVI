@@ -139,6 +139,10 @@ public class POMDPProblem {
         return actionNameToIndex.get(actionName);
     }
 
+    public TransitionFunction getTransitionFunction() {
+        return transitionFunction;
+    }
+
     public double getTransitionProbability(int s, int a, int s_) {
         return transitionFunction.getProbability(s, a, s_);
     }
@@ -204,11 +208,16 @@ public class POMDPProblem {
     }
 
     public double getProbabilityOfObservationPlayingAction(int o, double[] belief, int a) {
+        // TODO precompute? s*a*o
         double probSum = 0;
         double probSubSum;
+        Iterator<Integer> reachableStatesIt;
+        int s_;
         for (int s = 0; s < getNumberOfStates(); ++s) {
             probSubSum = 0;
-            for (int s_ = 0; s_ < getNumberOfStates(); ++s_) {
+            reachableStatesIt = transitionFunction.getIteratorOverReachableStates(s, a);
+            while (reachableStatesIt.hasNext()) {
+                s_ = reachableStatesIt.next();
                 probSubSum += transitionFunction.getProbability(s, a, s_) * observationProbabilities[s_][a][o];
             }
             probSum += belief[s] * probSubSum;
