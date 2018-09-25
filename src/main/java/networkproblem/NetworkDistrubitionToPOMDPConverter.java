@@ -72,7 +72,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     private void loadNetwork() {
         try {
             readNetworksFile();
-            System.out.println("Read network: " + networks);
+            // System.out.println("Read network: " + networks);
         } catch (IOException e) {
             System.err.println("Could not read from " + pathToNetworkFile);
             System.exit(30);
@@ -193,7 +193,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private void createPomdpProblem() {
-        System.out.println("Creating POMDP problem");
+        // System.out.println("Creating POMDP problem");
         ArrayList<State> states = createStates();
         ArrayList<String> statesNames = createStatesNames(states);
         HashMap<String, Integer> statesToIndexes = createStateToIndexMap(statesNames);
@@ -213,22 +213,23 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private ArrayList<State> createStates() {
-        System.out.println("\tCreating states");
+        // System.out.println("\tCreating states");
         ArrayList<Integer> openPortsList = new ArrayList<>(openPorts);
-        System.out.println("\t\tProduction ports: " + openPortsList);
+        // System.out.println("\t\tProduction ports: " + openPortsList);
 
         StatesMakerIterator stateIterator;
         LinkedList<State> states = new LinkedList<>();
         State state;
         for (int honeypotsCount = honeypotsCountsLb; honeypotsCount <= honeypotsCountsUb; ++honeypotsCount) {
             stateIterator = new StatesMakerIterator(networks, openPortsList, honeypotsCount);
-            System.out.println("\t\tTotal number of states: " + stateIterator.getTotalNumberOfStates());
+            // System.out.println("\t\tNumber of states with " + honeypotsCount + " honeypots: " + stateIterator.getTotalNumberOfStates());
             while (stateIterator.hasNext()) {
                 state = stateIterator.next();
                 groups.get(state.getNetwork().getGroupId()).add(states.size());
                 states.add(state);
             }
         }
+        System.out.println("Total number of states: " + states.size());
 
         // TODO now we can do only maxNumberOfDetectedAttacksAllowed == 0
         if (maxNumberOfDetectedAttacksAllowed > 0) {
@@ -242,7 +243,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private ArrayList<String> createStatesNames(ArrayList<State> states) {
-        System.out.println("\tCreating states names");
+        // System.out.println("\tCreating states names");
         ArrayList<String> statesNames = new ArrayList<>(states.size());
         infoSets = new TreeMap<>();
         String infoSetName, combinationGroupName;
@@ -265,17 +266,17 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private HashMap<String, Integer> createStateToIndexMap(ArrayList<String> statesNames) {
-        System.out.println("\tCreating states names to indexes map");
+        // System.out.println("\tCreating states names to indexes map");
         HashMap<String, Integer> stateNamesToIndex = new HashMap<>(statesNames.size() * 2);
         for (int s = 0; s < statesNames.size(); ++s) {
-            System.out.println("\t\t" + s + ": " + statesNames.get(s));
+            // System.out.println("\t\t" + s + ": " + statesNames.get(s));
             stateNamesToIndex.put(statesNames.get(s), s);
         }
         return stateNamesToIndex;
     }
 
     private ArrayList<Action> createActions(ArrayList<State> states) {
-        System.out.println("\tCreating actions");
+        // System.out.println("\tCreating actions");
 
         int maxComputersCount = Integer.MIN_VALUE;
         for (State state : states) {
@@ -288,9 +289,9 @@ public class NetworkDistrubitionToPOMDPConverter {
 
         int actionsCount = maxComputersCount * openPorts.size() * 2;
 
-        System.out.println("\t\tMax computers count in a single network: " + maxComputersCount);
-        System.out.println("\t\tMax ports count in a single computer: " + openPorts.size());
-        System.out.println("\t\tTotal number of probe/attack actions: " + actionsCount);
+        // System.out.println("\t\tMax computers count in a single network: " + maxComputersCount);
+        // System.out.println("\t\tMax ports count in a single computer: " + openPorts.size());
+        // System.out.println("\t\tTotal number of probe/attack actions: " + actionsCount);
         ArrayList<Action> actions = new ArrayList<>(actionsCount);
         for (int targetComputerI = 0; targetComputerI < maxComputersCount; ++targetComputerI) {
             for (Integer port : openPorts) {
@@ -302,7 +303,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private ArrayList<String> creatActionsNames(ArrayList<Action> actions) {
-        System.out.println("\tCreating actions names");
+        // System.out.println("\tCreating actions names");
         ArrayList<String> actionsNames = new ArrayList<>(actions.size());
         for (Action action : actions) {
             actionsNames.add(action.getName());
@@ -311,17 +312,17 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private HashMap<String, Integer> createActionToIndexMap(ArrayList<String> actionsNames) {
-        System.out.println("\tCreating actions names to indexes map");
+        // System.out.println("\tCreating actions names to indexes map");
         HashMap<String, Integer> actionNamesToIndex = new HashMap<>(actionsNames.size() * 2);
         for (int a = 0; a < actionsNames.size(); ++a) {
-            System.out.println("\t\t" + a + ": " + actionsNames.get(a));
+            // System.out.println("\t\t" + a + ": " + actionsNames.get(a));
             actionNamesToIndex.put(actionsNames.get(a), a);
         }
         return actionNamesToIndex;
     }
 
     private TransitionFunction createTransitionFunction(ArrayList<State> states, ArrayList<Action> actions) {
-        System.out.println("\tCreating transition function");
+        // System.out.println("\tCreating transition function");
 
 
         int finalS = states.size() - 1;
@@ -379,16 +380,16 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private ArrayList<String> createObservations() {
-        System.out.println("\tCreating observations");
+        // System.out.println("\tCreating observations");
         ArrayList<String> observations = new ArrayList<>(Arrays.asList(Observation.ObservationType.NOTHING.toString(),
                 Observation.ObservationType.REAL.toString(),
                 Observation.ObservationType.HONEYPOT.toString()));
-        System.out.println("\t\tObservations: " + observations);
+        // System.out.println("\t\tObservations: " + observations);
         return observations;
     }
 
     private HashMap<String, Integer> createObservationToIndexMap(ArrayList<String> observations) {
-        System.out.println("\tCreating observations to indexes map");
+        // System.out.println("\tCreating observations to indexes map");
         HashMap<String, Integer> observationToIndex = new HashMap<>(observations.size() * 2);
         for (int o = 0; o < observations.size(); ++o) {
             observationToIndex.put(observations.get(o), o);
@@ -399,7 +400,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     private double[][][] createObservationProbabilities(ArrayList<State> states,
                                                         ArrayList<Action> actions,
                                                         HashMap<String, Integer> observationToIndex) {
-        System.out.println("\tCreating observation probabilities");
+        // System.out.println("\tCreating observation probabilities");
         double[][][] observationProbabilities = new double[actions.size()][states.size()][observationToIndex.size()];
         int nothingObsI = observationToIndex.get(Observation.ObservationType.NOTHING.toString());
         int realObsI = observationToIndex.get(Observation.ObservationType.REAL.toString());
@@ -467,7 +468,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                                             HashMap<String, Integer> observationToIndex,
                                             TransitionFunction transitionFunction,
                                             double[][][] observationProbabilities) {
-        System.out.println("\tCreating reward function");
+        // System.out.println("\tCreating reward function");
         double[][] rewards = new double[states.size()][actions.size()];
 
         int realObsI = observationToIndex.get(Observation.ObservationType.REAL.toString());
@@ -480,13 +481,12 @@ public class NetworkDistrubitionToPOMDPConverter {
         double rewardForAttack, rewardForSuccefulAttack, successfulAttackProb;
         for (int a = 0; a < actions.size(); ++a) {
             action = actions.get(a);
-            System.out.println("\t\t" + action);
             for (int s = 0; s < finalS; ++s) {
                 state = states.get(s);
                 network = state.getNetwork();
                 switch (action.getActionType()) {
                     case PROBE:
-                            rewards[s][a] = probeCost;
+                        rewards[s][a] = probeCost;
                         break;
                     case ATTACK:
                         // does the computer and the port we attack even exist at this index in this network?
@@ -501,7 +501,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                                 successfulAttackProb = portsSuccessfulAttackProbs.getOrDefault(port, getDefaultSuccessfulAttackProbability);
                                 rewardForAttack = successfulAttackProb * rewardForSuccefulAttack;
                                 rewards[s][a] += rewardForAttack;
-                                System.out.println("\t\t\tr[" + s + "][" + a + "] = " + rewards[s][a]);
+                                // System.out.println("\t\t\tr[" + s + "][" + a + "] = " + rewards[s][a]);
                             }
                         }
                         break;

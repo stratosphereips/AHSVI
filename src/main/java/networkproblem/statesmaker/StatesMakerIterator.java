@@ -75,10 +75,8 @@ public class StatesMakerIterator implements Iterator<State> {
 
     private void createHoneypotCombinations() {
         createPossibleHoneycomputersSizeCombinations(new ArrayList<>(honeypotsCount), 0, 1);
-        System.out.println("Possible honeycomputers sizes combinations count: " + honeycomputersSizesCombinations.size());
 
         createHoneypotsCombinationsOfPossibleSizes();
-        System.out.println("Honeypot combinations size: " + honeycomputersCombinations.size());
 
     }
 
