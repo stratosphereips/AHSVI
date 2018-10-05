@@ -8,7 +8,7 @@ public class Network {
     private static final String VALUES_DELIM = ",";
     private static final String COMPUTERS_DELIM = "\\|";
 
-    private static int networkId = 0;
+    private static int networkId;
 
     private int groupId;
     private double probability;
@@ -95,5 +95,9 @@ public class Network {
                 "groupId=" + groupId +
                 ",computers=" + computers +
                 '}';
+    }
+
+    public static void resetNetworks() {
+        networkId = 0;
     }
 }

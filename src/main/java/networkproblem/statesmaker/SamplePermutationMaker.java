@@ -3,6 +3,7 @@ package networkproblem.statesmaker;
 import networkproblem.Computer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 public class SamplePermutationMaker extends AllPermutationsMaker {
@@ -15,9 +16,9 @@ public class SamplePermutationMaker extends AllPermutationsMaker {
 
     @Override
     public void createPermutations() {
-        createAllPermutations();
-        ArrayList<Computer> permutation = permutations.get(random.nextInt(permutations.size()));
+        ArrayList<Computer> sampledPermutation = new ArrayList<>(network);
+        Collections.shuffle(sampledPermutation, random);
         permutations = new ArrayList<>(1);
-        permutations.add(permutation);
+        permutations.add(sampledPermutation);
     }
 }

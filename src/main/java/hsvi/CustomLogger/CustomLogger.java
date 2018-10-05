@@ -15,10 +15,12 @@ public class CustomLogger {
             LOGGER = Logger.getLogger("LOGGER");
             LOGGER.setLevel(Config.LOGGING_LEVEL);
             LOGGER.setUseParentHandlers(false);
-            Handler hndl = new ConsoleHandler();
-            hndl.setFormatter(new CustomRecordFormatter());
-            hndl.setLevel(Config.LOGGING_LEVEL);
-            LOGGER.addHandler(hndl);
+            if (Config.LOGGING_ON) {
+                Handler hndl = new ConsoleHandler();
+                hndl.setFormatter(new CustomRecordFormatter());
+                hndl.setLevel(Config.LOGGING_LEVEL);
+                LOGGER.addHandler(hndl);
+            }
         }
         return LOGGER;
     }

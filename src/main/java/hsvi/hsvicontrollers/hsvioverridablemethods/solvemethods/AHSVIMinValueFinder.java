@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class AHSVIMinValueFinder extends InitializableWithHSVI {
+    private static int CPLEX_THREADS_USED = 1; // 0 for unlimited
+
     private final ArrayList<LinkedList<Integer>> statesGroups;
     private final double[] groupsProbabilities;
 
@@ -30,6 +32,7 @@ public class AHSVIMinValueFinder extends InitializableWithHSVI {
         // TODO make this smarter
         try {
             IloCplex model = new IloCplex();
+            model.setParam(IloCplex.IntParam.Threads, CPLEX_THREADS_USED);
             model.setOut(null);
             model.setWarning(null);
 
@@ -67,6 +70,7 @@ public class AHSVIMinValueFinder extends InitializableWithHSVI {
         // TODO make this smarter
         try {
             IloCplex model = new IloCplex();
+            model.setParam(IloCplex.IntParam.Threads, CPLEX_THREADS_USED);
             model.setOut(null);
             model.setWarning(null);
 

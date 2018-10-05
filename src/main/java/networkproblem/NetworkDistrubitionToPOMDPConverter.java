@@ -1,15 +1,21 @@
 package networkproblem;
 
 import helpers.HelperFunctions;
+import hsvi.CustomLogger.CustomLogger;
 import networkproblem.statesmaker.StatesMakerIterator;
 import pomdpproblem.POMDPProblem;
+import pomdpproblem.SingleDestinationTransitionFunction;
 import pomdpproblem.SparseTransitionFunction;
 import pomdpproblem.TransitionFunction;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Logger;
 
-public class NetworkDistrubitionToPOMDPConverter {
+public class NetworkDistrubitionToPOMDPConverter<PermutationsMakerType> {
+
+    private static Logger LOGGER = CustomLogger.getLogger();
+
     private static final double DEFAULT_DISCOUNT = 0.9;
     private static final int DEFAULT_HONEYPOTS_COUNT = 2;
     private static final int DEFAULT_MAX_NUMBER_OF_DETECTED_ATTACKS_ALLOWED = 0;
@@ -18,7 +24,9 @@ public class NetworkDistrubitionToPOMDPConverter {
     private static final double DEFAULT_PROBE_SUCCESS_PROBABILITY = 0.75;
     private static final double DEFAULT_PROBE_COST = DEFAULT_SUCCESFUL_ATTACK_REWARD / 2;
 
+
     private final String pathToNetworkFile;
+    private final Class<PermutationsMakerType> permutationsMakerTypeClass;
 
     private ArrayList<Network> networks;
     private TreeSet<Integer> openPorts;
@@ -39,8 +47,9 @@ public class NetworkDistrubitionToPOMDPConverter {
     private double[] groupsProbabilities;
     private Map<String, Map<String, Set<Integer>>> infoSets;
 
-    public NetworkDistrubitionToPOMDPConverter(String fileName) {
+    public NetworkDistrubitionToPOMDPConverter(String fileName, Class<PermutationsMakerType> permutationsMakerTypeClass) {
         pathToNetworkFile = fileName;
+        this.permutationsMakerTypeClass = permutationsMakerTypeClass;
         try {
             networks = new ArrayList<>(HelperFunctions.countLinesInFile(pathToNetworkFile) - 1);
         } catch (IOException e) {
@@ -70,6 +79,7 @@ public class NetworkDistrubitionToPOMDPConverter {
     }
 
     private void loadNetwork() {
+        Network.resetNetworks();
         try {
             readNetworksFile();
             // System.out.println("Read network: " + networks);
@@ -200,7 +210,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         ArrayList<Action> actions = createActions(states);
         ArrayList<String> actionsNames = creatActionsNames(actions);
         HashMap<String, Integer> actionsToIndexes = createActionToIndexMap(actionsNames);
-        TransitionFunction transitionFunction = createTransitionFunction(states, actions);
+        TransitionFunction transitionFunction = createSingleDestinationTransitionFunction(states, actions);
         ArrayList<String> observations = createObservations();
         HashMap<String, Integer> observationsToIndexes = createObservationToIndexMap(observations);
         double[][][] observationProbabilities = POMDPProblem.transformObservationProbabilitiesToHSVI(createObservationProbabilities(states, actions, observationsToIndexes));
@@ -221,7 +231,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         LinkedList<State> states = new LinkedList<>();
         State state;
         for (int honeypotsCount = honeypotsCountsLb; honeypotsCount <= honeypotsCountsUb; ++honeypotsCount) {
-            stateIterator = new StatesMakerIterator(networks, openPortsList, honeypotsCount);
+            stateIterator = new StatesMakerIterator(permutationsMakerTypeClass, networks, openPortsList, honeypotsCount);
             // System.out.println("\t\tNumber of states with " + honeypotsCount + " honeypots: " + stateIterator.getTotalNumberOfStates());
             while (stateIterator.hasNext()) {
                 state = stateIterator.next();
@@ -229,7 +239,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                 states.add(state);
             }
         }
-        System.out.println("Total number of states: " + states.size());
+        LOGGER.fine("Total number of states: " + states.size());
 
         // TODO now we can do only maxNumberOfDetectedAttacksAllowed == 0
         if (maxNumberOfDetectedAttacksAllowed > 0) {
@@ -299,6 +309,7 @@ public class NetworkDistrubitionToPOMDPConverter {
                 actions.add(new Action(Action.ActionType.ATTACK, targetComputerI, port));
             }
         }
+        LOGGER.fine("Total number of actions: " + actions.size());
         return actions;
     }
 
@@ -321,7 +332,7 @@ public class NetworkDistrubitionToPOMDPConverter {
         return actionNamesToIndex;
     }
 
-    private TransitionFunction createTransitionFunction(ArrayList<State> states, ArrayList<Action> actions) {
+    private TransitionFunction createSparseTransitionFunction(ArrayList<State> states, ArrayList<Action> actions) {
         // System.out.println("\tCreating transition function");
 
 
@@ -377,6 +388,58 @@ public class NetworkDistrubitionToPOMDPConverter {
         }
 
         return new SparseTransitionFunction(transitionFunction);
+    }
+
+    private TransitionFunction createSingleDestinationTransitionFunction(ArrayList<State> states, ArrayList<Action> actions) {
+        // System.out.println("\tCreating transition function");
+
+        SingleDestinationTransitionFunction transitionFunction =
+                new SingleDestinationTransitionFunction(states.size(), actions.size());
+        int finalS = states.size() - 1;
+        Action action;
+        State state;
+        Network network;
+        for (int a = 0; a < actions.size(); ++a) {
+            // cannnot go anywhere from final state
+            action = actions.get(a);
+            if (action.getActionType() == Action.ActionType.ATTACK) {
+                transitionFunction.addStateAndActionPairEndingInSource(finalS, a);
+            }
+            for (int s = 0; s < finalS; ++s) {
+                state = states.get(s);
+                network = state.getNetwork();
+                switch (action.getActionType()) {
+                    case PROBE:
+                        transitionFunction.addProbe(a);
+                        break;
+                    case ATTACK:
+                        // does the computer and the port we attack even exist at this index in this network?
+                        if (network.containsComputerAtIndex(action.getTargetComputerI()) &&
+                                network.getComputerAtIndex(action.getTargetComputerI()).containsPort(action.getTargetPort())) {
+                            if (network.computerAtIndexIsReal(action.getTargetComputerI())) {
+                                //
+                            } else {
+                                // attack on a honeypot
+                                if (state.getNumberOfAttackOnHoneypot() + 1 <= maxNumberOfDetectedAttacksAllowed) {
+                                    // TODO add transition to the state with honeypot attacks higher by one
+                                    System.exit(12345);
+                                } else {
+                                    // detected
+                                    //
+                                }
+                            }
+                        } else {
+                            transitionFunction.addStateAndActionPairEndingInSource(s, a);
+                        }
+                        break;
+                    default:
+                        System.out.println("No such action");
+                        System.exit(21313);
+                }
+            }
+        }
+
+        return transitionFunction;
     }
 
     private ArrayList<String> createObservations() {

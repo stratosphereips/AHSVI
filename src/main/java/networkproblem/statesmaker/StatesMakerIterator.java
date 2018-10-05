@@ -4,9 +4,10 @@ import networkproblem.Computer;
 import networkproblem.Network;
 import networkproblem.State;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class StatesMakerIterator implements Iterator<State> {
+public class StatesMakerIterator<PermutationsMakerType> implements Iterator<State> {
 
     private final ArrayList<Network> inputNetworks;
     private final ArrayList<Integer> openPorts;
@@ -16,11 +17,14 @@ public class StatesMakerIterator implements Iterator<State> {
     private final LinkedList<ArrayList<Computer>> honeycomputersCombinations;
 
 
+    private final Class<PermutationsMakerType> permutationsMakerTypeClass;
     private CombinationsPermutationsMaker permutationsMaker;
     private ListIterator<ArrayList<Computer>> combinationsIter;
     private int currentInputNetworkI;
 
-    public StatesMakerIterator(ArrayList<Network> inputNetworks, ArrayList<Integer> openPorts, int honeypotsCount) {
+    public StatesMakerIterator(Class<PermutationsMakerType> permutationsMakerTypeClass,
+                               ArrayList<Network> inputNetworks, ArrayList<Integer> openPorts, int honeypotsCount) {
+        this.permutationsMakerTypeClass = permutationsMakerTypeClass;
         this.inputNetworks = inputNetworks;
         this.openPorts = openPorts;
         this.honeypotsCount = honeypotsCount;
@@ -59,7 +63,13 @@ public class StatesMakerIterator implements Iterator<State> {
             ArrayList<Computer> network = new ArrayList<>(originalNetwork.getComputers());
             ArrayList<Computer> honeycomputersCombination = combinationsIter.next();
             network.addAll(honeycomputersCombination);
-            permutationsMaker = new AllPermutationsMaker(network);
+            try {
+                permutationsMaker =
+                        (CombinationsPermutationsMaker)permutationsMakerTypeClass.getConstructor(ArrayList.class).newInstance(network);
+            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+                System.exit(54321);
+            }
             if (!combinationsIter.hasNext() && !permutationsMaker.hasNext()) {
                 combinationsIter = honeycomputersCombinations.listIterator();
             }
@@ -67,10 +77,6 @@ public class StatesMakerIterator implements Iterator<State> {
         }
         ArrayList<Computer> networkPermutation = permutationsMaker.next();
         return new State(new Network(originalNetwork.getGroupId(), originalNetwork.getProbability(), networkPermutation));
-    }
-
-    public int getTotalNumberOfStates() {
-        return honeycomputersCombinations.size() * inputNetworks.size();
     }
 
     private void createHoneypotCombinations() {

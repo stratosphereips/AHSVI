@@ -44,13 +44,14 @@ public class AHSVIInSolveMethod extends InSolveMethod {
                 hsvi.getPomdpProblem().getActionName(
                         hsvi.getLbFunction().getDotProdArgMax(minUbValueBelief).a));
         LOGGER.fine("BOUNDS_GAP: " + (solveMethodsContainer.getUbVal() - solveMethodsContainer.getLbVal()));
+        LOGGER.fine("BOUNDS_GAP_IMPROVEMENT: " + (solveMethodsContainer.getLastUbVal() - solveMethodsContainer.getLastLbVal()));
 
         //LOGGER.fine(hsvi.getLbFunction().getAlphaVectors().stream().map(a -> Arrays.toString(a.vector)).collect(Collectors.joining("\n")));
 
-        logInfoSets();
+        logInfoSets(minLbValueBelief, minUbValueBelief);
     }
 
-    protected void logInfoSets() {
+    protected void logInfoSets(double[] minLbValueBelief, double[] minUbValueBelief) {
         Set<String> infoSetsKeySet = infoSets.keySet();
         Map<String, Set<Integer>> combinationGroupsInInfoSet;
         Set<String> combinationGroupsKeySet;
@@ -63,7 +64,10 @@ public class AHSVIInSolveMethod extends InSolveMethod {
                 combinationGroup = combinationGroupsInInfoSet.get(combinationGroupName);
                 LOGGER.fine("\t" + combinationGroupName);
                 for (Integer s : combinationGroup) {
-                    LOGGER.fine("\t\t" + hsvi.getPomdpProblem().getInitBelief(s) + "   " + hsvi.getPomdpProblem().getStateName(s));
+                    LOGGER.fine(String.format("\t\t%.4f %.4f %s",
+                            minLbValueBelief[s],
+                            minUbValueBelief[s],
+                            hsvi.getPomdpProblem().getStateName(s) ));
                 }
             }
         }

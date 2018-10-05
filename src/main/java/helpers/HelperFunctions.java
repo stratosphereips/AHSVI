@@ -119,6 +119,12 @@ public class HelperFunctions {
         }
     }
 
+    public static void arrDiv(double[] arr1, double n) {
+        for (int i = 0; i < arr1.length; ++i) {
+            arr1[i] /= n;
+        }
+    }
+
     public static double infinityNorm(double[] arr) {
         double infN = -1;
         for (int i = 0; i < arr.length; ++i) {

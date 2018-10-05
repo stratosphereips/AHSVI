@@ -1,5 +1,7 @@
 package hsvi;
 
+import helpers.HelperFunctions;
+import hsvi.CustomLogger.CustomLogger;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.AHSVIMinValueFinder;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.AHSVIInSolveMethod;
 import hsvi.hsvicontrollers.hsvioverridablemethods.solvemethods.insolvemethods.InSolveMethod;
@@ -15,13 +17,20 @@ import hsvi.hsvicontrollers.terminators.solveterminators.SolveTerminatorInfinite
 import networkproblem.NetworkDistrubitionToPOMDPConverter;
 import networkproblem.statesmaker.AllPermutationsMaker;
 import networkproblem.statesmaker.SamplePermutationMaker;
-import networkproblem.statesmaker.SinglePermutationMaker;
 import org.apache.commons.cli.*;
 import pomdpproblem.POMDPProblem;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.SimpleTimeZone;
+import java.util.logging.Logger;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
-public class AHSVIMain {
+public class AHSVIAveragedMain {
+
+    private static Logger LOGGER = CustomLogger.getLogger();
 
     private static Options createOptions() {
         Options options = new Options();
@@ -79,46 +88,76 @@ public class AHSVIMain {
         double probeCost = Double.parseDouble(cmd.getOptionValue("pc", "-0.0"));
         double discount = Double.parseDouble(cmd.getOptionValue("d", "0.95"));
 
-
-        Class<?> permutationsMakerClass = AllPermutationsMaker.class;
+        Class<?> permutationsMakerClass = SamplePermutationMaker.class;
 
         // =======================================
-
-        NetworkDistrubitionToPOMDPConverter networkFileReader =
-                new NetworkDistrubitionToPOMDPConverter(networksFileName, permutationsMakerClass)
-                        .setDiscount(discount)
-                        .setHoneypotsCountsRange(honeypotsCountLb, honeypotsCountUb)
-                        .setProbeSuccessProbability(probeSuccessProbability)
-                        .setProbeCost(probeCost)
-                        .loadPortsValues(portsValuesFileName)
-                        .loadPortsSuccessfulAttackProbs(portsSuccessfulAttacksProbsFileName);
-        POMDPProblem pomdpProblem = networkFileReader.getPomdpProblem();
-
-        AHSVIMinValueFinder minValueFinder =
-                new AHSVIMinValueFinder(networkFileReader.getStatesGroupsIds(), networkFileReader.getGroupsProbabilities());
-
-        // =========================================================
-        // =              A H S V I   S E T T I N G S              =
-
-        PreSolveMethod preSolveMethod = new AHSVIPreSolveMethod(minValueFinder, networkFileReader.getInfoSets());
-        InSolveMethod inSolveMethod = new AHSVIInSolveMethod(minValueFinder, networkFileReader.getInfoSets());
-        PostSolveMethod postSolveMethod = new AHSVIPostSolveMethod(minValueFinder, networkFileReader.getInfoSets());
-        SolveTerminator solveTerminator = new AHSVISolveTerminatorAbsoluteDiff();
-        ExploreTerminator exploreTerminator = new HSVIExploreTerminatorClassic();
+        NetworkDistrubitionToPOMDPConverter networkFileReader = null;
+        POMDPProblem pomdpProblem= null;
+        AHSVIMinValueFinder minValueFinder= null;
+        PreSolveMethod preSolveMethod= null;
+        InSolveMethod inSolveMethod= null;
+        PostSolveMethod postSolveMethod= null;
+        SolveTerminator solveTerminator = null;
+        ExploreTerminator exploreTerminator = null;
         double epsilon = Config.ZERO;
+        HSVIAlgorithm hsviAlgorithm= null;
 
-        // =========================================================
-        // =                        A H S V I                      =
+        double[] beliefsSummed = null;
 
-        HSVIAlgorithm hsviAlgorithm = new HSVIAlgorithm.HSVIAlgorithmBuilder()
-                .setEpsilon(epsilon)
-                .setPomdpProblem(pomdpProblem)
-                .setPreSolveMethod(preSolveMethod)
-                .setInSolveMethod(inSolveMethod)
-                .setPostSolveMethod(postSolveMethod)
-                .setSolveTerminator(solveTerminator)
-                .setExploreTerminator(exploreTerminator)
-                .build();
-        hsviAlgorithm.solve();
+
+        int samplingEpochsCount = 1000;
+        for (int iter = 0; iter < samplingEpochsCount; ++iter) {
+            System.out.println("Epoch: " + iter);
+
+            networkFileReader =
+                    new NetworkDistrubitionToPOMDPConverter(networksFileName, permutationsMakerClass)
+                            .setDiscount(discount)
+                            .setHoneypotsCountsRange(honeypotsCountLb, honeypotsCountUb)
+                            .setProbeSuccessProbability(probeSuccessProbability)
+                            .setProbeCost(probeCost)
+                            .loadPortsValues(portsValuesFileName)
+                            .loadPortsSuccessfulAttackProbs(portsSuccessfulAttacksProbsFileName);
+            pomdpProblem = networkFileReader.getPomdpProblem();
+
+            minValueFinder =
+                    new AHSVIMinValueFinder(networkFileReader.getStatesGroupsIds(), networkFileReader.getGroupsProbabilities());
+
+            if (iter == 0) {
+                beliefsSummed = new double[pomdpProblem.getNumberOfStates()];
+            }
+
+            // =========================================================
+            // =              A H S V I   S E T T I N G S              =
+
+             preSolveMethod = new AHSVIPreSolveMethod(minValueFinder, networkFileReader.getInfoSets());
+             inSolveMethod = new AHSVIInSolveMethod(minValueFinder, networkFileReader.getInfoSets());
+             postSolveMethod = new AHSVIPostSolveMethod(minValueFinder, networkFileReader.getInfoSets());
+             solveTerminator = new AHSVISolveTerminatorAbsoluteDiff();
+             exploreTerminator = new HSVIExploreTerminatorClassic();
+
+            // =========================================================
+            // =                        A H S V I                      =
+
+            hsviAlgorithm = new HSVIAlgorithm.HSVIAlgorithmBuilder()
+                    .setEpsilon(epsilon)
+                    .setPomdpProblem(pomdpProblem)
+                    .setPreSolveMethod(preSolveMethod)
+                    .setInSolveMethod(inSolveMethod)
+                    .setPostSolveMethod(postSolveMethod)
+                    .setSolveTerminator(solveTerminator)
+                    .setExploreTerminator(exploreTerminator)
+                    .build();
+            hsviAlgorithm.solve();
+
+            HelperFunctions.arrAdd(beliefsSummed, pomdpProblem.getInitBelief());
+        }
+
+        HelperFunctions.arrDiv(beliefsSummed, samplingEpochsCount);
+        LOGGER.fine("\n\n\n\n\n");
+        LOGGER.fine(Arrays.stream(beliefsSummed).sum() + "  " + Arrays.toString(beliefsSummed));
+
+        for (int s = 0; s < pomdpProblem.getNumberOfStates(); ++s) {
+            LOGGER.fine(String.format("\t%s  %.4f", pomdpProblem.getStateName(s), beliefsSummed[s]));
+        }
     }
 }

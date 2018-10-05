@@ -6,6 +6,7 @@ import java.util.logging.Level;
 
 public class Config {
 
+    public static final boolean LOGGING_ON = true;
     public static final Level LOGGING_LEVEL = Level.FINE;
 
     public static final double ZERO = 1e-6;
